@@ -126,6 +126,23 @@ const path = '/contact/';
         if (sel && v && [].slice.call(sel.options).some(function (o) { return o.value === v; })) sel.value = v;
       }
 
+      // Projectcontext vanuit /aanbod/-detailpagina's: stad + bericht voorvullen,
+      // zodat de bezoeker projectnaam en stad niet opnieuw hoeft in te typen.
+      var project = params.get('project');
+      var stadParam = params.get('stad');
+      if (stadParam) {
+        var stadEl = document.getElementById('stad');
+        if (stadEl && !stadEl.value) stadEl.value = stadParam;
+      }
+      if (project) {
+        var berichtEl = document.getElementById('bericht');
+        if (berichtEl && !berichtEl.value) {
+          berichtEl.value = 'Ik heb interesse in het project ' + project
+            + (stadParam ? ' in ' + stadParam : '')
+            + ' en ontvang graag meer informatie.';
+        }
+      }
+
       function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
       function build() {

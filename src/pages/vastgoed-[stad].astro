@@ -10,8 +10,10 @@ import CtaInline from '../components/CtaInline.astro';
 import Faq from '../components/Faq.astro';
 import LeadCta from '../components/LeadCta.astro';
 import VerderLezen from '../components/VerderLezen.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 import { steden } from '../data/steden';
 import { prominenteSteden } from '../data/site';
+import { projectenVoorStad } from '../data/projecten';
 import { stedenExtra } from '../data/stedenExtra';
 import { marktdata } from '../data/marktdata';
 import { faqSchema, serviceSchema } from '../data/schema';
@@ -24,6 +26,7 @@ const { stad } = Astro.props;
 const path = `/vastgoed-${stad.slug}/`;
 const prominent = prominenteSteden.some((p) => p.slug === stad.slug);
 const extra = stedenExtra[stad.slug];
+const aanbod = projectenVoorStad(stad.slug);
 const md = marktdata[stad.slug];
 const heeftCijfers = md && (md.appartement || md.villa || md.rekencase || md.huurYield || md.airbnb);
 
@@ -70,6 +73,26 @@ const faqs = prominent
     letOp={stad.risicos[0]}
   />
   <TrustStrip />
+
+  {aanbod.length > 0 && (
+    <section class="section section--tinted">
+      <div class="container">
+        <div class="section__header">
+          <p class="eyebrow">Beschikbaar aanbod</p>
+          <h2>Onze projecten in <em>{stad.naam}</em></h2>
+          <p class="section__desc">{aanbod.length === 1 ? 'Dit project begeleiden wij' : `Deze ${aanbod.length} projecten begeleiden wij`} op dit moment in {stad.naam}. Bekijk foto's, ligging en volledige informatie.</p>
+        </div>
+        <div class="aanbod-grid">
+          {aanbod.map((p) => (
+            <div class="aanbod-grid__item"><ProjectCard project={p} headingLevel={3} sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 360px" /></div>
+          ))}
+        </div>
+        <p style="margin-top:32px">
+          <a href={`/aanbod/${stad.slug}/`} class="btn btn--primary">Bekijk het aanbod in {stad.naam}</a>
+        </p>
+      </div>
+    </section>
+  )}
 
   {prominent ? (
     <section class="section">

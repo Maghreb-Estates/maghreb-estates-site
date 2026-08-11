@@ -5,6 +5,7 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Faq from '../components/Faq.astro';
 import LeadCta from '../components/LeadCta.astro';
 import VerderLezen from '../components/VerderLezen.astro';
+import CtaInline from '../components/CtaInline.astro';
 import { steden } from '../data/steden';
 import { faqSchema, serviceSchema } from '../data/schema';
 
@@ -53,6 +54,13 @@ const faqs = [
         <strong>Marktcijfers zijn een startpunt, geen oordeel over één woning.</strong>
         <p>Prijsindicaties per stad zeggen weinig over een specifiek object. Straat, staat, bouwjaar, papieren en verhuurbaarheid bepalen de werkelijke waarde. Laat een concreet object altijd afzonderlijk beoordelen.</p>
       </div>
+
+      <CtaInline
+        title="Bekijk ons actuele vastgoedaanbod"
+        text="Wij begeleiden geselecteerde projecten in Marrakech en Tanger. Bekijk foto's, ligging en projectinformatie."
+        label="Naar het aanbod"
+        href="/aanbod/"
+      />
     </div>
   </section>
 

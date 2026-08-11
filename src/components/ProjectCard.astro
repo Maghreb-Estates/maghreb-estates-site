@@ -1,0 +1,50 @@
+---
+// Herbruikbare listing-/projectcard. Data-gedreven vanuit projecten.ts, zodat
+// nieuwe projecten automatisch dezelfde card krijgen. De hele card is één link.
+//
+// Beeld via astro:assets: automatische webp + srcset, met een vaste
+// beeldverhouding (16:10) in een overflow-container zodat er geen layout shift
+// optreedt, ook al verschillen de bronafmetingen per project.
+import { Image } from 'astro:assets';
+import { projectPad, type Project } from '../data/projecten';
+
+interface Props {
+  project: Project;
+  /** Kopregelniveau binnen de paginahiërarchie (2 op overzicht, 3 in lijstjes). */
+  headingLevel?: 2 | 3;
+  /** sizes-attribuut voor srcset; standaard 2 koloms desktop, vol op mobiel. */
+  sizes?: string;
+  /** Alleen de eerste card boven de vouw is niet-lazy (betere LCP). */
+  eager?: boolean;
+}
+
+const { project: p, headingLevel = 3, sizes = '(max-width: 760px) 100vw, 380px', eager = false } = Astro.props;
+const Titel = `h${headingLevel}` as 'h2' | 'h3';
+const pad = projectPad(p);
+const locatie = p.wijk ? `${p.stadNaam} · ${p.wijk}` : p.stadNaam;
+const prijs = p.prijsVanaf?.tekst ?? 'Prijs op aanvraag';
+---
+<article class="property-card">
+  <a class="property-card__link" href={pad} aria-label={`Bekijk ${p.naam} in ${p.stadNaam}`}>
+    <div class="property-card__media">
+      <Image
+        src={p.thumb.src}
+        alt={p.thumb.alt}
+        widths={[400, 600, 800]}
+        sizes={sizes}
+        class="property-card__img"
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : undefined}
+      />
+    </div>
+    <div class="property-card__body">
+      <p class="property-card__loc">{locatie}, Marokko</p>
+      <Titel class="property-card__title">{p.naam}</Titel>
+      <p class="property-card__desc">{p.kort}</p>
+      <div class="property-card__foot">
+        <span class="property-card__prijs">{prijs}</span>
+        <span class="property-card__cta">Bekijk project</span>
+      </div>
+    </div>
+  </a>
+</article>

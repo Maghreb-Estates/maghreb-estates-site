@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ProjectGallery from '../../../components/ProjectGallery.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import ProjectKaart from '../../../components/ProjectKaart.astro';
+import Faq from '../../../components/Faq.astro';
+import Icon from '../../../components/Icon.astro';
+import LeadCta from '../../../components/LeadCta.astro';
+import { site, waLink } from '../../../data/site';
+import { projecten, gerelateerdeProjecten, projectPad } from '../../../data/projecten';
+import { faqSchema, projectSchema } from '../../../data/schema';
+
+export function getStaticPaths() {
+  return projecten.map((p) => ({ params: { stad: p.stad, project: p.slug }, props: { p } }));
+}
+
+const { p } = Astro.props;
+const path = projectPad(p);
+const locatie = p.wijk ? `${p.stadNaam}, ${p.wijk}` : `${p.stadNaam}, Marokko`;
+const prijs = p.prijsVanaf?.tekst ?? p.prijsPerM2?.tekst ?? 'Prijs op aanvraag';
+const gerelateerd = gerelateerdeProjecten(p, 2);
+
+// Contactlink met projectcontext, zodat de bezoeker die niet opnieuw hoeft in te
+// vullen (doel + project + stad worden in het formulier voorgevuld).
+const contactHref = `/contact/?doel=nieuwbouw&project=${encodeURIComponent(p.naam)}&stad=${encodeURIComponent(p.stadNaam)}`;
+const waBericht = `Hallo Maghreb Estates, ik heb interesse in ${p.naam} in ${p.stadNaam}. Kunt u mij meer informatie sturen?`;
+
+const faqs = [
+  { q: `Waar ligt ${p.naam}?`, a: `${p.naam} ligt in ${locatie}. ${p.ligging}` },
+  { q: `Welk type woningen biedt ${p.naam}?`, a: `${p.naam} bestaat uit ${p.types.join(' en ').toLowerCase()}. ${p.woningtypen ? 'Beschikbare typen: ' + p.woningtypen.map((w) => w.type + ' (' + w.details + ')').join('; ') + '.' : ''}` },
+  { q: `Kan Maghreb Estates mij begeleiden bij de aankoop van ${p.naam}?`, a: `Ja. Wij zijn uw onafhankelijke aanspreekpunt: van objectselectie en dossiercontrole tot de notaris en beheer na aankoop. De begeleiding kan volledig op afstand, in het Nederlands, Engels, Frans of Arabisch.` },
+];
+
+const description = `${p.kort} Bekijk foto's, ligging en projectinformatie van ${p.naam} in ${p.stadNaam} en vraag vrijblijvend meer informatie aan bij Maghreb Estates.`;
+---
+<BaseLayout
+  title={`${p.naam} in ${p.stadNaam} | Vastgoed | Maghreb Estates`}
+  description={description}
+  path={path}
+  image={p.hero.src.src}
+  schema={[...projectSchema(p), faqSchema(faqs)]}
+>
+  <Breadcrumbs items={[
+    { label: 'Aanbod', href: '/aanbod/' },
+    { label: p.stadNaam, href: `/aanbod/${p.stad}/` },
+    { label: p.naam, href: path },
+  ]} />
+
+  <article class="project">
+    <header class="container project__kop">
+      <p class="project__loc">{locatie}</p>
+      <h1>{p.naam}</h1>
+    </header>
+
+    <div class="container">
+      <ProjectGallery fotos={p.galerij} projectNaam={p.naam} />
+    </div>
+
+    <!-- KERNINFORMATIE + PRIMAIRE CTA -->
+    <section class="section" style="padding-block:56px">
+      <div class="container project__lead">
+        <div class="project__kern">
+          <h2 class="project__introkop">Over {p.naam}</h2>
+          <p class="project__intro">{p.intro}</p>
+          <dl class="project__specs">
+            {p.kenmerken.map((k) => (
+              <div class="project__spec">
+                <dt>{k.label}</dt>
+                <dd>{k.waarde}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <aside class="project__cta" aria-label="Informatie aanvragen">
+          <p class="project__prijs">{prijs}</p>
+          {p.prijsPerM2 && p.prijsVanaf && <p class="project__prijssub">{p.prijsPerM2.tekst}</p>}
+          <p class="project__ctatekst">Interesse in {p.naam}? Wij sturen u vrijblijvend de beschikbare projectinformatie en beantwoorden uw vragen.</p>
+          <a href={contactHref} class="btn btn--primary btn--full">Vraag projectinformatie aan</a>
+          <ul class="project__contact">
+            <li><Icon name="whatsapp" size={17} /><a href={waLink(waBericht)}>Direct via WhatsApp</a></li>
+            <li><Icon name="telefoon" size={17} /><a href={`tel:${site.telefoonHref}`} dir="ltr">{site.telefoon}</a></li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <!-- OMSCHRIJVING + VOORZIENINGEN + WONINGTYPEN -->
+    <section class="section section--tinted" style="padding-block:var(--section-pad)">
+      <div class="container project__body">
+        <div class="prose" style="max-width:760px">
+          <h2 id="omschrijving">Projectomschrijving</h2>
+          {p.omschrijving.map((alinea) => <p>{alinea}</p>)}
+
+          <h2 id="voorzieningen">Voorzieningen</h2>
+          <ul class="checks">{p.voorzieningen.map((v) => <li>{v}</li>)}</ul>
+
+          {p.woningtypen && (
+            <>
+              <h2 id="woningtypen">Woningtypen</h2>
+              <ul class="spec">
+                {p.woningtypen.map((w) => (
+                  <li><b>{w.type}</b><span>{w.details}</span></li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {p.developer && (
+            <p class="project__bron">Projectinformatie op basis van gegevens van ontwikkelaar {p.developer}. Prijzen, oppervlakten en beschikbaarheid bevestigen wij per woningtype bij de bron voordat u een keuze maakt.</p>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <!-- LIGGING + KAART -->
+    <section class="section">
+      <div class="container" style="max-width:860px">
+        <h2 id="ligging">Ligging</h2>
+        <p style="color:var(--text-muted);font-size:17px;max-width:68ch;margin:14px 0 24px">{p.ligging}</p>
+        <ProjectKaart query={p.mapsQuery} plaats={locatie} />
+      </div>
+    </section>
+
+    <!-- GERELATEERDE PROJECTEN -->
+    {gerelateerd.length > 0 && (
+      <section class="section section--tinted">
+        <div class="container">
+          <div class="section__header">
+            <p class="eyebrow">Meer aanbod</p>
+            <h2>Bekijk ook <em>deze projecten</em></h2>
+          </div>
+          <div class="aanbod-grid">
+            {gerelateerd.map((g) => (
+              <div class="aanbod-grid__item"><ProjectCard project={g} headingLevel={3} sizes="(max-width: 760px) 100vw, 380px" /></div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+  </article>
+
+  <Faq items={faqs} title={`Veelgestelde vragen over ${p.naam}`} />
+
+  <LeadCta path={path} />
+</BaseLayout>

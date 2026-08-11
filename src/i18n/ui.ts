@@ -183,7 +183,20 @@ export const ui: Record<Taal, UiStrings> = {
 /** Menu-items met het juiste pad voor de gekozen taal. */
 export const navVoorTaal = (taal: Taal) => {
   const t = ui[taal];
+  // "Aanbod" (de concrete projectlistings) staat vooraan als eigen route — het is
+  // de transactionele kern nu er daadwerkelijk projecten zijn. Het aanbod is
+  // Nederlandstalig (net als de stad- en marktpagina's) en verschijnt daarom
+  // alleen in de Nederlandse navigatie; anderstalige bezoekers bereiken het via
+  // de commerciële kernpagina's en de footer.
+  const aanbodItem = taal === 'nl'
+    ? [{ label: 'Aanbod', href: '/aanbod/', children: [
+        { label: 'Alle projecten', href: '/aanbod/' },
+        { label: 'Marrakech', href: '/aanbod/marrakech/' },
+        { label: 'Tanger', href: '/aanbod/tanger/' },
+      ] }]
+    : [];
   return [
+    ...aanbodItem,
     { label: t.nav.kopen, href: paginas.aankoopbegeleiding[taal], children: [
       { label: t.footer.aankoop, href: paginas.aankoopbegeleiding[taal] },
       { label: t.nav.nieuwbouw, href: paginas.nieuwbouw[taal] },

@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Faq from '../../components/Faq.astro';
+import LeadCta from '../../components/LeadCta.astro';
+import VerderLezen from '../../components/VerderLezen.astro';
+import { projecten, stedenMetAanbod, stadPad } from '../../data/projecten';
+import { faqSchema, serviceSchema } from '../../data/schema';
+
+const path = '/aanbod/';
+
+const faqs = [
+  { q: 'Welke vastgoedprojecten biedt Maghreb Estates aan?', a: 'Wij begeleiden op dit moment de aankoop van geselecteerde nieuwbouw- en projectwoningen in Marrakech en Tanger. Ons aanbod groeit doordat wij samenwerken met lokale ontwikkelaars; nieuwe projecten voegen wij toe zodra de gegevens en voorwaarden gecontroleerd zijn.' },
+  { q: 'Kan ik als buitenlandse koper een appartement in deze projecten kopen?', a: 'Ja. Buitenlandse kopers kunnen vrijwel overal in Marokko onroerend goed kopen, ook op afstand met een volmacht. Wij controleren de eigendomstitel, het koopcontract en de betalingsroute en begeleiden de overdracht via de notaris.' },
+  { q: 'Zijn de getoonde prijzen definitief?', a: 'Prijzen en beschikbaarheid verschillen per woningtype en per fase en kunnen wijzigen. Waar wij een prijs tonen, komt die van de ontwikkelaar. Wij bevestigen de actuele prijs en beschikbaarheid altijd voordat u een keuze maakt.' },
+  { q: 'Wat kost het om Maghreb Estates in te schakelen?', a: 'Een eerste adviesgesprek is vrijblijvend. Wij bespreken vooraf helder hoe onze begeleiding werkt en wat u van ons kunt verwachten, zodat u zonder verplichtingen kunt oriënteren.' },
+];
+---
+<BaseLayout
+  title="Vastgoedaanbod in Marokko | Projecten in Marrakech & Tanger | Maghreb Estates"
+  description="Ontdek geselecteerde vastgoedprojecten van Maghreb Estates in Marrakech en Tanger. Bekijk foto's, ligging en projectinformatie en vraag vrijblijvend meer informatie aan."
+  path={path}
+  schema={[
+    faqSchema(faqs),
+    serviceSchema({ naam: 'Vastgoedaanbod Marokko', beschrijving: 'Geselecteerde vastgoedprojecten in Marokko, met begeleiding bij aankoop, dossiercontrole en overdracht.', path }),
+  ]}
+>
+  <Hero
+    compact
+    eyebrow="Vastgoedaanbod"
+    title="Vastgoed te koop<br /><em>in Marokko</em>"
+    sub="Een selectie van vastgoedprojecten die wij begeleiden in Marrakech en Tanger. Van oriëntatie tot overdracht staat Maghreb Estates naast u — onafhankelijk en meertalig."
+    image="/images/villa5.jpg"
+    ctas={[
+      { label: 'Plan adviesgesprek', href: '/adviesgesprek/', primary: true },
+      { label: 'Laat een object beoordelen', href: '/contact/?doel=objectanalyse' },
+    ]}
+  />
+  <Breadcrumbs items={[{ label: 'Aanbod', href: path }]} />
+
+  <section class="section">
+    <div class="container prose" style="max-width:760px">
+      <p><strong>Maghreb Estates begeleidt de aankoop van geselecteerde vastgoedprojecten in Marokko.</strong> Wij zijn geen projectontwikkelaar, maar uw onafhankelijke aanspreekpunt: wij verzamelen projecten van betrouwbare lokale ontwikkelaars, controleren de gegevens en begeleiden u van de eerste oriëntatie tot en met de overdracht bij de notaris.</p>
+      <p>Ons aanbod is bewust compact en groeit stap voor stap. Elk project beoordelen wij op locatie, prijs, papieren en verhuurbaarheid, zodat u niet alleen een mooie foto ziet, maar ook weet waar u aan begint. Hieronder vindt u de projecten die wij op dit moment begeleiden, in Marrakech en Tanger.</p>
+    </div>
+  </section>
+
+  <section class="section section--tinted" id="projecten">
+    <div class="container">
+      <div class="section__header section__header--center">
+        <p class="eyebrow">Beschikbare projecten</p>
+        <h2>Onze <em>projecten</em> in Marokko</h2>
+        <p class="section__desc">Filter op stad of bekijk alle projecten. Klik een project aan voor foto's, ligging en volledige informatie.</p>
+      </div>
+
+      <div class="aanbod-filter" role="group" aria-label="Filter op stad">
+        <button type="button" class="aanbod-filter__knop is-actief" data-filter="alle" aria-pressed="true">Alle projecten</button>
+        {stedenMetAanbod.map((s) => (
+          <button type="button" class="aanbod-filter__knop" data-filter={s.stad} aria-pressed="false">{s.stadNaam} ({s.aantal})</button>
+        ))}
+      </div>
+
+      <div class="aanbod-grid">
+        {projecten.map((p, i) => (
+          <div class="aanbod-grid__item" data-stad={p.stad}>
+            <ProjectCard project={p} headingLevel={3} sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 360px" eager={i === 0} />
+          </div>
+        ))}
+      </div>
+
+      <div class="aanbod-steden">
+        {stedenMetAanbod.map((s) => (
+          <a class="aanbod-steden__link" href={stadPad(s.stad)}>Bekijk alle projecten in {s.stadNaam}</a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container prose" style="max-width:760px">
+      <h2>Vastgoed kopen in Marokko met begeleiding</h2>
+      <p>De Marokkaanse markt is lokaal en versnipperd: prijzen, kwaliteit en juridische situatie verschillen sterk per stad, wijk en ontwikkelaar. Bij nieuwbouw- en projectwoningen komt daar de betrouwbaarheid van de ontwikkelaar, de vergunningen en het betalingsschema bij. Juist daar voegt onafhankelijke begeleiding waarde toe.</p>
+      <p>Wij helpen u de juiste vragen te stellen: klopt de prijs met de markt, zijn de papieren in orde, hoe realistisch is de verhuurpotentie en wat gebeurt er bij oplevering? Voor <a href="/vastgoed-marrakech/">vastgoed in Marrakech</a> en <a href="/vastgoed-tanger/">vastgoed in Tanger</a> vindt u op onze stadspagina's meer achtergrond over de lokale markt. Wilt u breder vergelijken? Bekijk dan <a href="/vastgoed-marokko/">de Marokkaanse markt per stad</a>.</p>
+      <p>Bekijk ook hoe wij werken bij <a href="/aankoopbegeleiding-vastgoed-marokko/">aankoopbegeleiding</a>, <a href="/nieuwbouw-vastgoed-marokko/">nieuwbouw &amp; off-plan</a> en <a href="/investeren-vastgoed-marokko/">investeren in Marokkaans vastgoed</a>.</p>
+    </div>
+  </section>
+
+  <Faq items={faqs} title="Veelgestelde vragen over ons vastgoedaanbod" />
+
+  <VerderLezen items={[
+    { label: 'Aankoopbegeleiding', href: '/aankoopbegeleiding-vastgoed-marokko/', tekst: 'Selectie, due diligence en overdracht — stap voor stap.' },
+    { label: 'Nieuwbouw & off-plan', href: '/nieuwbouw-vastgoed-marokko/', tekst: 'Waar u bij projectwoningen op moet letten.' },
+    { label: 'Investeringsadvies', href: '/investeren-vastgoed-marokko/', tekst: 'Netto rendement en strategie per stad en objecttype.' },
+    { label: 'Markten in Marokko', href: '/vastgoed-marokko/', tekst: 'Vergelijk steden, prijzen en verhuurpotentie.' },
+  ]} />
+
+  <LeadCta path={path} />
+</BaseLayout>
+
+<script>
+  const knoppen = document.querySelectorAll<HTMLButtonElement>('.aanbod-filter__knop');
+  const items = document.querySelectorAll<HTMLElement>('.aanbod-grid__item');
+  knoppen.forEach((knop) => {
+    knop.addEventListener('click', () => {
+      const filter = knop.dataset.filter;
+      knoppen.forEach((k) => {
+        const actief = k === knop;
+        k.classList.toggle('is-actief', actief);
+        k.setAttribute('aria-pressed', String(actief));
+      });
+      items.forEach((item) => {
+        const toon = filter === 'alle' || item.dataset.stad === filter;
+        item.hidden = !toon;
+      });
+    });
+  });
+</script>

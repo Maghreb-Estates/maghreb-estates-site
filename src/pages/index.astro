@@ -2,7 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Icon from '../components/Icon.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 import { team, teamNetwerk } from '../data/site';
+import { projecten } from '../data/projecten';
+
+const uitgelicht = projecten.slice(0, 3);
 
 // Bewust rustige homepage: hero → data/insights → aanpak → waarom → proces →
 // team → korte CTA → footer. Geen stedenblok, geen FAQ, geen kennisbankdump.
@@ -114,6 +118,25 @@ const redenen = [
       </div>
     </div>
   </section>
+
+  <!-- UITGELICHT AANBOD -->
+  {uitgelicht.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section__header" style="max-width:820px">
+          <p class="eyebrow">Aanbod</p>
+          <h2>Vastgoedprojecten die wij<br /><em>op dit moment begeleiden</em></h2>
+          <p class="section__desc">Een selectie van projecten in Marrakech en Tanger. Onafhankelijke begeleiding, van de eerste oriëntatie tot en met de overdracht.</p>
+        </div>
+        <div class="aanbod-grid">
+          {uitgelicht.map((p) => (
+            <div class="aanbod-grid__item"><ProjectCard project={p} headingLevel={3} sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 360px" /></div>
+          ))}
+        </div>
+        <p style="margin-top:36px"><a href="/aanbod/" class="btn btn--outline">Bekijk het volledige aanbod</a></p>
+      </div>
+    </section>
+  )}
 
   <!-- WAAROM KLANTEN MET ONS WERKEN -->
   <section class="section">
