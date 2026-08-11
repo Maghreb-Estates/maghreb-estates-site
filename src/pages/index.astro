@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Icon from '../components/Icon.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import CardSlider from '../components/CardSlider.astro';
 import { team, teamNetwerk } from '../data/site';
 import { projecten } from '../data/projecten';
 
@@ -76,19 +77,44 @@ const redenen = [
         <h2>Beslissen op basis van inzicht,<br /><em>niet alleen gevoel</em></h2>
         <p class="section__desc">De Marokkaanse vastgoedmarkt is lokaal, versnipperd en vaak weinig transparant. Maghreb Estates brengt structuur aan in die markt. Wij analyseren objecten op prijs, locatie, verhuurpotentie, marktdynamiek en dossierkwaliteit, zodat u niet alleen ziet wat een woning kost, maar ook hoe sterk de onderliggende investering is.</p>
       </div>
-      <div class="datacards">
-        {datacards.map((c) => (
-          <div class="datacard">
-            <span class="datacard__ic"><Icon name={c.icon} size={24} /></span>
-            <h3>{c.titel}</h3>
-            <p>{c.tekst}</p>
-          </div>
-        ))}
+      <div class="cardslider">
+        <p class="cardslider__hint">Veeg
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </p>
+        <div class="datacards grid--slider">
+          {datacards.map((c) => (
+            <div class="datacard">
+              <span class="datacard__ic"><Icon name={c.icon} size={24} /></span>
+              <h3>{c.titel}</h3>
+              <p>{c.tekst}</p>
+            </div>
+          ))}
+        </div>
+        <div class="cardslider__dots" aria-hidden="true"></div>
       </div>
     </div>
   </section>
 
-  <!-- DIENSTEN -->
+  <!-- UITGELICHT AANBOD — direct na de insights -->
+  {uitgelicht.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section__header" style="max-width:820px">
+          <p class="eyebrow">Aanbod</p>
+          <h2>Vastgoedprojecten die wij<br /><em>op dit moment begeleiden</em></h2>
+          <p class="section__desc">Een selectie van projecten in Marrakech en Tanger. Onafhankelijke begeleiding, van de eerste oriëntatie tot en met de overdracht.</p>
+        </div>
+        <CardSlider cols={3} hint="Veeg voor meer projecten">
+          {uitgelicht.map((p) => (
+            <ProjectCard project={p} headingLevel={3} sizes="(max-width: 760px) 84vw, (max-width: 1100px) 50vw, 360px" />
+          ))}
+        </CardSlider>
+        <p style="margin-top:36px"><a href="/aanbod/" class="btn btn--outline">Bekijk het volledige aanbod</a></p>
+      </div>
+    </section>
+  )}
+
+  <!-- ONZE AANPAK -->
   <section class="section section--tinted">
     <div class="container">
       <div class="section__header" style="max-width:820px">
@@ -96,7 +122,7 @@ const redenen = [
         <h2>Marktdata, juridische controle<br /><em>en lokale kennis samen</em></h2>
         <p class="section__desc">Een vastgoedbeslissing wordt sterker wanneer marktdata, juridische controle en lokale kennis samenkomen. Daarom combineren wij objectanalyse, prijsvergelijking, documentcontrole en begeleiding ter plaatse in één helder proces.</p>
       </div>
-      <div class="grid grid--3">
+      <CardSlider cols={3} hint="Veeg voor meer">
         <a class="card card--link" href="/aankoopbegeleiding-vastgoed-marokko/">
           <span class="card__ic"><Icon name="schild" size={26} /></span>
           <h3>Aankoopbegeleiding</h3>
@@ -115,28 +141,9 @@ const redenen = [
           <p>Beoordeling van ontwikkelaar, vergunningen, contractvoorwaarden, betalingsstructuur en oplevering.</p>
           <span class="card__more">Meer over nieuwbouw</span>
         </a>
-      </div>
+      </CardSlider>
     </div>
   </section>
-
-  <!-- UITGELICHT AANBOD -->
-  {uitgelicht.length > 0 && (
-    <section class="section">
-      <div class="container">
-        <div class="section__header" style="max-width:820px">
-          <p class="eyebrow">Aanbod</p>
-          <h2>Vastgoedprojecten die wij<br /><em>op dit moment begeleiden</em></h2>
-          <p class="section__desc">Een selectie van projecten in Marrakech en Tanger. Onafhankelijke begeleiding, van de eerste oriëntatie tot en met de overdracht.</p>
-        </div>
-        <div class="aanbod-grid">
-          {uitgelicht.map((p) => (
-            <div class="aanbod-grid__item"><ProjectCard project={p} headingLevel={3} sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 360px" /></div>
-          ))}
-        </div>
-        <p style="margin-top:36px"><a href="/aanbod/" class="btn btn--outline">Bekijk het volledige aanbod</a></p>
-      </div>
-    </section>
-  )}
 
   <!-- WAAROM KLANTEN MET ONS WERKEN -->
   <section class="section">

@@ -773,6 +773,14 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
   .project__cta { position: static; }
   .project__specs { grid-template-columns: 1fr 1fr; }
 }
+
+/* Insights-datacards als horizontale swipe-slider op mobiel. De verbonden
+   rand-stijl (1px-gaps + omkaderend blok) is alleen voor desktop; in de slider
+   wordt elke datacard een losse kaart. Hergebruikt .grid--slider + .cardslider. */
+@media (max-width: 560px) {
+  .datacards.grid--slider { background: transparent; border: 0; border-radius: 0; overflow: visible; overflow-x: auto; }
+  .datacards.grid--slider .datacard { border: 1px solid var(--border); border-radius: var(--radius); }
+}
 @media (max-width: 460px) {
   .project__specs { grid-template-columns: 1fr; }
 }
