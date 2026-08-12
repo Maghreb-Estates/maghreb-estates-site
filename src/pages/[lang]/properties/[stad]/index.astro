@@ -1,0 +1,107 @@
+---
+// Vertaalde stad-listingpagina (EN/FR/AR). Nederlandse tegenhanger: /aanbod/[stad]/.
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Hero from '../../../../components/Hero.astro';
+import Breadcrumbs from '../../../../components/Breadcrumbs.astro';
+import ProjectCard from '../../../../components/ProjectCard.astro';
+import CtaInline from '../../../../components/CtaInline.astro';
+import Faq from '../../../../components/Faq.astro';
+import { stedenMetAanbod, projectenVoorStad } from '../../../../data/projecten';
+import { stadContent } from '../../../../data/projectenVertaling';
+import { faqSchema, serviceSchema } from '../../../../data/schema';
+import { vertaalTalen, paginas, type Taal } from '../../../../i18n/config';
+import { ui } from '../../../../i18n/ui';
+import { aanbodUi, aanbodHubPad, aanbodStadPad, aanbodAlternates } from '../../../../i18n/aanbod';
+
+export function getStaticPaths() {
+  return vertaalTalen.flatMap((taal) =>
+    stedenMetAanbod.map((s) => ({ params: { lang: taal, stad: s.stad }, props: { taal, stadInfo: s } })),
+  );
+}
+const { taal, stadInfo } = Astro.props as { taal: Exclude<Taal, 'nl'>; stadInfo: { stad: string; stadNaam: string; regio: string } };
+const a = aanbodUi[taal];
+const t = ui[taal];
+const path = aanbodStadPad(taal, stadInfo.stad);
+const { alternates, xDefault } = aanbodAlternates({ soort: 'stad', stad: stadInfo.stad });
+
+const projects = projectenVoorStad(stadInfo.stad);
+const sc = stadContent(stadInfo.stad, taal);
+const aantal = projects.length === 1 ? a.stad.ditProject : a.stad.dezeProjecten(projects.length);
+const projectNamen = projects.map((p) => p.naam).join(', ');
+
+// Generieke, correcte vragen (buitenlandse koper + prijzen); stadsspecifieke
+// FAQ-teksten zijn er niet, dus geen verzonnen inhoud.
+const faqs = [a.hub.faqs[1], a.hub.faqs[2]];
+
+const heroCtas = [
+  { label: a.planAdvies, href: paginas.adviesgesprek[taal], primary: true },
+  { label: a.laatBeoordelen, href: `${paginas.contact[taal]}?doel=objectanalyse` },
+];
+---
+<BaseLayout
+  title={a.stad.title(stadInfo.stadNaam)}
+  description={a.stad.description(stadInfo.stadNaam, projectNamen)}
+  path={path}
+  taal={taal}
+  alternates={alternates}
+  xDefault={xDefault}
+  schema={[
+    faqSchema(faqs),
+    serviceSchema({ naam: `${a.aanbod} — ${stadInfo.stadNaam}`, beschrijving: a.stad.description(stadInfo.stadNaam, projectNamen), path }),
+  ]}
+>
+  <Hero
+    compact
+    eyebrow={a.stad.eyebrowRegio(stadInfo.regio)}
+    title={a.stad.h1(stadInfo.stadNaam)}
+    sub={a.stad.sub(sc.invalshoek, aantal, stadInfo.stadNaam)}
+    image="/images/villa4.jpg"
+    ctas={heroCtas}
+  />
+  <Breadcrumbs
+    items={[{ label: a.aanbod, href: aanbodHubPad(taal) }, { label: stadInfo.stadNaam, href: path }]}
+    home={{ label: t.breadcrumb.home, href: paginas.home[taal] }}
+  />
+
+  <section class="section">
+    <div class="container prose" style="max-width:760px">
+      <p>{sc.intro}</p>
+    </div>
+  </section>
+
+  <section class="section section--tinted">
+    <div class="container">
+      <div class="section__header section__header--center">
+        <p class="eyebrow">{a.hub.projectenEyebrow}</p>
+        <h2><em>{stadInfo.stadNaam}</em></h2>
+      </div>
+      <div class="aanbod-grid">
+        {projects.map((p, i) => (
+          <div class="aanbod-grid__item">
+            <ProjectCard project={p} taal={taal} headingLevel={3} sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 360px" eager={i === 0} />
+          </div>
+        ))}
+      </div>
+
+      <CtaInline
+        title={a.stad.specifiekObject(stadInfo.stadNaam)}
+        text={a.stad.specifiekObjectTekst}
+        label={a.stad.stuurObject}
+        href={`${paginas.contact[taal]}?doel=objectanalyse`}
+      />
+    </div>
+  </section>
+
+  <Faq items={faqs} title={a.stad.faqTitel(stadInfo.stadNaam)} eyebrow="FAQ" />
+
+  <section class="ctaband">
+    <div class="container">
+      <h2>{a.slotCtaTitel}</h2>
+      <p>{a.slotCtaTekst}</p>
+      <div class="ctaband__actions">
+        <a href={paginas.adviesgesprek[taal]} class="btn btn--light">{a.planAdvies}</a>
+        <a href={aanbodHubPad(taal)} class="btn btn--outline" style="color:var(--cream);border-color:var(--cream)">{a.alleProjecten}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

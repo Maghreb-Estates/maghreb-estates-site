@@ -21,6 +21,10 @@ interface Props {
   noindex?: boolean;
   /** Taal van de pagina. Default Nederlands, want dat is de hoofdtaal. */
   taal?: Taal;
+  /** Expliciete hreflang-alternates (voor dynamische pagina's buiten het
+   *  paginaregister, zoals het vastgoedaanbod). Overschrijft de sleutel-logica. */
+  alternates?: { lang: string; href: string }[];
+  xDefault?: string;
 }
 
 const {
@@ -37,11 +41,12 @@ const rtl = isRtl(taal);
 // verzinnen voor pagina's die alleen in het Nederlands bestaan zou zoekmachines
 // naar 404's sturen, dus dat doen we niet.
 const sleutel = sleutelVoorPad(pad);
-const alternates = sleutel
+// Expliciete alternates (props) hebben voorrang; anders afleiden uit het register.
+const alternates = Astro.props.alternates ?? (sleutel
   ? talen.map((t) => ({ lang: htmlLang[t], href: new URL(paginas[sleutel][t], site.url).href }))
-  : [];
+  : []);
 // x-default wijst naar de Nederlandse versie: dat is de hoofdtaal van het merk.
-const xDefault = sleutel ? new URL(paginas[sleutel][standaardTaal], site.url).href : '';
+const xDefault = Astro.props.xDefault ?? (sleutel ? new URL(paginas[sleutel][standaardTaal], site.url).href : '');
 
 const ogLocale: Record<Taal, string> = { nl: 'nl_NL', en: 'en_GB', fr: 'fr_FR', ar: 'ar_MA' };
 

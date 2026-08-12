@@ -1,15 +1,19 @@
 ---
-// Herbruikbare listing-/projectcard. Data-gedreven vanuit projecten.ts, zodat
-// nieuwe projecten automatisch dezelfde card krijgen. De hele card is één link.
+// Herbruikbare listing-/projectcard. Data-gedreven vanuit projecten.ts +
+// projectenVertaling.ts, taal-bewust. De hele card is één link.
 //
 // Beeld via astro:assets: automatische webp + srcset, met een vaste
 // beeldverhouding (16:10) in een overflow-container zodat er geen layout shift
 // optreedt, ook al verschillen de bronafmetingen per project.
 import { Image } from 'astro:assets';
-import { projectPad, type Project } from '../data/projecten';
+import { type Project } from '../data/projecten';
+import { projectContent } from '../data/projectenVertaling';
+import { standaardTaal, type Taal } from '../i18n/config';
+import { aanbodUi, aanbodProjectPad } from '../i18n/aanbod';
 
 interface Props {
   project: Project;
+  taal?: Taal;
   /** Kopregelniveau binnen de paginahiërarchie (2 op overzicht, 3 in lijstjes). */
   headingLevel?: 2 | 3;
   /** sizes-attribuut voor srcset; standaard 2 koloms desktop, vol op mobiel. */
@@ -18,14 +22,16 @@ interface Props {
   eager?: boolean;
 }
 
-const { project: p, headingLevel = 3, sizes = '(max-width: 760px) 100vw, 380px', eager = false } = Astro.props;
+const { project: p, taal = standaardTaal, headingLevel = 3, sizes = '(max-width: 760px) 100vw, 380px', eager = false } = Astro.props;
+const ui = aanbodUi[taal];
+const c = projectContent(p, taal);
 const Titel = `h${headingLevel}` as 'h2' | 'h3';
-const pad = projectPad(p);
+const pad = aanbodProjectPad(taal, p.stad, p.slug);
 const locatie = p.wijk ? `${p.stadNaam} · ${p.wijk}` : p.stadNaam;
-const prijs = p.prijsVanaf?.tekst ?? 'Prijs op aanvraag';
+const prijs = c.prijsVanafTekst ?? ui.prijsOpAanvraag;
 ---
 <article class="property-card">
-  <a class="property-card__link" href={pad} aria-label={`Bekijk ${p.naam} in ${p.stadNaam}`}>
+  <a class="property-card__link" href={pad} aria-label={`${p.naam} — ${locatie}`}>
     <div class="property-card__media">
       <Image
         src={p.thumb.src}
@@ -38,12 +44,12 @@ const prijs = p.prijsVanaf?.tekst ?? 'Prijs op aanvraag';
       />
     </div>
     <div class="property-card__body">
-      <p class="property-card__loc">{locatie}, Marokko</p>
+      <p class="property-card__loc">{locatie}, {ui.land}</p>
       <Titel class="property-card__title">{p.naam}</Titel>
-      <p class="property-card__desc">{p.kort}</p>
+      <p class="property-card__desc">{c.kort}</p>
       <div class="property-card__foot">
         <span class="property-card__prijs">{prijs}</span>
-        <span class="property-card__cta">Bekijk project</span>
+        <span class="property-card__cta">{ui.bekijkProject}</span>
       </div>
     </div>
   </a>

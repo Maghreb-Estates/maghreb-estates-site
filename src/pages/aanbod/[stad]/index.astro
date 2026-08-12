@@ -10,6 +10,7 @@ import VerderLezen from '../../../components/VerderLezen.astro';
 import { stedenMetAanbod, projectenVoorStad } from '../../../data/projecten';
 import { steden } from '../../../data/steden';
 import { faqSchema, serviceSchema } from '../../../data/schema';
+import { aanbodAlternates } from '../../../i18n/aanbod';
 
 export function getStaticPaths() {
   return stedenMetAanbod.map((s) => ({
@@ -20,6 +21,7 @@ export function getStaticPaths() {
 
 const { stadInfo, stad } = Astro.props;
 const path = `/aanbod/${stadInfo.stad}/`;
+const { alternates, xDefault } = aanbodAlternates({ soort: 'stad', stad: stadInfo.stad });
 const projects = projectenVoorStad(stadInfo.stad);
 const meer = projects.length === 1 ? 'dit project' : `deze ${projects.length} projecten`;
 
@@ -33,6 +35,8 @@ const faqs = [
   title={`Vastgoed te koop in ${stadInfo.stadNaam} | Projecten | Maghreb Estates`}
   description={`Bekijk het vastgoedaanbod van Maghreb Estates in ${stadInfo.stadNaam}: ${projects.map((p) => p.naam).join(', ')}. Foto's, ligging en projectinformatie, met onafhankelijke begeleiding.`}
   path={path}
+  alternates={alternates}
+  xDefault={xDefault}
   schema={[
     faqSchema(faqs),
     serviceSchema({ naam: `Vastgoedaanbod ${stadInfo.stadNaam}`, beschrijving: `Vastgoedprojecten in ${stadInfo.stadNaam}, met begeleiding bij aankoop, dossiercontrole en overdracht.`, path }),

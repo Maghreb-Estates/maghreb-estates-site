@@ -10,6 +10,7 @@ import LeadCta from '../../../components/LeadCta.astro';
 import { site, waLink } from '../../../data/site';
 import { projecten, gerelateerdeProjecten, projectPad } from '../../../data/projecten';
 import { faqSchema, projectSchema } from '../../../data/schema';
+import { aanbodAlternates } from '../../../i18n/aanbod';
 
 export function getStaticPaths() {
   return projecten.map((p) => ({ params: { stad: p.stad, project: p.slug }, props: { p } }));
@@ -17,6 +18,7 @@ export function getStaticPaths() {
 
 const { p } = Astro.props;
 const path = projectPad(p);
+const { alternates, xDefault } = aanbodAlternates({ soort: 'project', stad: p.stad, slug: p.slug });
 const locatie = p.wijk ? `${p.stadNaam}, ${p.wijk}` : `${p.stadNaam}, Marokko`;
 const prijs = p.prijsVanaf?.tekst ?? p.prijsPerM2?.tekst ?? 'Prijs op aanvraag';
 const gerelateerd = gerelateerdeProjecten(p, 2);
@@ -39,6 +41,8 @@ const description = `${p.kort} Bekijk foto's, ligging en projectinformatie van $
   description={description}
   path={path}
   image={p.hero.src.src}
+  alternates={alternates}
+  xDefault={xDefault}
   schema={[...projectSchema(p), faqSchema(faqs)]}
 >
   <Breadcrumbs items={[

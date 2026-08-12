@@ -1,0 +1,161 @@
+---
+// Vertaalde projectdetailpagina (EN/FR/AR). NL-tegenhanger: /aanbod/[stad]/[project]/.
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../../components/Breadcrumbs.astro';
+import ProjectGallery from '../../../../components/ProjectGallery.astro';
+import ProjectCard from '../../../../components/ProjectCard.astro';
+import ProjectKaart from '../../../../components/ProjectKaart.astro';
+import Faq from '../../../../components/Faq.astro';
+import Icon from '../../../../components/Icon.astro';
+import { site, waLink } from '../../../../data/site';
+import { projecten, gerelateerdeProjecten } from '../../../../data/projecten';
+import { projectContent } from '../../../../data/projectenVertaling';
+import { faqSchema, projectSchema } from '../../../../data/schema';
+import { vertaalTalen, paginas, type Taal } from '../../../../i18n/config';
+import { ui } from '../../../../i18n/ui';
+import { aanbodUi, aanbodHubPad, aanbodStadPad, aanbodProjectPad, aanbodAlternates } from '../../../../i18n/aanbod';
+
+export function getStaticPaths() {
+  return vertaalTalen.flatMap((taal) =>
+    projecten.map((p) => ({ params: { lang: taal, stad: p.stad, project: p.slug }, props: { taal, p } })),
+  );
+}
+const { taal, p } = Astro.props as { taal: Exclude<Taal, 'nl'>; p: (typeof projecten)[number] };
+const a = aanbodUi[taal];
+const t = ui[taal];
+const c = projectContent(p, taal);
+const path = aanbodProjectPad(taal, p.stad, p.slug);
+const { alternates, xDefault } = aanbodAlternates({ soort: 'project', stad: p.stad, slug: p.slug });
+
+const locatie = p.wijk ? `${p.stadNaam}, ${p.wijk}` : `${p.stadNaam}, ${a.land}`;
+const prijs = c.prijsVanafTekst ?? c.prijsPerM2Tekst ?? a.prijsOpAanvraag;
+const gerelateerd = gerelateerdeProjecten(p, 2);
+
+const contactHref = `${paginas.contact[taal]}?doel=nieuwbouw&project=${encodeURIComponent(p.naam)}&stad=${encodeURIComponent(p.stadNaam)}`;
+const waBericht = `${a.over} ${p.naam} — ${p.stadNaam}. ${a.vraagProjectinfo}.`;
+
+const faqs = [
+  { q: `${a.ligging} — ${p.naam}?`, a: `${p.naam}: ${locatie}. ${c.ligging}` },
+  { q: `${a.woningtypen} — ${p.naam}?`, a: `${c.woningtypen ? c.woningtypen.map((w) => `${w.type} (${w.details})`).join('; ') + '.' : c.kort}` },
+  { q: a.hub.faqs[1].q, a: a.hub.faqs[1].a },
+];
+
+const description = `${c.kort}`;
+---
+<BaseLayout
+  title={a.detail.title(p.naam, p.stadNaam)}
+  description={description}
+  path={path}
+  taal={taal}
+  image={p.hero.src.src}
+  alternates={alternates}
+  xDefault={xDefault}
+  schema={[...projectSchema(p), faqSchema(faqs)]}
+>
+  <Breadcrumbs
+    items={[
+      { label: a.aanbod, href: aanbodHubPad(taal) },
+      { label: p.stadNaam, href: aanbodStadPad(taal, p.stad) },
+      { label: p.naam, href: path },
+    ]}
+    home={{ label: t.breadcrumb.home, href: paginas.home[taal] }}
+  />
+
+  <article class="project">
+    <header class="container project__kop">
+      <p class="project__loc">{locatie}</p>
+      <h1>{p.naam}</h1>
+    </header>
+
+    <div class="container">
+      <ProjectGallery fotos={p.galerij} projectNaam={p.naam} taal={taal} />
+    </div>
+
+    <section class="section" style="padding-block:56px">
+      <div class="container project__lead">
+        <div class="project__kern">
+          <h2 class="project__introkop">{a.over} {p.naam}</h2>
+          <p class="project__intro">{c.intro}</p>
+          <dl class="project__specs">
+            {c.kenmerken.map((k) => (
+              <div class="project__spec">
+                <dt>{k.label}</dt>
+                <dd>{k.waarde}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <aside class="project__cta" aria-label={a.vraagProjectinfo}>
+          <p class="project__prijs">{prijs}</p>
+          <p class="project__ctatekst">{a.detail.ctaTekst(p.naam)}</p>
+          <a href={contactHref} class="btn btn--primary btn--full">{a.vraagProjectinfo}</a>
+          <ul class="project__contact">
+            <li><Icon name="whatsapp" size={17} /><a href={waLink(waBericht)}>{a.directWhatsapp}</a></li>
+            <li><Icon name="telefoon" size={17} /><a href={`tel:${site.telefoonHref}`} dir="ltr">{site.telefoon}</a></li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section--tinted" style="padding-block:var(--section-pad)">
+      <div class="container project__body">
+        <div class="prose" style="max-width:760px">
+          <h2 id="omschrijving">{a.projectomschrijving}</h2>
+          {c.omschrijving.map((alinea) => <p>{alinea}</p>)}
+
+          <h2 id="voorzieningen">{a.voorzieningen}</h2>
+          <ul class="checks">{c.voorzieningen.map((v) => <li>{v}</li>)}</ul>
+
+          {c.woningtypen && (
+            <>
+              <h2 id="woningtypen">{a.woningtypen}</h2>
+              <ul class="spec">
+                {c.woningtypen.map((w) => (<li><b>{w.type}</b><span>{w.details}</span></li>))}
+              </ul>
+            </>
+          )}
+
+          {p.developer && <p class="project__bron">{a.developerNote(p.developer)}</p>}
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="max-width:860px">
+        <h2 id="ligging">{a.ligging}</h2>
+        <p style="color:var(--text-muted);font-size:17px;max-width:68ch;margin:14px 0 24px">{c.ligging}</p>
+        <ProjectKaart query={p.mapsQuery} plaats={locatie} taal={taal} />
+      </div>
+    </section>
+
+    {gerelateerd.length > 0 && (
+      <section class="section section--tinted">
+        <div class="container">
+          <div class="section__header">
+            <p class="eyebrow">{a.meerAanbod}</p>
+            <h2>{a.bekijkOokProjecten}</h2>
+          </div>
+          <div class="aanbod-grid">
+            {gerelateerd.map((g) => (
+              <div class="aanbod-grid__item"><ProjectCard project={g} taal={taal} headingLevel={3} sizes="(max-width: 760px) 100vw, 380px" /></div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+  </article>
+
+  <Faq items={faqs} title={`${a.hub.faqTitel}`} eyebrow="FAQ" />
+
+  <section class="ctaband">
+    <div class="container">
+      <h2>{a.slotCtaTitel}</h2>
+      <p>{a.slotCtaTekst}</p>
+      <div class="ctaband__actions">
+        <a href={contactHref} class="btn btn--light">{a.vraagProjectinfo}</a>
+        <a href={paginas.adviesgesprek[taal]} class="btn btn--outline" style="color:var(--cream);border-color:var(--cream)">{a.planAdvies}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

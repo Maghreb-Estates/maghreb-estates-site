@@ -8,9 +8,12 @@
 // er geen layout shift optreedt ongeacht de bronafmetingen.
 import { Image, getImage } from 'astro:assets';
 import type { ProjectFoto } from '../data/projecten';
+import { standaardTaal, type Taal } from '../i18n/config';
+import { aanbodUi } from '../i18n/aanbod';
 
-interface Props { fotos: ProjectFoto[]; projectNaam: string }
-const { fotos, projectNaam } = Astro.props;
+interface Props { fotos: ProjectFoto[]; projectNaam: string; taal?: Taal }
+const { fotos, projectNaam, taal = standaardTaal } = Astro.props;
+const ui = aanbodUi[taal];
 
 // Full-size webp voor in de lightbox (los van de kleinere grid-varianten).
 const full = await Promise.all(
@@ -22,8 +25,8 @@ const [hoofd, ...rest] = fotos;
 const zichtbareThumbs = rest.slice(0, 4);
 const extra = rest.length - zichtbareThumbs.length; // aantal achter "alle foto's"
 ---
-<section class="pgallery" aria-label={`Foto's van ${projectNaam}`}>
-  <button class="pgallery__main" type="button" data-lightbox="0" aria-label={`${hoofd.alt} — open galerij`}>
+<section class="pgallery" aria-label={`${ui.fotos} — ${projectNaam}`}>
+  <button class="pgallery__main" type="button" data-lightbox="0" aria-label={`${hoofd.alt} — ${ui.openGalerij}`}>
     <Image
       src={hoofd.src}
       alt={hoofd.alt}
@@ -35,14 +38,14 @@ const extra = rest.length - zichtbareThumbs.length; // aantal achter "alle foto'
     />
     <span class="pgallery__count">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-      {fotos.length} foto's
+      {fotos.length} {ui.fotos}
     </span>
   </button>
 
   {zichtbareThumbs.length > 0 && (
     <div class="pgallery__thumbs">
       {zichtbareThumbs.map((f, i) => (
-        <button class="pgallery__thumb" type="button" data-lightbox={i + 1} aria-label={`${f.alt} — open galerij`}>
+        <button class="pgallery__thumb" type="button" data-lightbox={i + 1} aria-label={`${f.alt} — ${ui.openGalerij}`}>
           <Image src={f.src} alt={f.alt} widths={[240, 480]} sizes="200px" loading="lazy" class="pgallery__img" />
           {i === zichtbareThumbs.length - 1 && extra > 0 && (
             <span class="pgallery__meer" aria-hidden="true">+{extra}</span>
@@ -53,18 +56,18 @@ const extra = rest.length - zichtbareThumbs.length; // aantal achter "alle foto'
   )}
 
   <div class="pgallery__actie">
-    <button class="btn btn--outline pgallery__alle" type="button" data-lightbox="0">Bekijk alle foto's</button>
+    <button class="btn btn--outline pgallery__alle" type="button" data-lightbox="0">{ui.bekijkAlleFotos}</button>
   </div>
 </section>
 
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label={`Fotogalerij ${projectNaam}`} hidden>
-  <button class="lightbox__sluit" type="button" aria-label="Galerij sluiten">&times;</button>
-  <button class="lightbox__nav lightbox__nav--vorige" type="button" aria-label="Vorige foto">&#8249;</button>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label={`${ui.fotos} — ${projectNaam}`} hidden>
+  <button class="lightbox__sluit" type="button" aria-label={ui.sluiten}>&times;</button>
+  <button class="lightbox__nav lightbox__nav--vorige" type="button" aria-label={ui.vorige}>&#8249;</button>
   <figure class="lightbox__figure">
     <img class="lightbox__img" alt="" />
     <figcaption class="lightbox__caption"></figcaption>
   </figure>
-  <button class="lightbox__nav lightbox__nav--volgende" type="button" aria-label="Volgende foto">&#8250;</button>
+  <button class="lightbox__nav lightbox__nav--volgende" type="button" aria-label={ui.volgende}>&#8250;</button>
 </div>
 
 <script type="application/json" id="lightbox-data" set:html={JSON.stringify(lightboxData)}></script>

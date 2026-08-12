@@ -1,0 +1,135 @@
+---
+// Vertaalde vastgoedhub (EN/FR/AR). Nederlandse tegenhanger: /aanbod/.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Hero from '../../../components/Hero.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import Faq from '../../../components/Faq.astro';
+import { projecten, stedenMetAanbod } from '../../../data/projecten';
+import { faqSchema, serviceSchema } from '../../../data/schema';
+import { vertaalTalen, paginas, type Taal } from '../../../i18n/config';
+import { ui } from '../../../i18n/ui';
+import { aanbodUi, aanbodHubPad, aanbodStadPad, aanbodAlternates } from '../../../i18n/aanbod';
+
+export function getStaticPaths() {
+  return vertaalTalen.map((taal) => ({ params: { lang: taal }, props: { taal } }));
+}
+const { taal } = Astro.props as { taal: Exclude<Taal, 'nl'> };
+const a = aanbodUi[taal];
+const t = ui[taal];
+const path = aanbodHubPad(taal);
+const { alternates, xDefault } = aanbodAlternates({ soort: 'hub' });
+
+const heroCtas = [
+  { label: a.planAdvies, href: paginas.adviesgesprek[taal], primary: true },
+  { label: a.laatBeoordelen, href: `${paginas.contact[taal]}?doel=objectanalyse` },
+];
+const contextLinks = [
+  { label: t.footer.aankoop, href: paginas.aankoopbegeleiding[taal] },
+  { label: t.nav.nieuwbouw, href: paginas.nieuwbouw[taal] },
+  { label: t.footer.investering, href: paginas.investeren[taal] },
+];
+---
+<BaseLayout
+  title={a.hub.title}
+  description={a.hub.description}
+  path={path}
+  taal={taal}
+  alternates={alternates}
+  xDefault={xDefault}
+  schema={[
+    faqSchema(a.hub.faqs),
+    serviceSchema({ naam: `Maghreb Estates — ${a.aanbod}`, beschrijving: a.hub.description, path }),
+  ]}
+>
+  <Hero
+    compact
+    eyebrow={a.hub.eyebrow}
+    title={a.hub.h1}
+    sub={a.hub.sub}
+    image="/images/villa5.jpg"
+    ctas={heroCtas}
+  />
+  <Breadcrumbs items={[{ label: a.aanbod, href: path }]} home={{ label: t.breadcrumb.home, href: paginas.home[taal] }} />
+
+  <section class="section">
+    <div class="container prose" style="max-width:760px">
+      <p><strong>{a.hub.intro1}</strong></p>
+      <p>{a.hub.intro2}</p>
+    </div>
+  </section>
+
+  <section class="section section--tinted" id="projecten">
+    <div class="container">
+      <div class="section__header section__header--center">
+        <p class="eyebrow">{a.hub.projectenEyebrow}</p>
+        <h2 set:html={a.hub.projectenTitel} />
+        <p class="section__desc">{a.hub.projectenSub}</p>
+      </div>
+
+      <div class="aanbod-filter" role="group" aria-label={a.filterAria}>
+        <button type="button" class="aanbod-filter__knop is-actief" data-filter="alle" aria-pressed="true">{a.filterAlle}</button>
+        {stedenMetAanbod.map((s) => (
+          <button type="button" class="aanbod-filter__knop" data-filter={s.stad} aria-pressed="false">{s.stadNaam} ({s.aantal})</button>
+        ))}
+      </div>
+
+      <div class="aanbod-grid">
+        {projecten.map((p, i) => (
+          <div class="aanbod-grid__item" data-stad={p.stad}>
+            <ProjectCard project={p} taal={taal} headingLevel={3} sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 360px" eager={i === 0} />
+          </div>
+        ))}
+      </div>
+
+      <div class="aanbod-steden">
+        {stedenMetAanbod.map((s) => (
+          <a class="aanbod-steden__link" href={aanbodStadPad(taal, s.stad)}>{a.hub.bekijkAlleInStad(s.stadNaam)}</a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container prose" style="max-width:760px">
+      <h2>{a.hub.contextTitel}</h2>
+      <p>{a.hub.contextTekst}</p>
+      <p>
+        {contextLinks.map((l, i) => (
+          <>{i > 0 && ' · '}<a href={l.href}>{l.label}</a></>
+        ))}
+      </p>
+    </div>
+  </section>
+
+  <Faq items={a.hub.faqs} title={a.hub.faqTitel} eyebrow="FAQ" />
+
+  <section class="ctaband">
+    <div class="container">
+      <h2>{a.slotCtaTitel}</h2>
+      <p>{a.slotCtaTekst}</p>
+      <div class="ctaband__actions">
+        <a href={paginas.adviesgesprek[taal]} class="btn btn--light">{a.planAdvies}</a>
+        <a href={`${paginas.contact[taal]}?doel=objectanalyse`} class="btn btn--outline" style="color:var(--cream);border-color:var(--cream)">{a.laatBeoordelen}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const knoppen = document.querySelectorAll<HTMLButtonElement>('.aanbod-filter__knop');
+  const items = document.querySelectorAll<HTMLElement>('.aanbod-grid__item');
+  knoppen.forEach((knop) => {
+    knop.addEventListener('click', () => {
+      const filter = knop.dataset.filter;
+      knoppen.forEach((k) => {
+        const actief = k === knop;
+        k.classList.toggle('is-actief', actief);
+        k.setAttribute('aria-pressed', String(actief));
+      });
+      items.forEach((item) => {
+        item.hidden = !(filter === 'alle' || item.dataset.stad === filter);
+      });
+    });
+  });
+</script>

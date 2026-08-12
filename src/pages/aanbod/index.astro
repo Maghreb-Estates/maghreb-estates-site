@@ -8,8 +8,10 @@ import LeadCta from '../../components/LeadCta.astro';
 import VerderLezen from '../../components/VerderLezen.astro';
 import { projecten, stedenMetAanbod, stadPad } from '../../data/projecten';
 import { faqSchema, serviceSchema } from '../../data/schema';
+import { aanbodAlternates } from '../../i18n/aanbod';
 
 const path = '/aanbod/';
+const { alternates, xDefault } = aanbodAlternates({ soort: 'hub' });
 
 const faqs = [
   { q: 'Welke vastgoedprojecten biedt Maghreb Estates aan?', a: 'Wij begeleiden op dit moment de aankoop van geselecteerde nieuwbouw- en projectwoningen in Marrakech en Tanger. Ons aanbod groeit doordat wij samenwerken met lokale ontwikkelaars; nieuwe projecten voegen wij toe zodra de gegevens en voorwaarden gecontroleerd zijn.' },
@@ -22,6 +24,8 @@ const faqs = [
   title="Vastgoedaanbod in Marokko | Projecten in Marrakech & Tanger | Maghreb Estates"
   description="Ontdek geselecteerde vastgoedprojecten van Maghreb Estates in Marrakech en Tanger. Bekijk foto's, ligging en projectinformatie en vraag vrijblijvend meer informatie aan."
   path={path}
+  alternates={alternates}
+  xDefault={xDefault}
   schema={[
     faqSchema(faqs),
     serviceSchema({ naam: 'Vastgoedaanbod Marokko', beschrijving: 'Geselecteerde vastgoedprojecten in Marokko, met begeleiding bij aankoop, dossiercontrole en overdracht.', path }),

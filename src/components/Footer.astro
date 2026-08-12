@@ -2,6 +2,7 @@
 import { site, legal, waLink } from '../data/site';
 import { paginas, standaardTaal, type Taal } from '../i18n/config';
 import { ui } from '../i18n/ui';
+import { aanbodUi, aanbodHubPad } from '../i18n/aanbod';
 import Icon from './Icon.astro';
 
 interface Props { taal?: Taal }
@@ -67,7 +68,7 @@ const nl = t.nlLabel;
         <a href="/kennisbank/">{t.kennisbank}{nl}</a>
 
         <h4 style="margin-top:26px">{t.markets}</h4>
-        <a href="/aanbod/">Aanbod{nl}</a>
+        <a href={aanbodHubPad(taal)}>{aanbodUi[taal].aanbod}</a>
         <a href="/vastgoed-marokko/">{t.alleMarkten}{nl}</a>
       </div>
     </div>

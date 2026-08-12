@@ -6,9 +6,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import Icon from '../../components/Icon.astro';
 import ContentBlok from '../../components/ContentBlok.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import CardSlider from '../../components/CardSlider.astro';
 import { team, teamNetwerk } from '../../data/site';
+import { projecten } from '../../data/projecten';
 import { paginas, vertaalTalen, type Taal } from '../../i18n/config';
 import { ui } from '../../i18n/ui';
+import { aanbodUi, aanbodHubPad } from '../../i18n/aanbod';
 import { content } from '../../i18n/content';
 
 export function getStaticPaths() {
@@ -19,7 +23,9 @@ interface Props { taal: Exclude<Taal, 'nl'> }
 const { taal } = Astro.props;
 
 const t = ui[taal];
+const a = aanbodUi[taal];
 const pagina = content[taal].home;
+const uitgelicht = projecten.slice(0, 3);
 
 // Rollen en bio's van het team zijn in het Nederlands opgeslagen; per taal
 // vertaald zodat de teamsectie niet uit de toon valt.
@@ -95,6 +101,25 @@ const diensten = [
       <ContentBlok blok={pagina.blokken[0]} />
     </div>
   </section>
+
+  {/* Uitgelicht aanbod */}
+  {uitgelicht.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section__header" style="max-width:820px">
+          <p class="eyebrow">{a.aanbod}</p>
+          <h2 set:html={a.hub.projectenTitel} />
+          <p class="section__desc">{a.hub.projectenSub}</p>
+        </div>
+        <CardSlider cols={3} hint={a.veegProjecten}>
+          {uitgelicht.map((p) => (
+            <ProjectCard project={p} taal={taal} headingLevel={3} sizes="(max-width: 760px) 84vw, (max-width: 1100px) 50vw, 360px" />
+          ))}
+        </CardSlider>
+        <p style="margin-top:36px"><a href={aanbodHubPad(taal)} class="btn btn--outline">{a.alleProjecten}</a></p>
+      </div>
+    </section>
+  )}
 
   {/* Aanpak + diensten */}
   <section class="section section--tinted">

@@ -2,22 +2,25 @@
 // Google Maps-facade: laadt de zware interactieve kaart pas na een klik
 // (performance + privacy). De zoekopdracht is op gebiedsniveau — geen verzonnen
 // coördinaten. Er is altijd een directe link "Open in Google Maps".
-interface Props { query: string; plaats: string }
-const { query, plaats } = Astro.props;
+import { standaardTaal, type Taal } from '../i18n/config';
+import { aanbodUi } from '../i18n/aanbod';
+interface Props { query: string; plaats: string; taal?: Taal }
+const { query, plaats, taal = standaardTaal } = Astro.props;
+const ui = aanbodUi[taal];
 const q = encodeURIComponent(query);
 const embed = `https://www.google.com/maps?q=${q}&output=embed`;
 const extern = `https://www.google.com/maps/search/?api=1&query=${q}`;
 ---
 <div class="kaart" data-embed={embed}>
-  <button class="kaart__facade" type="button" aria-label={`Toon kaart van ${plaats}`}>
+  <button class="kaart__facade" type="button" aria-label={`${ui.toonKaartVan} ${plaats}`}>
     <span class="kaart__ic">
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
     </span>
-    <span class="kaart__label">Toon kaart van {plaats}</span>
-    <span class="kaart__sub">Google Maps laadt na een klik</span>
+    <span class="kaart__label">{ui.toonKaartVan} {plaats}</span>
+    <span class="kaart__sub">{ui.kaartSub}</span>
   </button>
   <p class="kaart__link">
-    <a href={extern} target="_blank" rel="noopener noreferrer">Open de locatie in Google Maps</a>
+    <a href={extern} target="_blank" rel="noopener noreferrer">{ui.openInMaps}</a>
   </p>
 </div>
 

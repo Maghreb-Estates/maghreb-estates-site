@@ -12,6 +12,14 @@ interface Props { taal: Exclude<Taal, 'nl'>; pagina: FormulierPagina }
 const { taal, pagina } = Astro.props;
 const t = ui[taal];
 const f = t.formulier;
+
+// Voorvultekst bij projectcontext vanuit een /properties/-detailpagina.
+const interesseTpl: Record<Exclude<Taal, 'nl'>, string> = {
+  en: 'I am interested in the project {p} in {c} and would like to receive more information.',
+  fr: 'Je suis intéressé par le projet {p} à {c} et je souhaite recevoir plus d’informations.',
+  ar: 'أنا مهتم بمشروع {p} في {c} وأرغب في الحصول على مزيد من المعلومات.',
+};
+const interesse = interesseTpl[taal];
 ---
 <section class="section">
   <div class="container">
@@ -106,6 +114,7 @@ const f = t.formulier;
     email: site.email,
     labels: f,
     kopieTekst: pagina.kopie,
+    interesse: interesse,
   }}
 >
   (function () {
@@ -124,6 +133,20 @@ const f = t.formulier;
       var sel = document.getElementById('doel');
       var v = map[doel];
       if (sel && v && [].slice.call(sel.options).some(function (o) { return o.value === v; })) sel.value = v;
+    }
+
+    // Projectcontext vanuit een /properties/-detailpagina: stad + bericht voorvullen.
+    var project = params.get('project');
+    var stadParam = params.get('stad');
+    if (stadParam) {
+      var stadEl = document.getElementById('stad');
+      if (stadEl && !stadEl.value) stadEl.value = stadParam;
+    }
+    if (project) {
+      var berichtEl = document.getElementById('bericht');
+      if (berichtEl && !berichtEl.value) {
+        berichtEl.value = interesse.replace('{p}', project).replace('{c}', stadParam || '');
+      }
     }
 
     function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
