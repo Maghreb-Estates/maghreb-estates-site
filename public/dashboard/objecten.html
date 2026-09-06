@@ -71,9 +71,9 @@
     .count strong{color:var(--accent);}
 
     /* Table */
-    .table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:4px;background:var(--card);}
+    .table-scroll{overflow:auto;max-height:calc(100vh - 250px);min-height:360px;border:1px solid var(--border);border-radius:4px;background:var(--card);}
     table{border-collapse:collapse;width:100%;font-size:13px;}
-    thead th{background:var(--green);color:var(--cream);font-family:var(--font-sans);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:11px 12px;white-space:nowrap;cursor:pointer;position:sticky;top:68px;}
+    thead th{background:var(--green);color:var(--cream);font-family:var(--font-sans);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:11px 12px;white-space:nowrap;cursor:pointer;position:sticky;top:0;z-index:5;}
     thead th:hover{background:var(--green-mid);}
     thead th.num{text-align:right;}
     thead th .arrow{color:var(--gold);margin-left:4px;font-size:10px;}
@@ -105,7 +105,7 @@
 
     @media(max-width:640px){
       .nav{padding:0 16px;} .wrap{padding:16px;} .filters{padding:14px;gap:12px;}
-      thead th{top:68px;}
+      .table-scroll{max-height:calc(100vh - 320px);}
     }
   </style>
 </head>
@@ -250,8 +250,10 @@ async function loadData(){
   const rows=[]; let from=0;
   while(true){
     const { data, error } = await sb.from('listings')
-      .select('city,neighborhood,price,surface_m2,transaction_type,property_type,bedrooms,bathrooms,url,source,last_seen_at')
-      .eq('is_active',true).not('price','is',null).range(from,from+999);
+      .select('id,city,neighborhood,price,surface_m2,transaction_type,property_type,bedrooms,bathrooms,url,source,last_seen_at')
+      .eq('is_active',true).not('price','is',null)
+      .order('id',{ascending:true})   // stabiele volgorde: zonder ORDER BY mag paginering rijen dubbelen/overslaan
+      .range(from,from+999);
     if(error){
       document.getElementById('loading').innerHTML =
         `<div style="color:var(--danger);font-family:var(--font-mono);padding:40px">Fout bij laden: ${error.message}</div>`;
@@ -268,10 +270,13 @@ async function loadData(){
 async function init(){
   const data = await loadData();
   if(!data) return;
-  allData = data.map(r=>{
-    const ppm2 = (r.surface_m2>0 && r.price>0) ? Math.round(r.price/r.surface_m2) : null;
-    return {...r, eur: r.price!=null?Math.round(r.price*EUR):null, ppm2};
-  });
+  // vangnet: unieke rijen op id (mocht een paginering toch iets dubbelen)
+  const seen = new Set();
+  allData = data.filter(r=>{ const k=r.id||r.url; if(seen.has(k)) return false; seen.add(k); return true; })
+    .map(r=>{
+      const ppm2 = (r.surface_m2>0 && r.price>0) ? Math.round(r.price/r.surface_m2) : null;
+      return {...r, eur: r.price!=null?Math.round(r.price*EUR):null, ppm2};
+    });
 
   buildFilterOptions();
   document.getElementById('loading').style.display='none';
@@ -406,7 +411,7 @@ function render(){
       <td>${r.url?`<a class="link" href="${r.url}" target="_blank" rel="noopener">Bekijk ↗</a>`:'—'}</td>
     </tr>`;
   }).join('');
-  window.scrollTo({top:0,behavior:'smooth'});
+  const sc=document.querySelector('.table-scroll'); if(sc) sc.scrollTop=0;
 }
 
 function downloadCSV(){
