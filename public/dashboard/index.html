@@ -262,7 +262,10 @@
       <span>Marktanalyse · Intern dashboard</span>
     </div>
     <div class="dash-nav__meta" id="nav-meta">Laden…</div>
-    <div class="dash-nav__badge">Live Data</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="./objecten.html" style="font-family:var(--font-sans);font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,241,232,0.6);text-decoration:none;padding:5px 12px;border:1px solid rgba(245,241,232,0.2);border-radius:2px">Objectenlijst →</a>
+      <div class="dash-nav__badge">Live Data</div>
+    </div>
   </div>
 
   <div class="hero-strip">
@@ -813,7 +816,7 @@ function renderWijkTable(d) {
 function renderMap() {
   if (!leafletMap) {
     leafletMap = L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([30.5,-7.5],5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap · © CARTO',subdomains:'abcd',maxZoom:18}).addTo(leafletMap);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri · © OpenStreetMap',maxZoom:16}).addTo(leafletMap);
   }
   mapMarkers.forEach(m=>m.remove()); mapMarkers=[];
   const byCity = groupBy(allData.filter(r=>r.city in CITY_COORDS),'city');
