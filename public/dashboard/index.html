@@ -72,10 +72,49 @@
     .hero-divider { width:1px; height:32px; background:rgba(245,241,232,0.15); }
 
     /* ── Section nav ── */
-    .section-nav { background:var(--cream); border-bottom:1.5px solid var(--border); padding:0 48px; display:flex; }
-    .section-btn { padding:14px 24px; border:none; background:none; color:var(--muted); font-family:var(--font-sans); font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1.5px; transition:color 0.2s, border-color 0.2s; }
+    .section-nav { background:var(--cream); border-bottom:1.5px solid var(--border); padding:0 48px; display:flex; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .section-nav::-webkit-scrollbar { height:0; }
+    .section-btn { flex:0 0 auto; white-space:nowrap; padding:14px 24px; border:none; background:none; color:var(--muted); font-family:var(--font-sans); font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1.5px; transition:color 0.2s, border-color 0.2s; }
     .section-btn:hover { color:var(--text); }
     .section-btn.active { color:var(--green); border-bottom-color:var(--accent); }
+
+    /* ── Objecten sectie ── */
+    #s-obj { padding:24px 48px 60px; }
+    #s-obj .obj-filters { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:18px 20px; display:flex; flex-wrap:wrap; gap:16px 20px; align-items:flex-end; margin-bottom:18px; }
+    #s-obj .obj-f { display:flex; flex-direction:column; gap:5px; }
+    #s-obj .obj-f label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+    #s-obj .obj-f input, #s-obj .obj-f select { font-family:var(--font-mono); font-size:13px; padding:8px 10px; border:1px solid var(--border); border-radius:2px; background:#fff; color:var(--text); outline:none; min-width:120px; }
+    #s-obj .obj-f input:focus, #s-obj .obj-f select:focus { border-color:var(--accent); }
+    #s-obj .cur-toggle { display:inline-flex; border:1px solid var(--border); border-radius:2px; overflow:hidden; }
+    #s-obj .cur-toggle button { font-family:var(--font-mono); font-size:11px; padding:8px 12px; border:none; background:#fff; color:var(--muted); cursor:pointer; }
+    #s-obj .cur-toggle button.active { background:var(--green); color:var(--cream); }
+    #s-obj .obj-btn { font-family:var(--font-sans); font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; padding:9px 16px; border-radius:2px; cursor:pointer; border:1px solid var(--border); background:#fff; color:var(--text); }
+    #s-obj .obj-btn:hover { border-color:var(--accent); }
+    #s-obj .obj-btn--accent { background:var(--accent); color:#fff; border-color:var(--accent); }
+    #s-obj .obj-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px; }
+    #s-obj .obj-count { font-family:var(--font-mono); font-size:13px; color:var(--green); }
+    #s-obj .obj-count strong { color:var(--accent); }
+    #s-obj .obj-scroll { overflow:auto; max-height:calc(100vh - 260px); min-height:360px; border:1px solid var(--border); border-radius:4px; background:var(--card); }
+    #s-obj table { border-collapse:collapse; width:100%; font-size:13px; }
+    #s-obj thead th { background:var(--green); color:var(--cream); font-family:var(--font-sans); font-weight:400; font-size:11px; letter-spacing:.06em; text-transform:uppercase; text-align:left; padding:11px 12px; white-space:nowrap; cursor:pointer; position:sticky; top:0; z-index:5; }
+    #s-obj thead th:hover { background:var(--green-mid); }
+    #s-obj thead th.num { text-align:right; }
+    #s-obj thead th .arrow { color:var(--gold); margin-left:4px; font-size:10px; }
+    #s-obj tbody td { padding:10px 12px; border-top:1px solid var(--border); font-family:var(--font-mono); font-size:12.5px; white-space:nowrap; }
+    #s-obj tbody td.stad, #s-obj tbody td.wijk { font-family:var(--font-sans); }
+    #s-obj tbody tr:hover { background:var(--cream-dark); }
+    #s-obj td.num { text-align:right; }
+    #s-obj .eur { color:var(--muted); font-size:11px; }
+    #s-obj .tag { font-family:var(--font-sans); font-size:10px; letter-spacing:.05em; text-transform:uppercase; padding:2px 8px; border-radius:10px; }
+    #s-obj .tag--koop { background:#e6efe3; color:var(--success); }
+    #s-obj .tag--huur { background:#f7e9df; color:var(--accent); }
+    #s-obj .src { color:var(--muted); text-transform:uppercase; font-size:10px; letter-spacing:.06em; }
+    #s-obj .link { color:var(--accent); text-decoration:none; font-family:var(--font-sans); font-size:12px; }
+    #s-obj .link:hover { text-decoration:underline; }
+    #s-obj .obj-empty { padding:60px; text-align:center; color:var(--muted); font-family:var(--font-mono); }
+    #s-obj .obj-pager { display:flex; justify-content:center; align-items:center; gap:14px; margin-top:18px; font-family:var(--font-mono); font-size:12px; color:var(--muted); }
+    #s-obj .obj-pager button { font-family:var(--font-mono); font-size:12px; padding:7px 14px; border:1px solid var(--border); border-radius:2px; background:#fff; cursor:pointer; color:var(--text); }
+    #s-obj .obj-pager button:disabled { opacity:.35; cursor:default; }
 
     /* ── Main ── */
     .dash-main { padding:32px 48px 80px; max-width:1440px; margin:0 auto; }
@@ -223,6 +262,8 @@
     /* ── Responsive ── */
     @media (max-width:900px) {
       .dash-nav, .hero-strip, .section-nav, .dash-main, .dash-footer { padding-left:20px; padding-right:20px; }
+      #s-obj { padding-left:20px; padding-right:20px; }
+      #s-obj .obj-scroll { max-height:calc(100vh - 340px); }
       .kpi-grid { grid-template-columns:repeat(2,1fr); }
       .chart-grid { grid-template-columns:1fr; }
       .hero-strip { flex-wrap:wrap; gap:20px; }
@@ -262,10 +303,7 @@
       <span>Marktanalyse · Intern dashboard</span>
     </div>
     <div class="dash-nav__meta" id="nav-meta">Laden…</div>
-    <div style="display:flex;gap:10px;align-items:center">
-      <a href="./objecten.html" style="font-family:var(--font-sans);font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,241,232,0.6);text-decoration:none;padding:5px 12px;border:1px solid rgba(245,241,232,0.2);border-radius:2px">Objectenlijst →</a>
-      <div class="dash-nav__badge">Live Data</div>
-    </div>
+    <div class="dash-nav__badge">Live Data</div>
   </div>
 
   <div class="hero-strip">
@@ -284,6 +322,7 @@
     <button class="section-btn active" data-sec="markt">Marktoverzicht</button>
     <button class="section-btn" data-sec="wijk">Wijk-analyse</button>
     <button class="section-btn" data-sec="deal">Deal Validator</button>
+    <button class="section-btn" data-sec="obj">Objecten</button>
   </div>
 
   <div id="loading">
@@ -488,6 +527,72 @@
     </div>
   </div>
 
+  <!-- ═══ OBJECTEN ═══ -->
+  <div id="s-obj" style="display:none">
+    <div class="obj-filters">
+      <div class="obj-f"><label>Stad</label><select id="o-stad"></select></div>
+      <div class="obj-f"><label>Buurt / wijk</label><input id="o-buurt" type="text" placeholder="zoek buurt…" /></div>
+      <div class="obj-f"><label>Type</label><select id="o-type"></select></div>
+      <div class="obj-f"><label>Transactie</label>
+        <select id="o-trans">
+          <option value="all">Alles</option>
+          <option value="koop">Te koop</option>
+          <option value="huur">Te huur</option>
+        </select>
+      </div>
+      <div class="obj-f">
+        <label>Prijs van — tot</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="o-pmin" type="number" placeholder="min" style="width:110px;min-width:0" />
+          <span style="color:var(--muted)">–</span>
+          <input id="o-pmax" type="number" placeholder="max" style="width:110px;min-width:0" />
+          <div class="cur-toggle">
+            <button id="o-cur-mad" class="active" data-cur="MAD">MAD</button>
+            <button id="o-cur-eur" data-cur="EUR">€</button>
+          </div>
+        </div>
+      </div>
+      <div class="obj-f"><label>Slaapk. min</label><input id="o-bed" type="number" placeholder="0" style="width:90px;min-width:0" /></div>
+      <div class="obj-f"><label>Opp. m² min</label><input id="o-m2" type="number" placeholder="0" style="width:90px;min-width:0" /></div>
+      <div class="obj-f"><label>Bron</label><select id="o-src"></select></div>
+      <div class="obj-f"><label>&nbsp;</label><button class="obj-btn" id="o-reset">Wis filters</button></div>
+      <div class="obj-f"><label>&nbsp;</label><button class="obj-btn obj-btn--accent" id="o-csv">Download CSV</button></div>
+    </div>
+
+    <div class="obj-bar">
+      <div class="obj-count" id="o-count">—</div>
+      <div class="obj-count" style="color:var(--muted)" id="o-hint"></div>
+    </div>
+
+    <div class="obj-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="city">Stad</th>
+            <th data-sort="neighborhood">Buurt / wijk</th>
+            <th data-sort="property_type">Type</th>
+            <th data-sort="transaction_type">Transactie</th>
+            <th data-sort="price" class="num">Prijs (MAD)</th>
+            <th data-sort="eur" class="num">≈ €</th>
+            <th data-sort="bedrooms" class="num">Slaapk.</th>
+            <th data-sort="bathrooms" class="num">Badk.</th>
+            <th data-sort="surface_m2" class="num">m²</th>
+            <th data-sort="ppm2" class="num">MAD/m²</th>
+            <th data-sort="source">Bron</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody id="o-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="obj-pager">
+      <button id="o-prev">‹ Vorige</button>
+      <span id="o-page">—</span>
+      <button id="o-next">Volgende ›</button>
+    </div>
+  </div>
+
   <div class="dash-footer">
     <span>© 2026 Maghreb Estates · Data: Mubawab · Avito · Sarouty · Agenz</span>
     <span id="footer-meta">—</span>
@@ -548,11 +653,147 @@ document.querySelectorAll('.section-btn').forEach(b =>
 
 function switchSec(s) {
   document.querySelectorAll('.section-btn').forEach(b => b.classList.toggle('active', b.dataset.sec === s));
-  ['markt','wijk','deal'].forEach(id => {
+  ['markt','wijk','deal','obj'].forEach(id => {
     document.getElementById('s-'+id).style.display = id===s ? 'block' : 'none';
   });
   if (s === 'wijk') populateWaStad();
   if (s === 'deal') populateDvStad();
+  if (s === 'obj') initObj();
+}
+
+// ── OBJECTEN sectie ───────────────────────────────────────────────────────────
+let objData = [], objFiltered = [], objPage = 1, objInited = false;
+let objSort = { col:'city', dir:'asc' }, objCur = 'MAD';
+const OBJ_PAGE = 100;
+const OBJ_SALE = new Set(['sale','new_construction']);
+const objIsSale = t => OBJ_SALE.has(t);
+const objTransLbl = t => objIsSale(t) ? 'Te koop' : 'Te huur';
+const objType = t => TYPE_LBL[t] || (t==='new_construction'?'Nieuwbouw':(t==='unknown'?'Onbekend':(t||'—')));
+
+function initObj() {
+  if (objInited) return;
+  objInited = true;
+  objData = allData.map(r => {
+    const ppm2 = (r.surface_m2>0 && r.price>0) ? Math.round(r.price/r.surface_m2) : null;
+    return { city:r.city, neighborhood:r.neighborhood, price:r.price, surface_m2:r.surface_m2,
+             transaction_type:r.transaction_type, property_type:r.property_type,
+             bedrooms:r.bedrooms, bathrooms:r.bathrooms, url:r.url, source:r.source,
+             eur: r.price!=null?Math.round(r.price*EUR):null, ppm2 };
+  });
+  const cities=[...new Set(objData.map(r=>r.city).filter(c=>c&&c!=='Onbekend'))].sort();
+  document.getElementById('o-stad').innerHTML='<option value="all">Alle steden</option>'+cities.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const types=[...new Set(objData.map(r=>r.property_type).filter(Boolean))].sort((a,b)=>objType(a).localeCompare(objType(b)));
+  document.getElementById('o-type').innerHTML='<option value="all">Alle types</option>'+types.map(t=>`<option value="${t}">${objType(t)}</option>`).join('');
+  const srcs=[...new Set(objData.map(r=>r.source).filter(Boolean))].sort();
+  document.getElementById('o-src').innerHTML='<option value="all">Alle bronnen</option>'+srcs.map(s=>`<option value="${s}">${s}</option>`).join('');
+  objWire();
+  objApply();
+}
+
+function objWire() {
+  ['o-stad','o-type','o-trans','o-src'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{objPage=1;objApply();}));
+  ['o-buurt','o-pmin','o-pmax','o-bed','o-m2'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{objPage=1;objApply();}));
+  document.getElementById('o-reset').addEventListener('click',objReset);
+  document.getElementById('o-csv').addEventListener('click',objCSV);
+  document.getElementById('o-cur-mad').addEventListener('click',()=>objSetCur('MAD'));
+  document.getElementById('o-cur-eur').addEventListener('click',()=>objSetCur('EUR'));
+  document.getElementById('o-prev').addEventListener('click',()=>{if(objPage>1){objPage--;objRender();}});
+  document.getElementById('o-next').addEventListener('click',()=>{const mp=Math.max(1,Math.ceil(objFiltered.length/OBJ_PAGE));if(objPage<mp){objPage++;objRender();}});
+  document.querySelectorAll('#s-obj thead th[data-sort]').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const c=th.dataset.sort;
+      if(objSort.col===c) objSort.dir=objSort.dir==='asc'?'desc':'asc';
+      else { objSort.col=c; objSort.dir=['city','neighborhood','property_type','transaction_type','source'].includes(c)?'asc':'desc'; }
+      objApply();
+    });
+  });
+}
+
+function objSetCur(c){ objCur=c; document.getElementById('o-cur-mad').classList.toggle('active',c==='MAD'); document.getElementById('o-cur-eur').classList.toggle('active',c==='EUR'); objPage=1; objApply(); }
+function objReset(){
+  document.getElementById('o-stad').value='all'; document.getElementById('o-type').value='all';
+  document.getElementById('o-trans').value='all'; document.getElementById('o-src').value='all';
+  ['o-buurt','o-pmin','o-pmax','o-bed','o-m2'].forEach(id=>document.getElementById(id).value='');
+  objPage=1; objApply();
+}
+
+function objApply(){
+  const stad=document.getElementById('o-stad').value;
+  const buurt=document.getElementById('o-buurt').value.trim().toLowerCase();
+  const type=document.getElementById('o-type').value;
+  const trans=document.getElementById('o-trans').value;
+  const src=document.getElementById('o-src').value;
+  const bed=parseFloat(document.getElementById('o-bed').value);
+  const m2=parseFloat(document.getElementById('o-m2').value);
+  let pmin=parseFloat(document.getElementById('o-pmin').value);
+  let pmax=parseFloat(document.getElementById('o-pmax').value);
+  if(objCur==='EUR'){ if(!isNaN(pmin))pmin=pmin/EUR; if(!isNaN(pmax))pmax=pmax/EUR; }
+  objFiltered=objData.filter(r=>{
+    if(stad!=='all'&&r.city!==stad)return false;
+    if(type!=='all'&&r.property_type!==type)return false;
+    if(src!=='all'&&r.source!==src)return false;
+    if(trans==='koop'&&!objIsSale(r.transaction_type))return false;
+    if(trans==='huur'&&objIsSale(r.transaction_type))return false;
+    if(buurt&&!((r.neighborhood||'').toLowerCase().includes(buurt)))return false;
+    if(!isNaN(pmin)&&!(r.price>=pmin))return false;
+    if(!isNaN(pmax)&&!(r.price<=pmax))return false;
+    if(!isNaN(bed)&&!(r.bedrooms>=bed))return false;
+    if(!isNaN(m2)&&!(r.surface_m2>=m2))return false;
+    return true;
+  });
+  const dir=objSort.dir==='asc'?1:-1;
+  objFiltered.sort((a,b)=>{
+    let x=a[objSort.col],y=b[objSort.col];
+    const xe=(x==null||x===''||x==='Onbekend'), ye=(y==null||y===''||y==='Onbekend');
+    if(xe&&ye)return 0; if(xe)return 1; if(ye)return -1;   // lege/onbekende altijd onderaan
+    if(typeof x==='string')return x.localeCompare(y)*dir;
+    return (x-y)*dir;
+  });
+  objRender();
+}
+
+function objRender(){
+  const total=objFiltered.length, mp=Math.max(1,Math.ceil(total/OBJ_PAGE));
+  if(objPage>mp)objPage=mp;
+  const start=(objPage-1)*OBJ_PAGE, slice=objFiltered.slice(start,start+OBJ_PAGE);
+  document.getElementById('o-count').innerHTML=`<strong>${fmt(total)}</strong> objecten gevonden`;
+  document.getElementById('o-hint').textContent=total>OBJ_PAGE?`toont ${start+1}–${Math.min(start+OBJ_PAGE,total)}`:'';
+  document.getElementById('o-page').textContent=`Pagina ${objPage} / ${mp}`;
+  document.getElementById('o-prev').disabled=objPage<=1;
+  document.getElementById('o-next').disabled=objPage>=mp;
+  document.querySelectorAll('#s-obj thead th[data-sort]').forEach(th=>{
+    const base=th.textContent.replace(/[▲▼]\s*$/,'').trim();
+    th.innerHTML=th.dataset.sort===objSort.col?`${base} <span class="arrow">${objSort.dir==='asc'?'▲':'▼'}</span>`:base;
+  });
+  const tb=document.getElementById('o-tbody');
+  if(!slice.length){ tb.innerHTML='<tr><td colspan="12" class="obj-empty">Geen objecten voor deze filters.</td></tr>'; return; }
+  tb.innerHTML=slice.map(r=>{
+    const koop=objIsSale(r.transaction_type);
+    return `<tr>
+      <td class="stad">${r.city||'—'}</td>
+      <td class="wijk">${r.neighborhood||'—'}</td>
+      <td>${objType(r.property_type)}</td>
+      <td><span class="tag ${koop?'tag--koop':'tag--huur'}">${objTransLbl(r.transaction_type)}</span></td>
+      <td class="num">${fmt(r.price)}</td>
+      <td class="num eur">€${fmt(r.eur)}</td>
+      <td class="num">${r.bedrooms!=null?r.bedrooms:'—'}</td>
+      <td class="num">${r.bathrooms!=null?r.bathrooms:'—'}</td>
+      <td class="num">${r.surface_m2!=null?fmt(r.surface_m2):'—'}</td>
+      <td class="num">${r.ppm2!=null?fmt(r.ppm2):'—'}</td>
+      <td class="src">${r.source||'—'}</td>
+      <td>${r.url?`<a class="link" href="${r.url}" target="_blank" rel="noopener">Bekijk ↗</a>`:'—'}</td>
+    </tr>`;
+  }).join('');
+  const sc=document.querySelector('#s-obj .obj-scroll'); if(sc) sc.scrollTop=0;
+}
+
+function objCSV(){
+  const cols=[['city','Stad'],['neighborhood','Buurt'],['property_type','Type'],['transaction_type','Transactie'],['price','Prijs_MAD'],['eur','Prijs_EUR'],['bedrooms','Slaapkamers'],['bathrooms','Badkamers'],['surface_m2','Opp_m2'],['ppm2','MAD_per_m2'],['source','Bron'],['url','Link']];
+  const esc=v=>{ if(v==null)return''; const s=String(v); return /[",;\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+  const head=cols.map(c=>c[1]).join(';');
+  const body=objFiltered.map(r=>cols.map(([k])=>{ if(k==='property_type')return esc(objType(r[k])); if(k==='transaction_type')return esc(objTransLbl(r[k])); return esc(r[k]); }).join(';')).join('\n');
+  const blob=new Blob(['﻿'+head+'\n'+body],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`maghreb-objecten-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
