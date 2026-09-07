@@ -588,13 +588,22 @@ function dc(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
 const bsc = { grid:{color:'#d8d1c4'}, ticks:{font:{family:MONO,size:10},color:'#7a8c7a'} };
 
 // ── Load ──────────────────────────────────────────────────────────────────────
+// Toon panden die in de laatste N dagen zijn gezien i.p.v. de is_active-vlag.
+// Reden: een onvolledige/afgebroken scrape zet listings die niet opnieuw gezien
+// zijn ten onrechte op is_active=false, waardoor het aanbod instort. last_seen_at
+// blijft bij zo'n gemiste scrape onveranderd, dus dit venster geeft het echte
+// recente aanbod. Zet terug op .eq('is_active', true) zodra de scrape weer
+// volledig en betrouwbaar draait.
+const ACTIEF_DAGEN = 10;
 async function loadData() {
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const cutoff = new Date(Date.now() - ACTIEF_DAGEN * 86400000).toISOString();
   const rows = []; let from = 0;
   while (true) {
     const { data, error } = await sb.from('listings')
       .select('city,neighborhood,price,surface_m2,transaction_type,property_type,last_seen_at,url,title,source,bedrooms,bathrooms')
-      .eq('is_active', true).not('price','is',null).range(from, from+999);
+      .gte('last_seen_at', cutoff).not('price','is',null)
+      .order('id',{ascending:true}).range(from, from+999);
     if (error) {
       document.getElementById('loading').innerHTML =
         `<div style="color:var(--danger);font-family:var(--font-mono);padding:40px">Fout: ${error.message}</div>`;

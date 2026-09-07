@@ -245,13 +245,19 @@ function transLabel(t){ return SALE.has(t) ? 'Te koop' : 'Te huur'; }
 function isSale(t){ return SALE.has(t); }
 
 // ── Load ──
+// Toon panden gezien in de laatste N dagen i.p.v. de is_active-vlag: een
+// onvolledige scrape zet niet-opnieuw-geziene listings ten onrechte op inactief,
+// terwijl last_seen_at intact blijft. Terugzetten op .eq('is_active',true) zodra
+// de scrape weer volledig draait.
+const ACTIEF_DAGEN = 10;
 async function loadData(){
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const cutoff = new Date(Date.now() - ACTIEF_DAGEN * 86400000).toISOString();
   const rows=[]; let from=0;
   while(true){
     const { data, error } = await sb.from('listings')
       .select('id,city,neighborhood,price,surface_m2,transaction_type,property_type,bedrooms,bathrooms,url,source,last_seen_at')
-      .eq('is_active',true).not('price','is',null)
+      .gte('last_seen_at', cutoff).not('price','is',null)
       .order('id',{ascending:true})   // stabiele volgorde: zonder ORDER BY mag paginering rijen dubbelen/overslaan
       .range(from,from+999);
     if(error){
