@@ -39,6 +39,14 @@ import nestZwembad from '../assets/aanbod/nest/nest-tanger-zwembad.jpg';
 import nestTuinLucht from '../assets/aanbod/nest/nest-tanger-binnentuin-luchtfoto.jpg';
 import nestMasterplan from '../assets/aanbod/nest/nest-tanger-masterplan-luchtfoto.jpg';
 
+// -- Le Domaine d'Achakar (Tanger · Achakar) --------------------------------
+import daLucht from '../assets/aanbod/domaine-achakar/domaine-achakar-tanger-luchtfoto-kust.jpg';
+import daVillaZwembad from '../assets/aanbod/domaine-achakar/domaine-achakar-tanger-villa-zwembad-oceaan.jpg';
+import daInterieur from '../assets/aanbod/domaine-achakar/domaine-achakar-tanger-interieur.jpg';
+import daVillasVrij from '../assets/aanbod/domaine-achakar/domaine-achakar-tanger-villas-vrijstaand.jpg';
+import daResidentie from '../assets/aanbod/domaine-achakar/domaine-achakar-tanger-residentie-toegang.jpg';
+import daStrand from '../assets/aanbod/domaine-achakar/domaine-achakar-tanger-strand-achakar.jpg';
+
 export interface ProjectFoto {
   src: ImageMetadata;
   alt: string;
@@ -96,6 +104,61 @@ export interface Project {
 }
 
 export const projecten: Project[] = [
+  // ── LE DOMAINE D'ACHAKAR — Tanger, Achakar ────────────────────────────────
+  {
+    slug: 'domaine-achakar',
+    naam: "Le Domaine d'Achakar",
+    stad: 'tanger',
+    stadNaam: 'Tanger',
+    regio: 'Tanger-Tetouan-Al Hoceima',
+    wijk: 'Achakar',
+    types: ['Bouwgrond'],
+    kort: 'Zeldzaam perceel van 39.051 m² in Achakar, aan de Atlantische kust van Tanger — getitelde grond in woonzone A2 met 17.180 m² bebouwbaar en twee ontwikkelscenario’s.',
+    intro:
+      "Le Domaine d'Achakar is een uitzonderlijk perceel van bijna vier hectare aaneengesloten grond in Achakar, een van de meest gewilde zones aan de Atlantische rand van Tanger. Het terrein heeft een volledig gezekerde eigendomstitel (titre foncier) en ligt in woonzone A2, met 17.180 m² bebouwbare oppervlakte. Maghreb Estates begeleidt kopers en investeerders bij de beoordeling, de dossiercontrole en de aankoop van dit foncier.",
+    omschrijving: [
+      "Het perceel ligt op korte afstand van de Atlantische Oceaan, tegenover de Royal Club Équestre Détroit en op enkele minuten van de Grotten van Hercules. Met een totale oppervlakte van 39.051 m² is dit een van de laatste grote grondkansen in het noorden van Tanger, in een gebied dat snel verstedelijkt maar zijn residentiële, laagdichte karakter behoudt.",
+      'Het terrein valt volledig onder het bestemmingsplan van de Agence Urbaine de Tanger, in zone A2 (vrijstaande individuele villa’s): bebouwingscoëfficiënt (COS) maximaal 0,5, vloeroppervlaktecoëfficiënt (CUS) maximaal 25% en een bouwhoogte tot R+1. Een deel van het perceel (zone V313) is aangemerkt als beschermde groenzone van circa 3.800 m², wat het landschap borgt en bebouwing recht tegenover het domein uitsluit.',
+      'De grond bestaat uit drie afzonderlijke bebouwbare kavels — west (2.770 m²), midden (5.470 m²) en oost (8.940 m², met dubbele straatzijde) — samen goed voor 17.180 m² bebouwbare oppervlakte. De aangrenzende verkeersas TM 431 (een weg van 30 meter) opent daarnaast de mogelijkheid tot een R+2-classificatie binnen een gesloten-complexproject.',
+      'Het domein leent zich voor twee ontwikkelscenario’s. In het eerste scenario ontstaat een vrijstaand landgoed van 27 individuele villa’s (R+1) op kavels van circa 510 m², elk met privézwembad. In het tweede scenario komt er een beveiligde residentie van 40 geschakelde villa’s (R+1) van circa 215 m² met zwembad, in een gesloten complex met één toegang en 24/7-bewaking. Per scenario is een uitgebreid dossier beschikbaar.',
+      'Wij bekijken met u welk scenario aansluit bij uw doel — vermogensopbouw, eigen ontwikkeling of doorverkoop — en controleren vóór aankoop de eigendomstitel, de stedenbouwkundige status en het aankooptraject. De begeleiding kan volledig op afstand, in het Nederlands, Engels, Frans of Arabisch.',
+    ],
+    kenmerken: [
+      { label: 'Stad', waarde: 'Tanger (Achakar)' },
+      { label: 'Type', waarde: 'Bouwgrond' },
+      { label: 'Totale oppervlakte', waarde: '39.051 m²' },
+      { label: 'Bebouwbaar', waarde: '17.180 m²' },
+      { label: 'Bestemming', waarde: 'Zone A2 · R+1' },
+      { label: 'Eigendom', waarde: 'Titre foncier' },
+    ],
+    voorzieningen: [
+      'Volledig getitelde eigendom (titre foncier)',
+      'Bijna vier hectare aaneengesloten grond',
+      'Drie afzonderlijke bebouwbare kavels in zone A2',
+      'Beschermde groenzone (V313) van circa 3.800 m²',
+      'Op loopafstand van het strand van Achakar',
+      'Tegenover de Royal Club Équestre Détroit',
+    ],
+    woningtypen: [
+      { type: 'Scenario 1 — vrijstaand landgoed', details: '27 vrijstaande villa’s (R+1) op kavels van ± 510 m², elk met privézwembad' },
+      { type: 'Scenario 2 — beveiligde residentie', details: '40 geschakelde villa’s (R+1) van ± 215 m² met zwembad, gesloten complex met 24/7-bewaking' },
+    ],
+    ligging:
+      "Le Domaine d'Achakar ligt in het woongebied van Achakar, aan de Atlantische rand van Tanger: op loopafstand van het strand van Achakar, tegenover de Royal Club Équestre Détroit, op vijf minuten van de Grotten van Hercules en op ongeveer vijftien minuten van zowel de internationale luchthaven van Tanger als het Grand Stade de Tanger (WK 2030). Wij bespreken de exacte ligging en kadastrale gegevens graag persoonlijk.",
+    mapsQuery: 'Achakar, Tanger, Marokko',
+    bron: 'https://domaine-achakar.lovable.app',
+    hero: { src: daLucht, alt: "Luchtfoto van Le Domaine d'Achakar en de Atlantische kust bij Tanger" },
+    thumb: { src: daVillaZwembad, alt: 'Villa met zwembad en zicht op de oceaan bij Achakar, Tanger' },
+    galerij: [
+      { src: daLucht, alt: "Luchtfoto van het perceel Le Domaine d'Achakar aan de kust van Tanger" },
+      { src: daVillaZwembad, alt: 'Villa met zwembad en zicht op de Atlantische Oceaan' },
+      { src: daInterieur, alt: 'Villa-interieur in Marokkaanse stijl, open naar de tuin' },
+      { src: daVillasVrij, alt: "Impressie van een vrijstaand landgoed met individuele villa's" },
+      { src: daResidentie, alt: 'Impressie van de toegang tot een beveiligde residentie' },
+      { src: daStrand, alt: 'Strand van Achakar aan de Atlantische kust van Tanger' },
+    ],
+  },
+
   // ── PROJET OR — Marrakech, Agdal ──────────────────────────────────────────
   {
     slug: 'projet-or',

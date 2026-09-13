@@ -22,6 +22,112 @@ export interface ProjectVertaling {
 }
 
 const projectVertaling: Record<string, Record<VertaalTaal, ProjectVertaling>> = {
+  // ── LE DOMAINE D'ACHAKAR ──────────────────────────────────────────────────
+  'domaine-achakar': {
+    en: {
+      kort: 'Rare 39,051 m² plot in Achakar, on the Atlantic coast of Tangier — titled land in residential zone A2 with 17,180 m² buildable and two development scenarios.',
+      intro:
+        "Le Domaine d'Achakar is an exceptional plot of nearly four hectares of contiguous land in Achakar, one of the most sought-after areas on the Atlantic edge of Tangier. The land has a fully secured title deed (titre foncier) and lies in residential zone A2, with 17,180 m² of buildable surface. Maghreb Estates guides buyers and investors through the assessment, the due diligence and the purchase of this land.",
+      omschrijving: [
+        'The plot lies a short distance from the Atlantic Ocean, opposite the Royal Club Équestre Détroit and a few minutes from the Caves of Hercules. With a total surface of 39,051 m², this is one of the last large land opportunities in the north of Tangier, in an area that is urbanising fast while keeping its low-density, residential character.',
+        'The land falls entirely under the development plan of the Agence Urbaine de Tanger, in zone A2 (detached individual villas): a ground-coverage ratio (COS) of up to 0.5, a floor-area ratio (CUS) of up to 25% and a building height up to R+1. Part of the plot (zone V313) is designated protected green space of about 3,800 m², which safeguards the landscape and rules out construction directly opposite the domain.',
+        'The land consists of three separate buildable lots — west (2,770 m²), centre (5,470 m²) and east (8,940 m², with a double frontage) — together good for 17,180 m² of buildable surface. The adjacent TM 431 road axis (a 30-metre road) also opens the possibility of an R+2 classification within a gated-community project.',
+        'The domain lends itself to two development scenarios. In the first, a private estate of 27 individual villas (R+1) on plots of about 510 m², each with a private pool. In the second, a secure residence of 40 semi-detached villas (R+1) of about 215 m² with a pool, in a gated complex with a single entrance and 24/7 security. A detailed dossier is available for each scenario.',
+        'We review with you which scenario suits your goal — wealth building, your own development or resale — and check the title deed, the planning status and the purchase process before you buy. Guidance can be entirely remote, in Dutch, English, French or Arabic.',
+      ],
+      kenmerken: [
+        { label: 'City', waarde: 'Tangier (Achakar)' },
+        { label: 'Type', waarde: 'Building land' },
+        { label: 'Total surface', waarde: '39,051 m²' },
+        { label: 'Buildable', waarde: '17,180 m²' },
+        { label: 'Zoning', waarde: 'Zone A2 · R+1' },
+        { label: 'Ownership', waarde: 'Titre foncier' },
+      ],
+      voorzieningen: [
+        'Fully titled ownership (titre foncier)',
+        'Nearly four hectares of contiguous land',
+        'Three separate buildable lots in zone A2',
+        'Protected green space (V313) of about 3,800 m²',
+        'Walking distance from Achakar beach',
+        'Opposite the Royal Club Équestre Détroit',
+      ],
+      woningtypen: [
+        { type: 'Scenario 1 — private estate', details: '27 detached villas (R+1) on plots of ± 510 m², each with a private pool' },
+        { type: 'Scenario 2 — secure residence', details: '40 semi-detached villas (R+1) of ± 215 m² with a pool, gated complex with 24/7 security' },
+      ],
+      ligging:
+        "Le Domaine d'Achakar lies in the residential area of Achakar, on the Atlantic edge of Tangier: within walking distance of Achakar beach, opposite the Royal Club Équestre Détroit, five minutes from the Caves of Hercules and about fifteen minutes from both Tangier international airport and the Grand Stade de Tanger (2030 World Cup). We are happy to discuss the exact location and cadastral details in person.",
+    },
+    fr: {
+      kort: 'Terrain rare de 39 051 m² à Achakar, sur la côte atlantique de Tanger — foncier titré en zone résidentielle A2, 17 180 m² constructibles et deux scénarios de valorisation.',
+      intro:
+        "Le Domaine d'Achakar est un terrain exceptionnel de près de quatre hectares d'un seul tenant à Achakar, l'un des secteurs les plus prisés de la façade atlantique de Tanger. Le terrain bénéficie d'un titre foncier pleinement sécurisé et se situe en zone résidentielle A2, avec 17 180 m² de surface constructible. Maghreb Estates accompagne les acquéreurs et les investisseurs dans l'évaluation, la vérification du dossier et l'achat de ce foncier.",
+      omschrijving: [
+        "Le terrain se trouve à faible distance de l'océan Atlantique, face au Royal Club Équestre Détroit et à quelques minutes des Grottes d'Hercule. Avec une surface totale de 39 051 m², c'est l'une des dernières grandes opportunités foncières du nord de Tanger, dans un secteur qui s'urbanise rapidement tout en conservant son caractère résidentiel et sa faible densité.",
+        "Le terrain est intégralement régi par le plan d'aménagement de l'Agence Urbaine de Tanger, en zone A2 (villas individuelles isolées) : coefficient d'occupation du sol (COS) de 0,5 maximum, coefficient d'utilisation du sol (CUS) de 25 % maximum et une hauteur jusqu'à R+1. Une partie du terrain (zone V313) est classée espace vert protégé d'environ 3 800 m², ce qui préserve le paysage et exclut toute construction en vis-à-vis du domaine.",
+        "Le foncier se compose de trois lots constructibles distincts — ouest (2 770 m²), centre (5 470 m²) et est (8 940 m², à double façade) — totalisant 17 180 m² de surface constructible. L'axe routier TM 431 (voie de 30 mètres) attenant ouvre par ailleurs la possibilité d'un classement R+2 dans le cadre d'un projet de cité fermée.",
+        "Le domaine se prête à deux scénarios de valorisation. Dans le premier, un domaine patrimonial de 27 villas individuelles (R+1) sur des parcelles d'environ 510 m², chacune avec piscine privée. Dans le second, une résidence sécurisée de 40 villas jumelées (R+1) d'environ 215 m² avec piscine, en cité fermée à entrée unique et gardiennage 24/7. Un dossier détaillé est disponible pour chaque scénario.",
+        "Nous examinons avec vous le scénario adapté à votre objectif — constitution de patrimoine, développement propre ou revente — et vérifions le titre foncier, la situation urbanistique et le processus d'achat avant l'acquisition. L'accompagnement peut se faire entièrement à distance, en néerlandais, anglais, français ou arabe.",
+      ],
+      kenmerken: [
+        { label: 'Ville', waarde: 'Tanger (Achakar)' },
+        { label: 'Type', waarde: 'Terrain à bâtir' },
+        { label: 'Surface totale', waarde: '39 051 m²' },
+        { label: 'Constructible', waarde: '17 180 m²' },
+        { label: 'Zonage', waarde: 'Zone A2 · R+1' },
+        { label: 'Propriété', waarde: 'Titre foncier' },
+      ],
+      voorzieningen: [
+        'Propriété entièrement titrée (titre foncier)',
+        "Près de quatre hectares d'un seul tenant",
+        'Trois lots constructibles distincts en zone A2',
+        'Espace vert protégé (V313) d’environ 3 800 m²',
+        "À distance de marche de la plage d'Achakar",
+        'Face au Royal Club Équestre Détroit',
+      ],
+      woningtypen: [
+        { type: 'Scénario 1 — domaine patrimonial', details: "27 villas individuelles (R+1) sur parcelles d'environ 510 m², chacune avec piscine privée" },
+        { type: 'Scénario 2 — résidence sécurisée', details: "40 villas jumelées (R+1) d'environ 215 m² avec piscine, cité fermée à gardiennage 24/7" },
+      ],
+      ligging:
+        "Le Domaine d'Achakar se situe dans le secteur résidentiel d'Achakar, sur la façade atlantique de Tanger : à distance de marche de la plage d'Achakar, face au Royal Club Équestre Détroit, à cinq minutes des Grottes d'Hercule et à environ quinze minutes de l'aéroport international de Tanger comme du Grand Stade de Tanger (Mondial 2030). Nous discutons volontiers de l'emplacement exact et des données cadastrales en personne.",
+    },
+    ar: {
+      kort: 'أرض نادرة مساحتها 39.051 م² في أشقار، على الساحل الأطلسي لطنجة — أرض محفّظة في المنطقة السكنية A2 مع 17.180 م² قابلة للبناء وسيناريوهان للتطوير.',
+      intro:
+        'Le Domaine d’Achakar أرض استثنائية تقارب أربعة هكتارات متّصلة في أشقار، أحد أكثر أحياء الواجهة الأطلسية لطنجة طلباً. تتمتّع الأرض بسند ملكية محفّظ بالكامل (تيتر فونسييه) وتقع في المنطقة السكنية A2، مع 17.180 م² قابلة للبناء. ترافق Maghreb Estates المشترين والمستثمرين في التقييم والتحقّق من الملف وشراء هذه الأرض.',
+      omschrijving: [
+        'تقع الأرض على مسافة قصيرة من المحيط الأطلسي، مقابل النادي الملكي للفروسية «الديترويت» وعلى بُعد دقائق من مغارة هرقل. بمساحة إجمالية تبلغ 39.051 م²، تُعدّ من آخر الفرص العقارية الكبيرة في شمال طنجة، في منطقة تشهد تحضّراً سريعاً مع احتفاظها بطابعها السكني ومنخفض الكثافة.',
+        'تخضع الأرض بالكامل لتصميم التهيئة الخاص بالوكالة الحضرية لطنجة، في المنطقة A2 (فيلات فردية منفصلة): معامل تغطية الأرض (COS) 0,5 كحدّ أقصى، ومعامل استغلال الأرض (CUS) 25% كحدّ أقصى، وارتفاع حتى R+1. وقد صُنّف جزء من الأرض (المنطقة V313) مساحةً خضراء محميّة تبلغ نحو 3.800 م²، ما يصون المشهد ويمنع أيّ بناء مقابل الأرض مباشرة.',
+        'تتكوّن الأرض من ثلاث قطع قابلة للبناء منفصلة — غرب (2.770 م²) ووسط (5.470 م²) وشرق (8.940 م² بواجهتين) — بمجموع 17.180 م² قابلة للبناء. كما يفتح المحور الطرقي TM 431 المجاور (طريق بعرض 30 متراً) إمكانية تصنيف R+2 ضمن مشروع إقامة مغلقة.',
+        'تصلح الأرض لسيناريوهين للتطوير. في الأول، ضيعة راقية من 27 فيلا فردية (R+1) على قطع تبلغ نحو 510 م²، لكلٍّ منها مسبح خاص. وفي الثاني، إقامة مؤمّنة من 40 فيلا متلاصقة (R+1) بنحو 215 م² مع مسبح، ضمن إقامة مغلقة بمدخل واحد وحراسة على مدار الساعة. ويتوفّر ملف مفصّل لكل سيناريو.',
+        'ندرس معكم السيناريو الملائم لهدفكم — بناء الثروة أو التطوير الذاتي أو إعادة البيع — ونتحقّق من سند الملكية والوضع العمراني ومسار الشراء قبل الاقتناء. ويمكن أن تتمّ المرافقة عن بُعد بالكامل، بالهولندية أو الإنجليزية أو الفرنسية أو العربية.',
+      ],
+      kenmerken: [
+        { label: 'المدينة', waarde: 'طنجة (أشقار)' },
+        { label: 'النوع', waarde: 'أرض للبناء' },
+        { label: 'المساحة الإجمالية', waarde: '39.051 م²' },
+        { label: 'القابلة للبناء', waarde: '17.180 م²' },
+        { label: 'التصميم', waarde: 'المنطقة A2 · R+1' },
+        { label: 'الملكية', waarde: 'تيتر فونسييه' },
+      ],
+      voorzieningen: [
+        'ملكية محفّظة بالكامل (تيتر فونسييه)',
+        'ما يقارب أربعة هكتارات من الأرض المتّصلة',
+        'ثلاث قطع قابلة للبناء منفصلة في المنطقة A2',
+        'مساحة خضراء محميّة (V313) بنحو 3.800 م²',
+        'على مسافة مشي من شاطئ أشقار',
+        'مقابل النادي الملكي للفروسية «الديترويت»',
+      ],
+      woningtypen: [
+        { type: 'السيناريو 1 — ضيعة راقية', details: '27 فيلا فردية (R+1) على قطع بنحو 510 م²، لكلٍّ مسبح خاص' },
+        { type: 'السيناريو 2 — إقامة مؤمّنة', details: '40 فيلا متلاصقة (R+1) بنحو 215 م² مع مسبح، إقامة مغلقة بحراسة على مدار الساعة' },
+      ],
+      ligging:
+        'يقع Le Domaine d’Achakar في حي أشقار السكني على الواجهة الأطلسية لطنجة: على مسافة مشي من شاطئ أشقار، مقابل النادي الملكي للفروسية «الديترويت»، وعلى خمس دقائق من مغارة هرقل، ونحو خمس عشرة دقيقة من مطار طنجة الدولي ومن الملعب الكبير بطنجة (مونديال 2030). ويسعدنا مناقشة الموقع الدقيق والمعطيات العقارية شخصياً.',
+    },
+  },
+
   // ── PROJET OR ─────────────────────────────────────────────────────────────
   'projet-or': {
     en: {
