@@ -144,8 +144,8 @@ export const projecten: Project[] = [
       { type: 'Scenario 2 — beveiligde residentie', details: '40 geschakelde villa’s (R+1) van ± 215 m² met zwembad, gesloten complex met 24/7-bewaking' },
     ],
     ligging:
-      "Le Domaine d'Achakar ligt in het woongebied van Achakar, aan de Atlantische rand van Tanger: op loopafstand van het strand van Achakar, tegenover de Royal Club Équestre Détroit, op vijf minuten van de Grotten van Hercules en op ongeveer vijftien minuten van zowel de internationale luchthaven van Tanger als het Grand Stade de Tanger (WK 2030). Wij bespreken de exacte ligging en kadastrale gegevens graag persoonlijk.",
-    mapsQuery: 'Achakar, Tanger, Marokko',
+      "Le Domaine d'Achakar ligt in het woongebied van Achakar, aan de Atlantische rand van Tanger: op loopafstand van het strand van Achakar, tegenover de Royal Club Équestre Détroit, op vijf minuten van de Grotten van Hercules en op ongeveer vijftien minuten van zowel de internationale luchthaven van Tanger als het Grand Stade de Tanger (WK 2030). De ligging van het perceel is op de kaart aangegeven; kadastrale details en perceelgrenzen bespreken wij graag persoonlijk.",
+    mapsQuery: '35.741795,-5.934159',
     bron: 'https://domaine-achakar.lovable.app',
     hero: { src: daLucht, alt: "Luchtfoto van Le Domaine d'Achakar en de Atlantische kust bij Tanger" },
     thumb: { src: daVillaZwembad, alt: 'Villa met zwembad en zicht op de oceaan bij Achakar, Tanger' },

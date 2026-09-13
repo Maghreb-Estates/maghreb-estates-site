@@ -56,7 +56,7 @@ const projectVertaling: Record<string, Record<VertaalTaal, ProjectVertaling>> = 
         { type: 'Scenario 2 — secure residence', details: '40 semi-detached villas (R+1) of ± 215 m² with a pool, gated complex with 24/7 security' },
       ],
       ligging:
-        "Le Domaine d'Achakar lies in the residential area of Achakar, on the Atlantic edge of Tangier: within walking distance of Achakar beach, opposite the Royal Club Équestre Détroit, five minutes from the Caves of Hercules and about fifteen minutes from both Tangier international airport and the Grand Stade de Tanger (2030 World Cup). We are happy to discuss the exact location and cadastral details in person.",
+        "Le Domaine d'Achakar lies in the residential area of Achakar, on the Atlantic edge of Tangier: within walking distance of Achakar beach, opposite the Royal Club Équestre Détroit, five minutes from the Caves of Hercules and about fifteen minutes from both Tangier international airport and the Grand Stade de Tanger (2030 World Cup). The location of the plot is shown on the map; cadastral details and plot boundaries we are happy to discuss in person.",
     },
     fr: {
       kort: 'Terrain rare de 39 051 m² à Achakar, sur la côte atlantique de Tanger — foncier titré en zone résidentielle A2, 17 180 m² constructibles et deux scénarios de valorisation.',
@@ -90,7 +90,7 @@ const projectVertaling: Record<string, Record<VertaalTaal, ProjectVertaling>> = 
         { type: 'Scénario 2 — résidence sécurisée', details: "40 villas jumelées (R+1) d'environ 215 m² avec piscine, cité fermée à gardiennage 24/7" },
       ],
       ligging:
-        "Le Domaine d'Achakar se situe dans le secteur résidentiel d'Achakar, sur la façade atlantique de Tanger : à distance de marche de la plage d'Achakar, face au Royal Club Équestre Détroit, à cinq minutes des Grottes d'Hercule et à environ quinze minutes de l'aéroport international de Tanger comme du Grand Stade de Tanger (Mondial 2030). Nous discutons volontiers de l'emplacement exact et des données cadastrales en personne.",
+        "Le Domaine d'Achakar se situe dans le secteur résidentiel d'Achakar, sur la façade atlantique de Tanger : à distance de marche de la plage d'Achakar, face au Royal Club Équestre Détroit, à cinq minutes des Grottes d'Hercule et à environ quinze minutes de l'aéroport international de Tanger comme du Grand Stade de Tanger (Mondial 2030). L'emplacement du terrain est indiqué sur la carte ; les détails cadastraux et les limites de la parcelle, nous en discutons volontiers en personne.",
     },
     ar: {
       kort: 'أرض نادرة مساحتها 39.051 م² في أشقار، على الساحل الأطلسي لطنجة — أرض محفّظة في المنطقة السكنية A2 مع 17.180 م² قابلة للبناء وسيناريوهان للتطوير.',
@@ -124,7 +124,7 @@ const projectVertaling: Record<string, Record<VertaalTaal, ProjectVertaling>> = 
         { type: 'السيناريو 2 — إقامة مؤمّنة', details: '40 فيلا متلاصقة (R+1) بنحو 215 م² مع مسبح، إقامة مغلقة بحراسة على مدار الساعة' },
       ],
       ligging:
-        'يقع Le Domaine d’Achakar في حي أشقار السكني على الواجهة الأطلسية لطنجة: على مسافة مشي من شاطئ أشقار، مقابل النادي الملكي للفروسية «الديترويت»، وعلى خمس دقائق من مغارة هرقل، ونحو خمس عشرة دقيقة من مطار طنجة الدولي ومن الملعب الكبير بطنجة (مونديال 2030). ويسعدنا مناقشة الموقع الدقيق والمعطيات العقارية شخصياً.',
+        'يقع Le Domaine d’Achakar في حي أشقار السكني على الواجهة الأطلسية لطنجة: على مسافة مشي من شاطئ أشقار، مقابل النادي الملكي للفروسية «الديترويت»، وعلى خمس دقائق من مغارة هرقل، ونحو خمس عشرة دقيقة من مطار طنجة الدولي ومن الملعب الكبير بطنجة (مونديال 2030). وموقع الأرض مبيَّن على الخريطة؛ ويسعدنا مناقشة التفاصيل العقارية وحدود القطعة شخصياً.',
     },
   },
 
