@@ -196,8 +196,6 @@ const redenen = [
         <div class="teamkaarten">
           {team.map((p) => (
             <div class="teamkaart">
-              {/* TODO: vervang de foto van Marouane door een portret met dezelfde
-                  achtergrond en belichting als die van Ayoub (zie site.ts). */}
               <img class="teamkaart__foto" src={p.foto} alt={p.naam} width="330" height="360" loading="lazy" />
               <div class="teamkaart__body">
                 <h3 class="teamkaart__naam">{p.naam}</h3>

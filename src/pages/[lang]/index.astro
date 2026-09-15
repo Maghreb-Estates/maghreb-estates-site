@@ -27,17 +27,16 @@ const a = aanbodUi[taal];
 const pagina = content[taal].home;
 const uitgelicht = projecten.slice(0, 3);
 
-// Rollen en bio's van het team zijn in het Nederlands opgeslagen; per taal
+// Rol en bio van het team zijn in het Nederlands opgeslagen; per taal
 // vertaald zodat de teamsectie niet uit de toon valt.
 const teamVertaling: Record<Exclude<Taal, 'nl'>, { titel: string; intro: string; netwerk: string; rollen: string[]; bios: string[]; meer: string }> = {
   en: {
     titel: 'Your team for<br /><em>property in Morocco</em>',
     intro: 'You work with recognisable points of contact, supported by a local network of specialists for file review, market information, viewings, management and execution.',
     netwerk: 'Alongside our permanent points of contact, we work with local partners and specialists for viewings, file review, notarial coordination, management and project follow-up.',
-    rollen: ['Founder & Real Estate Advisor', 'Real Estate Advisor & Operations'],
+    rollen: ['Founder & Real Estate Advisor'],
     bios: [
       'Ayoub is the founder of Maghreb Estates and advises clients on purchase strategy, property analysis and investment decisions. His focus is on structure, transparency and data-driven decision-making.',
-      'Marouane supports market research, client guidance and local follow-up. Together with the wider Maghreb Estates network, he ensures enquiries are handled professionally.',
     ],
     meer: 'More about Maghreb Estates',
   },
@@ -45,10 +44,9 @@ const teamVertaling: Record<Exclude<Taal, 'nl'>, { titel: string; intro: string;
     titel: 'Votre équipe pour<br /><em>l’immobilier au Maroc</em>',
     intro: 'Vous travaillez avec des interlocuteurs identifiés, appuyés par un réseau local de spécialistes pour l’examen des dossiers, l’information de marché, les visites, la gestion et l’exécution.',
     netwerk: 'Au-delà de nos interlocuteurs permanents, nous travaillons avec des partenaires et spécialistes locaux pour les visites, l’examen des dossiers, la coordination notariale, la gestion et le suivi de projet.',
-    rollen: ['Fondateur & Conseiller immobilier', 'Conseiller immobilier & Opérations'],
+    rollen: ['Fondateur & Conseiller immobilier'],
     bios: [
       'Ayoub est le fondateur de Maghreb Estates et accompagne les clients sur la stratégie d’achat, l’analyse des biens et les choix d’investissement. Son approche repose sur la structure, la transparence et la décision fondée sur les données.',
-      'Marouane intervient sur l’étude de marché, l’accompagnement client et le suivi local. Avec le réseau élargi de Maghreb Estates, il veille au traitement professionnel des demandes.',
     ],
     meer: 'En savoir plus sur Maghreb Estates',
   },
@@ -56,10 +54,9 @@ const teamVertaling: Record<Exclude<Taal, 'nl'>, { titel: string; intro: string;
     titel: 'فريقك للعقارات<br /><em>في المغرب</em>',
     intro: 'تتعامل مع جهات اتصال واضحة، مدعومة بشبكة محلية من المختصين في مراجعة الملفات ومعلومات السوق والمعاينات والإدارة والتنفيذ.',
     netwerk: 'إلى جانب جهات الاتصال الدائمة لدينا، نعمل مع شركاء ومختصين محليين في المعاينات ومراجعة الملفات والتنسيق التوثيقي والإدارة ومتابعة المشاريع.',
-    rollen: ['المؤسس ومستشار عقاري', 'مستشار عقاري والعمليات'],
+    rollen: ['المؤسس ومستشار عقاري'],
     bios: [
       'أيوب هو مؤسس Maghreb Estates ويرافق العملاء في استراتيجية الشراء وتحليل العقارات وقرارات الاستثمار. يركز على البنية والشفافية واتخاذ القرار المبني على البيانات.',
-      'مروان يساهم في استكشاف السوق ومرافقة العملاء والمتابعة المحلية. وبالتعاون مع شبكة Maghreb Estates الأوسع، يحرص على معالجة الطلبات بمهنية.',
     ],
     meer: 'المزيد عن Maghreb Estates',
   },

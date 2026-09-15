@@ -357,11 +357,13 @@ details.faq__item summary::-webkit-details-marker { display: none; }
 /* ===== ONS TEAM (homepage foto-kaarten) ===== */
 .teamsectie { max-width: 860px; }
 .teamsectie .section__header { margin-bottom: 32px; }
-.teamkaarten { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; align-items: stretch; }
+/* Kaarten krijgen een vaste maximale breedte, zodat één kaart niet over de
+   volle sectiebreedte uitrekt en meerdere kaarten netjes naast elkaar staan. */
+.teamkaarten { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 400px)); gap: 28px; align-items: stretch; }
 .teamkaart { display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: box-shadow var(--transition), transform var(--transition); }
 .teamkaart:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
-/* Beide portretten krijgen exact dezelfde uitsnede en verhouding, zodat de twee
-   kaarten visueel gelijkwaardig zijn ook al verschillen de bronfoto's nog.
+/* Het portret krijgt een vaste uitsnede en verhouding, zodat de kaart altijd
+   dezelfde vorm houdt ongeacht de bronfoto.
    `center 22%` legt het gezicht in het bovenste derde deel van het kader. */
 /* `height: auto` is nodig omdat het height-attribuut op de <img> anders als
    presentational hint wint en de aspect-ratio buitenspel zet. */
@@ -376,7 +378,7 @@ details.faq__item summary::-webkit-details-marker { display: none; }
 .teamkaart__contact svg { color: var(--green-mid); flex-shrink: 0; }
 
 /* ===== TEAM / PERSOON PLACEHOLDER ===== */
-.personen { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.personen { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
 .persoon { display: flex; gap: 20px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
 .persoon__foto { width: 92px; height: 92px; border-radius: 50%; background: var(--cream-dark); border: 1px solid var(--border); flex-shrink: 0; object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); text-align: center; }
 img.persoon__foto { object-position: center top; }

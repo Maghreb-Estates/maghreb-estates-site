@@ -51,8 +51,6 @@ const faqs = [
       <div class="personen">
         {team.map((p) => (
           <div class="persoon">
-            {/* TODO: vervang de foto van Marouane door een portret met dezelfde
-                achtergrond en belichting als die van Ayoub (zie site.ts). */}
             <img class="persoon__foto" src={p.foto} alt={p.naam} width="92" height="92" loading="lazy" />
             <div>
               <h3>{p.naam}</h3>
