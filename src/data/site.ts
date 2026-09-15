@@ -30,11 +30,10 @@ export const site = {
 export const waLink = (bericht = '', nummer = site.whatsapp) =>
   `https://wa.me/${nummer}${bericht ? `?text=${encodeURIComponent(bericht)}` : ''}`;
 
-// Team — vaste aanspreekpunten. Rollen bewust internationaal geformuleerd.
-// TODO: LinkedIn-URL's toevoegen zodra bekend.
-// Beide portretten zijn geschoten tegen dezelfde betonnen achtergrond en staan
-// op 900x1350 (2:3), zodat de teamkaarten identiek uitsnijden. De originelen
-// op volle resolutie staan in ../fotos-aangeleverd/portretten-origineel/.
+// Team — vast aanspreekpunt. Rol bewust internationaal geformuleerd.
+// TODO: LinkedIn-URL toevoegen zodra bekend.
+// Het portret staat op 900x1350 (2:3). Het origineel op volle resolutie staat
+// in ../fotos-aangeleverd/portretten-origineel/.
 export const team = [
   {
     naam: 'Ayoub Douider',
@@ -47,21 +46,10 @@ export const team = [
     linkedin: '',
     bio: 'Ayoub is founder van Maghreb Estates en begeleidt klanten bij aankoopstrategie, objectanalyse en investeringskeuzes. Zijn focus ligt op structuur, transparantie en datagedreven besluitvorming.',
   },
-  {
-    naam: 'Marouane Haddane',
-    rol: 'Real Estate Advisor & Operations',
-    foto: '/images/marouane.jpg',
-    telefoon: '+31 6 44 68 17 82',
-    telefoonHref: '+31644681782',
-    whatsapp: '31644681782',
-    email: 'm.haddane@maghreb-estates.com',
-    linkedin: '',
-    bio: 'Marouane ondersteunt bij marktverkenning, klantbegeleiding en lokale opvolging. Samen met het bredere netwerk van Maghreb Estates zorgt hij dat aanvragen professioneel worden opgevolgd.',
-  },
 ];
 
-// Tekst onder de teamprofielen — benoemt het bredere netwerk achter de twee
-// vaste aanspreekpunten (homepage + over-ons gebruiken dezelfde formulering).
+// Tekst onder het teamprofiel — benoemt het bredere netwerk achter het vaste
+// aanspreekpunt (homepage + over-ons gebruiken dezelfde formulering).
 export const teamNetwerk =
   'Naast onze vaste aanspreekpunten werken wij met lokale partners en specialisten voor onder meer bezichtigingen, dossiercontrole, notariële afstemming, beheer en projectopvolging.';
 
