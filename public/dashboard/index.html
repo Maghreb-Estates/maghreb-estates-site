@@ -1606,8 +1606,14 @@ function abMedHuur(city, bedrooms) {
 }
 
 function abEst(city, bedrooms) { return abEstimates.find(r => r.city===city && r.bedrooms===bedrooms) || null; }
+// AirROI's `revenue` bovenin de schatting is het GEMIDDELDE van de vergelijkbare
+// objecten en wordt door één topverhuurder omhooggetrokken (Essaouira, 2 slk:
+// gemiddeld 120.590 MAD, mediaan 88.415). Toon daarom de mediaan als die er is.
 function abRevenue(est) {
   if (!est) return null;
+  const pc = abObj(est && est.raw, ['percentiles']);
+  const p50 = pc && pc.revenue && typeof pc.revenue.p50 === 'number' ? pc.revenue.p50 : null;
+  if (p50 != null) return p50;
   return est.revenue != null ? +est.revenue
     : abNum(est.raw, ['revenue','annual_revenue','projected_revenue','ttm_revenue']);
 }
@@ -1636,7 +1642,7 @@ function renderAirbnb() {
   // Werkelijke mediaan van dezelfde stad + formaat, als de objecten geladen zijn.
   // Dit is de reality-check op de modelschatting van AirROI.
   const echt = (abListings[stad]||[]).filter(r => r.bedrooms===slk
-    && (r.room_type||'entire_home')==='entire_home' && r.revenue_ttm!=null);
+    && (r.room_type||'entire_home')==='entire_home' && Number(r.revenue_ttm) > 0);
   const echtMed = echt.length>=3 ? median(echt.map(r=>Number(r.revenue_ttm))) : null;
 
   const mOcc = abPct(abNum(mkt&&mkt.summary, ['occupancy','occupancy_rate','avg_occupancy']));
@@ -1715,6 +1721,12 @@ function abRenderSeizoen(est, mkt, cur) {
   if (!series && mkt) {
     series = abSeries(mkt.summary, keys);
     sub = 'Omzet per maand · hele markt (geen schatting per formaat beschikbaar)';
+  }
+  // AirROI levert de maandverdeling als fracties die samen 1 zijn. Vermenigvuldig
+  // met de jaaromzet, anders toont de grafiek kommagetallen in plaats van dirham.
+  if (series) {
+    const som = series.reduce((a,b)=>a+b,0), jaar = abRevenue(est);
+    if (som > 0 && som < 1.5 && jaar) series = series.map(v => v * jaar);
   }
   // Canvas alleen verbergen, nooit uit de DOM halen: een volgende render heeft het weer nodig.
   document.getElementById('ab-seizoen-wrap').style.display = series ? 'block' : 'none';
@@ -1803,11 +1815,15 @@ function abRenderWijken() {
   let d = all.filter(r => r.revenue_ttm!=null || r.adr_ttm!=null);
   if (room !== 'all') d = d.filter(r => (r.room_type||'entire_home') === room);
   if (scope === 'size') d = d.filter(r => r.bedrooms === slk);
+  // Een deel van de objecten stond twaalf maanden leeg (omzet 0). Die horen niet
+  // in een mediaan, maar het aandeel is zelf een marktsignaal.
+  const stil = d.filter(r => !(Number(r.revenue_ttm) > 0)).length;
+  const dv = d.filter(r => Number(r.revenue_ttm) > 0);
 
   const cur = abCurLbl(all[0] || null);
   document.getElementById('ab-wijk-sub').textContent = all.length
     ? `${fmt(d.length)} van ${fmt(all.length)} objecten · ${scope==='size'?abSlkLbl(slk):'alle formaten'}`
-      + ` · ${room==='all'?'alle kamertypes':'hele woningen'} · werkelijke cijfers over 12 maanden`
+      + ` · ${room==='all'?'alle kamertypes':'hele woningen'} · medianen over ${fmt(dv.length)} verhuurde objecten`
     : 'Geen objecten opgeslagen voor deze stad';
 
   if (!d.length) {
@@ -1821,13 +1837,13 @@ function abRenderWijken() {
   leeg.style.display='none'; wrap.style.display='block';
 
   // Stads-KPI's uit de werkelijke objecten
-  const med = k => median(d.map(r=>r[k]).filter(v=>v!=null).map(Number));
+  const med = k => median(dv.map(r=>r[k]).filter(v=>v!=null).map(Number));
   const occAll = abPct(med('occupancy_ttm'));
   const sh = d.filter(r=>r.superhost===true).length, pm = d.filter(r=>r.professional_management===true).length;
   document.getElementById('ab-wijk-kpi').innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Objecten</div>
       <div class="kpi-value">${fmt(d.length)}</div>
-      <div class="kpi-sub">${new Set(d.map(r=>r.district).filter(Boolean)).size} wijken bekend</div></div>
+      <div class="kpi-sub">${fmt(stil)} zonder omzet · ${new Set(d.map(r=>r.district).filter(Boolean)).size} wijken bekend</div></div>
     <div class="kpi-card accent"><div class="kpi-label">Med. jaaromzet</div>
       <div class="kpi-value accent">${abMoney(med('revenue_ttm'), cur)}</div>
       <div class="kpi-sub">werkelijk, laatste 12 mnd</div></div>
@@ -1848,7 +1864,7 @@ function abRenderWijken() {
       && r.price>5e4 && r.price<2e7 && r.neighborhood)
     .forEach(r => { const k=abSlug(r.neighborhood); (eigenBuurt[k]=eigenBuurt[k]||[]).push(r.price); });
 
-  const wijken = Object.entries(groupBy(d.filter(r=>r.district), 'district'))
+  const wijken = Object.entries(groupBy(dv.filter(r=>r.district), 'district'))
     .filter(([w, rows]) => w && w!=='Onbekend' && rows.length>=AB_MIN_WIJK)
     .map(([w, rows]) => {
       const rev = median(rows.map(r=>r.revenue_ttm).filter(v=>v!=null).map(Number));
@@ -1907,23 +1923,39 @@ function abRenderComps(est, cur) {
     el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Geen comparables beschikbaar</div>';
     return;
   }
-  const items = list.slice(0,8);
+  // Een comparable is een volledig AirROI-object: listing_info, property_details,
+  // ratings en performance_metrics met platte ttm_-velden (ttm_revenue, …).
+  const rows = list.map(c => {
+    const li = c.listing_info||{}, pd = c.property_details||{}, pm = c.performance_metrics||{};
+    const rt = c.ratings||{}, loc = c.location_info||{}, ho = c.host_info||{};
+    return {
+      id: li.listing_id != null ? li.listing_id : (c.listing_id != null ? c.listing_id : null),
+      naam: li.listing_name || 'Vergelijkbaar object',
+      rev: pm.ttm_revenue != null ? pm.ttm_revenue : abNum(pm, ['revenue'], 1),
+      adr: pm.ttm_avg_rate != null ? pm.ttm_avg_rate : abNum(pm, ['avg_rate','average_daily_rate'], 1),
+      occ: abPct(pm.ttm_occupancy != null ? pm.ttm_occupancy : abNum(pm, ['occupancy'], 1)),
+      bed: pd.bedrooms, wijk: loc.district || null,
+      reviews: rt.num_reviews, superhost: ho.superhost === true,
+    };
+  }).sort((a,b) => (b.rev??-1)-(a.rev??-1));
+
+  const verhuurd = rows.filter(r => (r.rev||0) > 0);
   document.getElementById('ab-comp-sub').textContent =
-    `${items.length} van ${list.length} panden waarop de schatting is gebaseerd`;
-  el.innerHTML = items.map(c => {
-    const id  = c.listing_id || c.id || null;
-    const rev = abNum(c, ['revenue','annual_revenue','ttm_revenue'], 2);
-    const adr = abNum(c, ['average_daily_rate','adr'], 2);
-    const occ = abPct(abNum(c, ['occupancy','occupancy_rate'], 2));
-    const bed = abNum(c, ['bedrooms'], 2);
-    const dist = abNum(c, ['distance_miles','distance'], 2);
-    const url = id ? `https://www.airbnb.com/rooms/${id}` : null;
+    `${rows.length} panden waarop de schatting rust · mediaan ${abMoney(median(verhuurd.map(r=>r.rev)), cur)}`
+    + ` · ${rows.length - verhuurd.length} zonder omzet in de laatste 12 maanden`;
+
+  el.innerHTML = rows.slice(0,10).map(r => {
+    // Airbnb-id's zijn groter dan JavaScript exact kan weergeven; alleen linken als
+    // het getal veilig is, anders zou de link naar een ander pand kunnen wijzen.
+    const veilig = r.id != null && Number.isSafeInteger(Number(r.id));
+    const url = veilig ? `https://www.airbnb.com/rooms/${r.id}` : null;
     return `<div class="comp-item">
       ${url?`<a href="${url}" target="_blank" rel="noopener">`:''}
-      <div class="comp-name">${id?'Airbnb #'+id:'Vergelijkbaar object'}</div>
-      <div class="comp-meta">${bed!=null?abSlkLbl(bed):'—'}${dist!=null?' · '+fmt(dist*1.609,1)+' km':''}${occ!=null?' · '+fmt(occ,0)+'% bezet':''}</div>
-      <div class="comp-pm2">${adr!=null?fmt(Math.round(adr))+' '+cur+'/nacht':'—'}</div>
-      <div class="comp-price">${abMoney(rev, cur)}</div>
+      <div class="comp-name">${r.naam}${r.superhost?' <span style="color:var(--gold)">&#9733;</span>':''}</div>
+      <div class="comp-meta">${r.bed!=null?abSlkLbl(r.bed):'—'}${r.wijk?' · '+r.wijk:''}${
+        r.occ!=null?' · '+fmt(r.occ,0)+'% bezet':''}${r.reviews!=null?' · '+fmt(r.reviews)+' reviews':''}</div>
+      <div class="comp-pm2">${r.adr!=null?fmt(Math.round(r.adr))+' '+cur+'/nacht':'—'}</div>
+      <div class="comp-price">${abMoney(r.rev, cur)}</div>
       ${url?'</a>':''}
     </div>`;
   }).join('');
