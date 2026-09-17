@@ -539,8 +539,8 @@
 
       <div class="wa-prompt" id="ab-empty" style="display:none;font-size:18px;line-height:1.7">
         Nog geen Airbnb-data in de database.<br>
-        <span style="font-size:14px">Draai in de backend-repo de workflow <strong>AirROI Airbnb-data verversen</strong><br>
-        (en voer eerst de migratie <code>2026-09-17_airbnb_airroi.sql</code> uit in Supabase).</span>
+        <span style="font-size:14px">Draai in de backend-repo de workflow
+        <strong>AirROI Airbnb-data verversen</strong> met <em>aggregates</em> aangevinkt.</span>
       </div>
 
       <div id="ab-content" style="display:none">
@@ -562,108 +562,76 @@
 
         <div class="kpi-grid" id="ab-kpi-grid"></div>
 
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-title">Seizoenspatroon</div>
-            <div class="chart-sub" id="ab-seizoen-sub">Verwachte omzet per maand</div>
-            <div class="chart-wrap" id="ab-seizoen-wrap"><canvas id="ab-chart-seizoen"></canvas></div>
-            <div class="ab-nodata" id="ab-seizoen-leeg" style="display:none">Geen maanddata in de opgeslagen AirROI-respons</div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">Spreiding jaaromzet</div>
-            <div class="chart-sub">Percentielen van vergelijkbare Airbnb-objecten · p50 = mediaan</div>
-            <div class="chart-wrap" id="ab-perc-wrap"><canvas id="ab-chart-perc"></canvas></div>
-            <div class="ab-nodata" id="ab-perc-leeg" style="display:none">Geen percentielen in de opgeslagen AirROI-respons</div>
-          </div>
-        </div>
-
         <div class="chart-card" style="margin-bottom:20px">
-          <div class="chart-title">Airbnb vs. lange termijn per stad</div>
-          <div class="chart-sub" id="ab-cmp-sub">Bruto rendement op de mediane koopprijs · zelfde woninggrootte</div>
-          <table class="wijk-table">
+          <div class="chart-title">Netjes verhuren versus het gemiddelde aanbod</div>
+          <div class="chart-sub" id="ab-cmp-sub">Jaaromzet per object · alle vijf de steden</div>
+          <div class="chart-wrap"><canvas id="ab-chart-cmp"></canvas></div>
+          <table class="wijk-table" style="margin-top:16px">
             <thead><tr>
               <th>Stad</th>
-              <th style="text-align:right">Airbnb jaaromzet</th>
-              <th style="text-align:right">Bezetting</th>
-              <th style="text-align:right">Med. koopprijs</th>
-              <th style="text-align:right">Airbnb bruto</th>
-              <th style="text-align:right">Lange termijn bruto</th>
+              <th style="text-align:right">Omzet, nette verhuurders</th>
+              <th style="text-align:right">Omzet, heel het aanbod</th>
               <th style="text-align:right">Verschil</th>
+              <th style="text-align:right">Bezetting</th>
+              <th style="text-align:right">Nachtprijs</th>
+              <th style="text-align:right">Objecten</th>
             </tr></thead>
             <tbody id="ab-cmp-tbody"></tbody>
           </table>
           <div class="yield-info">
-            <div class="yield-info-title">Hoe te lezen</div>
+            <div class="yield-info-title">Wat je hier ziet</div>
             <div class="yield-info-text">
-              <strong>Airbnb bruto</strong> = geschatte jaaromzet ÷ mediane koopprijs van hetzelfde
-              woningtype en -formaat in die stad. Dit is <strong>bruto</strong>: schoonmaak, beheer
-              (15–25% bij een verhuurbeheerder), nutsvoorzieningen, meubilair, platformkosten en
-              leegstand gaan er nog af. Reken op <strong>30–45% kosten</strong> voor een realistisch
-              netto beeld. <strong>Lange termijn bruto</strong> komt uit ons eigen aanbod
-              (mediaan maandhuur × 12 ÷ mediane koopprijs) en is dus niet van AirROI.
+              Links de gemiddelden van objecten die aan onze eisen voldoen: beoordeling 4 of hoger,
+              minstens 120 geboekte nachten in twaalf maanden, en ook geboekt in de laatste negentig
+              dagen. Rechts hetzelfde cijfer over het complete aanbod, inclusief advertenties die
+              nauwelijks draaien. Het verschil is wat goed verhuren oplevert, niet wat de markt
+              vanzelf geeft.
             </div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">Per maand</div>
+            <div class="chart-sub" id="ab-maand-sub">Omzet per maand · mediaan met spreiding</div>
+            <div class="chart-wrap" id="ab-maand-wrap"><canvas id="ab-chart-maand"></canvas></div>
+            <div class="ab-nodata" id="ab-maand-leeg" style="display:none">Geen maandreeks voor deze stad</div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Per woninggrootte</div>
+            <div class="chart-sub" id="ab-slk-sub">Jaaromzet van nette verhuurders per formaat</div>
+            <div class="chart-wrap" id="ab-slk-wrap"><canvas id="ab-chart-slk"></canvas></div>
+            <div class="ab-nodata" id="ab-slk-leeg" style="display:none">Geen cijfers per formaat voor deze stad</div>
           </div>
         </div>
 
         <div class="chart-card" style="margin-bottom:20px">
           <div class="chart-title">Wijken in <span id="ab-wijk-stad">—</span></div>
-          <div class="chart-sub" id="ab-wijk-sub">Werkelijke cijfers van de Airbnb-objecten in deze stad</div>
-
-          <div class="wa-filters" style="margin:20px 0 4px">
-            <div class="filter-group">
-              <div class="filter-label">Objecten meenemen</div>
-              <select class="filter-select" id="ab-wijk-scope" onchange="abRenderWijken()">
-                <option value="all">Alle formaten</option>
-                <option value="size">Alleen het gekozen formaat</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <div class="filter-label">Kamertype</div>
-              <select class="filter-select" id="ab-wijk-room" onchange="abRenderWijken()">
-                <option value="entire_home">Hele woning</option>
-                <option value="all">Alle kamertypes</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="kpi-grid" id="ab-wijk-kpi" style="margin-top:20px"></div>
-
-          <div class="chart-wrap tall" id="ab-wijk-chart-wrap"><canvas id="ab-chart-wijk"></canvas></div>
+          <div class="chart-sub" id="ab-wijk-sub">Gemiddelden van nette verhuurders per wijk</div>
+          <div class="chart-wrap tall" id="ab-wijk-wrap"><canvas id="ab-chart-wijk"></canvas></div>
           <div class="ab-nodata" id="ab-wijk-leeg" style="display:none">
-            Nog geen objecten voor deze stad in <code>airbnb_listings</code>.<br>
-            Draai de workflow met <strong>listings</strong> aangevinkt.
+            Voor deze stad kent AirROI geen wijken met genoeg objecten.
           </div>
-
           <table class="wijk-table" style="margin-top:12px">
             <thead><tr>
               <th>#</th><th>Wijk</th>
               <th style="text-align:right">Objecten</th>
-              <th style="text-align:right">Med. nachtprijs</th>
-              <th style="text-align:right">Med. bezetting</th>
-              <th style="text-align:right">Med. jaaromzet</th>
-              <th style="text-align:right">Superhost</th>
+              <th style="text-align:right">Bezetting</th>
+              <th style="text-align:right">Nachtprijs</th>
+              <th style="text-align:right">Jaaromzet</th>
               <th style="text-align:right">Onze med. koopprijs</th>
-              <th style="text-align:right">Airbnb bruto</th>
+              <th style="text-align:right">Bruto rendement</th>
             </tr></thead>
             <tbody id="ab-wijk-tbody"></tbody>
           </table>
           <div class="yield-info">
-            <div class="yield-info-title">Over deze wijkcijfers</div>
+            <div class="yield-info-title">Over de wijkcijfers</div>
             <div class="yield-info-text">
-              Dit zijn <strong>werkelijke</strong> cijfers van bestaande Airbnb-objecten over de
-              laatste twaalf maanden, geen model. Medianen, dus één uitschieter trekt ze niet scheef.
-              Wijken met minder dan 5 objecten laten we weg. De laatste twee kolommen verschijnen
-              alleen als de wijknaam van AirROI overeenkomt met een buurtnaam in ons eigen aanbod —
-              AirROI en Mubawab gebruiken niet dezelfde wijkindeling, dus een leeg vakje betekent
-              "geen naam-match", niet "geen aanbod".
+              AirROI kent niet elke wijk, en een wijk met minder dan 25 objecten weigert hij. Namen
+              staan er soms in drie schriften; ik toon ze ingekort. De laatste twee kolommen
+              verschijnen alleen als de wijknaam overeenkomt met een buurtnaam uit ons eigen aanbod.
             </div>
           </div>
-        </div>
-
-        <div class="chart-card" style="margin-bottom:20px">
-          <div class="chart-title">Vergelijkbare Airbnb-objecten</div>
-          <div class="chart-sub" id="ab-comp-sub">Panden waarop de schatting is gebaseerd</div>
-          <div class="comp-list" id="ab-comp-list"></div>
         </div>
 
         <div class="yield-info" style="margin-bottom:20px">
@@ -1041,7 +1009,9 @@ async function init() {
 
   document.getElementById('loading').style.display = 'none';
   buildCityTabs();
-  switchSec('markt');
+  // Klikte je tijdens het laden al op een andere sectie, laat die dan staan.
+  const actief = document.querySelector('.section-btn.active');
+  switchSec(actief ? actief.dataset.sec : 'markt');
   renderMarkt();
   // Wie de Airbnb-sectie opent terwijl het aanbod nog laadt, mist de koopprijzen
   // die het rendement berekenen — opnieuw renderen zodra allData binnen is.
@@ -1463,73 +1433,36 @@ function validateDeal() {
     </div>`;
 }
 
-// ── AIRBNB (AirROI-data uit Supabase-cache) ───────────────────────────────────
+// ── AIRBNB (gefilterde marktgemiddelden van AirROI, uit de Supabase-cache) ───
 // De AirROI-API is betaald en de sleutel mag niet in deze publieke pagina staan.
-// Daarom leest deze sectie alleen de tabellen airbnb_markets / airbnb_estimates,
-// die de backend-workflow `airroi_refresh.yml` periodiek vult.
-let abMarkets = [], abEstimates = [], abCharts = {}, abInited = false;
-// Objecten worden per stad geladen (kan duizenden rijen per stad zijn) en daarna
-// in deze map bewaard, zodat wisselen tussen steden geen nieuwe query kost.
-let abListings = {}, abLoadingStad = null;
+// Deze sectie leest daarom alleen de tabellen die de maandelijkse workflow vult:
+//   airbnb_market_stats   — gemiddelden per stad, woninggrootte en wijk
+//   airbnb_market_months  — dezelfde cijfers per maand, met spreiding p25 t/m p90
+//   airbnb_districts      — de wijken die AirROI kent, met hun aanbod
+// 'kwaliteit' = objecten met beoordeling 4+, 120+ geboekte nachten en recent
+// nog geboekt. 'alles' = het complete aanbod, als contrast.
+let abStats = [], abMonths = [], abDistricts = [], abCharts = {}, abInited = false;
 const AB_MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-const abSlkLbl = n => n===0 ? 'Studio' : `${n} slaapkamer${n>1?'s':''}`;
+const abSlkLbl = n => n < 0 ? 'Alle formaten' : n === 0 ? 'Studio' : `${n} slaapkamer${n>1?'s':''}`;
 const abResi = new Set(['apartment','riad','house','villa']);
 function dcAB(id){ if(abCharts[id]){abCharts[id].destroy();delete abCharts[id];} }
 
-// AirROI's veldnamen verschillen per endpoint en kunnen wijzigen; zoek daarom op
-// meerdere kandidaat-sleutels, eerst op het huidige niveau, dan dieper.
-function abNum(obj, keys, depth=4) {
-  if (obj==null || depth<0 || typeof obj!=='object') return null;
-  if (Array.isArray(obj)) return null;
-  for (const k of keys) {
-    const v = obj[k];
-    if (typeof v === 'number' && isFinite(v)) return v;
-    if (typeof v === 'string' && v.trim()!=='' && isFinite(+v)) return +v;
-    if (v && typeof v==='object' && !Array.isArray(v)) {
-      for (const kk of ['value','p50','median','avg','average','ttm','current','total']) {
-        if (typeof v[kk]==='number' && isFinite(v[kk])) return v[kk];
-      }
-    }
-  }
-  for (const k of Object.keys(obj)) {
-    const v = abNum(obj[k], keys, depth-1);
-    if (v!=null) return v;
-  }
-  return null;
-}
-function abObj(obj, keys, depth=4) {
-  if (obj==null || depth<0 || typeof obj!=='object' || Array.isArray(obj)) return null;
-  for (const k of keys) if (obj[k] && typeof obj[k]==='object' && !Array.isArray(obj[k])) return obj[k];
-  for (const k of Object.keys(obj)) { const v = abObj(obj[k], keys, depth-1); if (v) return v; }
-  return null;
-}
-function abArr(obj, keys, depth=4) {
-  if (obj==null || depth<0 || typeof obj!=='object') return null;
-  if (!Array.isArray(obj)) {
-    for (const k of keys) if (Array.isArray(obj[k]) && obj[k].length) return obj[k];
-    for (const k of Object.keys(obj)) { const v = abArr(obj[k], keys, depth-1); if (v) return v; }
-  }
-  return null;
-}
-// Maandreeks: 12 getallen, of 12 objecten met een omzet-/waardeveld.
-function abSeries(obj, keys) {
-  const arr = abArr(obj, keys);
-  if (!arr || arr.length < 6) return null;
-  const vals = arr.slice(0,12).map(x => typeof x==='number' ? x
-    : (x && typeof x==='object' ? abNum(x, ['revenue','value','amount','avg','average','p50'], 2) : null));
-  return vals.every(v => typeof v==='number' && isFinite(v)) ? vals : null;
-}
-// Bezetting komt soms als 0–1, soms als 0–100.
-const abPct = v => v==null ? null : (v<=1.5 ? v*100 : v);
-const abCurLbl = r => (r && String(r.currency||'').toLowerCase()==='usd') ? 'USD' : 'MAD';
-// 'Sidi  Bou-Saïd' → 'sidi bou said' — voor het matchen van AirROI-wijknamen op
-// onze eigen buurtnamen. Alleen een gelijke genormaliseerde naam telt als match.
-const abSlug = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+// Bezetting komt als fractie (0,53) binnen; overal tonen we procenten.
+const abPct = v => v == null ? null : (v <= 1.5 ? v * 100 : v);
+const abMoney = v => (v == null || isNaN(v)) ? '—' : fmtMAD(v);
+// 'Guéliz ⴳⵉⵍⵉⵣ گليز' → 'Guéliz' : AirROI zet er soms drie schriften achter elkaar.
+const abWijkKort = n => {
+  const eerste = String(n||'').split(/[؀-ۿⴰ-⵿]/)[0].trim().replace(/[,\-–]\s*$/, '');
+  const kort = eerste || String(n||'');
+  return kort.length > 30 ? kort.slice(0,29) + '…' : kort;
+};
+// Naam normaliseren om AirROI-wijken op onze eigen buurtnamen te leggen.
+const abSlug = v => String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
   .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-function abMoney(v, cur) {
-  if (v==null || isNaN(v)) return '—';
-  if (cur==='USD') return '$' + fmt(Math.round(v));
-  return fmtMAD(v);
+
+function abStat(city, district, bedrooms, label) {
+  return abStats.find(r => r.city===city && (r.district||'')===(district||'')
+    && r.bedrooms===bedrooms && r.filter_label===label) || null;
 }
 
 async function initAirbnb() {
@@ -1538,427 +1471,255 @@ async function initAirbnb() {
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   let ok = true;
   try {
-    const [m, e] = await Promise.all([
-      sb.from('airbnb_markets').select('city,lat,lng,summary,currency,fetched_at'),
-      sb.from('airbnb_estimates').select('city,bedrooms,baths,guests,currency,revenue,adr,occupancy,raw,fetched_at'),
+    const [st, mo, di] = await Promise.all([
+      sb.from('airbnb_market_stats').select(
+        'city,district,bedrooms,filter_label,occupancy,average_daily_rate,rev_par,revenue,' +
+        'booking_lead_time,length_of_stay,active_listings_count,currency,fetched_at'),
+      sb.from('airbnb_market_months').select('city,district,filter_label,month,metrics'),
+      sb.from('airbnb_districts').select('city,name,active_listings_count'),
     ]);
-    if (m.error || e.error) { ok = false; console.warn('Airbnb-data:', m.error||e.error); }
-    else { abMarkets = m.data||[]; abEstimates = e.data||[]; }
-  } catch (err) { ok = false; console.warn('Airbnb-data:', err); }
+    if (st.error || mo.error || di.error) { ok = false; console.warn('Airbnb:', st.error||mo.error||di.error); }
+    else { abStats = st.data||[]; abMonths = mo.data||[]; abDistricts = di.data||[]; }
+  } catch (err) { ok = false; console.warn('Airbnb:', err); }
 
   document.getElementById('ab-loading').style.display = 'none';
-  if (!ok || (!abMarkets.length && !abEstimates.length)) {
-    document.getElementById('ab-empty').style.display = 'block';
-    return;
-  }
+  if (!ok || !abStats.length) { document.getElementById('ab-empty').style.display = 'block'; return; }
   document.getElementById('ab-content').style.display = 'block';
 
-  const cities = [...new Set([...abEstimates.map(r=>r.city), ...abMarkets.map(r=>r.city)])].sort();
-  document.getElementById('ab-stad').innerHTML =
-    cities.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const slks = [...new Set(abEstimates.map(r=>r.bedrooms))].filter(n=>n!=null).sort((a,b)=>a-b);
-  const slkOpts = slks.length ? slks : [2];
+  const steden = [...new Set(abStats.map(r=>r.city))].sort();
+  document.getElementById('ab-stad').innerHTML = steden.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const maten = [...new Set(abStats.filter(r=>!r.district).map(r=>r.bedrooms))].sort((a,b)=>a-b);
   document.getElementById('ab-slk').innerHTML =
-    slkOpts.map(n=>`<option value="${n}"${n===2?' selected':''}>${abSlkLbl(n)}</option>`).join('');
+    maten.map(n=>`<option value="${n}"${n===-1?' selected':''}>${abSlkLbl(n)}</option>`).join('');
   renderAirbnb();
 }
 
-// Objecten van één stad ophalen (max. 1000 rijen per request, dus pagineren).
-// `raw` halen we niet op: dat is het volledige AirROI-antwoord per object en zou
-// de pagina onnodig zwaar maken.
-const AB_LISTING_COLS = 'listing_id,city,district,room_type,bedrooms,baths,guests,' +
-  'revenue_ttm,adr_ttm,occupancy_ttm,revpar_ttm,num_reviews,rating_overall,superhost,' +
-  'professional_management,currency,fetched_at';
-async function abLoadListings(stad) {
-  if (abListings[stad]) return abListings[stad];
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-  const rows = []; let from = 0;
-  while (true) {
-    const { data, error } = await sb.from('airbnb_listings').select(AB_LISTING_COLS)
-      .eq('city', stad).order('listing_id', {ascending:true}).range(from, from+999);
-    if (error) { console.warn('Airbnb-objecten:', error); abListings[stad] = []; return []; }
-    rows.push(...data);
-    if (data.length < 1000) break;
-    from += 1000;
-  }
-  abListings[stad] = rows;
-  return rows;
-}
-
-// Mediane koopprijs uit ons eigen aanbod, zo dicht mogelijk bij de gekozen
-// woninggrootte; verbreedt het filter als er te weinig panden zijn.
-function abMedKoop(city, bedrooms) {
-  const base = allData.filter(r => r.city===city && abResi.has(r.property_type)
+// Mediane koopprijs uit ons eigen aanbod, zo dicht mogelijk bij de gekozen maat.
+function abMedKoop(city, bedrooms, buurt) {
+  let base = allData.filter(r => r.city===city && abResi.has(r.property_type)
     && (r.transaction_type==='sale'||r.transaction_type==='new_construction')
     && r.price>5e4 && r.price<2e7);
-  let sel = base.filter(r => r.bedrooms===bedrooms), lbl = abSlkLbl(bedrooms);
-  if (sel.length<5) { sel = base.filter(r => r.bedrooms!=null && Math.abs(r.bedrooms-bedrooms)<=1); lbl = `${bedrooms}±1 slk`; }
-  if (sel.length<5) { sel = base; lbl = 'alle groottes'; }
+  if (buurt) base = base.filter(r => abSlug(r.neighborhood) === abSlug(buurt));
+  let sel = bedrooms >= 0 ? base.filter(r => r.bedrooms===bedrooms) : base;
+  let lbl = bedrooms >= 0 ? abSlkLbl(bedrooms) : 'alle groottes';
+  if (sel.length < 5 && bedrooms >= 0) {
+    sel = base.filter(r => r.bedrooms!=null && Math.abs(r.bedrooms-bedrooms)<=1);
+    lbl = `${bedrooms}±1 slk`;
+  }
+  if (sel.length < 5) { sel = base; lbl = 'alle groottes'; }
   return { med: median(sel.map(r=>r.price)), n: sel.length, lbl };
-}
-function abMedHuur(city, bedrooms) {
-  const base = allData.filter(r => r.city===city && abResi.has(r.property_type)
-    && r.transaction_type==='long_term_rental' && r.price>=800 && r.price<=200000);
-  let sel = base.filter(r => r.bedrooms===bedrooms);
-  if (sel.length<5) sel = base.filter(r => r.bedrooms!=null && Math.abs(r.bedrooms-bedrooms)<=1);
-  if (sel.length<5) sel = base;
-  return { med: median(sel.map(r=>r.price)), n: sel.length };
-}
-
-function abEst(city, bedrooms) { return abEstimates.find(r => r.city===city && r.bedrooms===bedrooms) || null; }
-// AirROI's `revenue` bovenin de schatting is het GEMIDDELDE van de vergelijkbare
-// objecten en wordt door één topverhuurder omhooggetrokken (Essaouira, 2 slk:
-// gemiddeld 120.590 MAD, mediaan 88.415). Toon daarom de mediaan als die er is.
-function abRevenue(est) {
-  if (!est) return null;
-  const pc = abObj(est && est.raw, ['percentiles']);
-  const p50 = pc && pc.revenue && typeof pc.revenue.p50 === 'number' ? pc.revenue.p50 : null;
-  if (p50 != null) return p50;
-  return est.revenue != null ? +est.revenue
-    : abNum(est.raw, ['revenue','annual_revenue','projected_revenue','ttm_revenue']);
-}
-function abAdr(est) {
-  if (!est) return null;
-  return est.adr != null ? +est.adr : abNum(est.raw, ['average_daily_rate','adr','avg_rate']);
-}
-function abOcc(est) {
-  if (!est) return null;
-  return abPct(est.occupancy != null ? +est.occupancy : abNum(est.raw, ['occupancy','occupancy_rate']));
 }
 
 function renderAirbnb() {
   const stad = document.getElementById('ab-stad').value;
   const slk  = parseInt(document.getElementById('ab-slk').value, 10);
-  const est  = abEst(stad, slk);
-  const mkt  = abMarkets.find(m => m.city===stad) || null;
-  const cur  = abCurLbl(est || mkt);
-  const rev  = abRevenue(est), adr = abAdr(est), occ = abOcc(est);
+  const kw   = abStat(stad, '', slk, 'kwaliteit');
+  const alles = abStat(stad, '', -1, 'alles');
 
+  const omzet = kw ? Number(kw.revenue) : null;
   const koop = abMedKoop(stad, slk);
-  const eigenPrijs = parseFloat(document.getElementById('ab-prijs').value);
-  const prijs = (eigenPrijs>0) ? eigenPrijs : koop.med;
-  const bruto = (rev!=null && prijs>0 && cur==='MAD') ? (rev/prijs*100) : null;
+  const eigen = parseFloat(document.getElementById('ab-prijs').value);
+  const prijs = eigen > 0 ? eigen : koop.med;
+  const bruto = (omzet != null && prijs > 0) ? omzet / prijs * 100 : null;
+  const occ = kw ? abPct(Number(kw.occupancy)) : null;
+  const occAlles = alles ? abPct(Number(alles.occupancy)) : null;
+  // Het contrastcijfer gaat altijd over de hele stad. De verhouding tonen we
+  // alleen bij 'alle formaten', anders vergelijk je twee slaapkamers met alles.
+  const kwStad = abStat(stad, '', -1, 'kwaliteit');
+  const verschil = (slk === -1 && kwStad && alles && alles.revenue)
+    ? Number(kwStad.revenue) / Number(alles.revenue) : null;
 
-  // Werkelijke mediaan van dezelfde stad + formaat, als de objecten geladen zijn.
-  // Dit is de reality-check op de modelschatting van AirROI.
-  const echt = (abListings[stad]||[]).filter(r => r.bedrooms===slk
-    && (r.room_type||'entire_home')==='entire_home' && Number(r.revenue_ttm) > 0);
-  const echtMed = echt.length>=3 ? median(echt.map(r=>Number(r.revenue_ttm))) : null;
-
-  const mOcc = abPct(abNum(mkt&&mkt.summary, ['occupancy','occupancy_rate','avg_occupancy']));
-  const mAdr = abNum(mkt&&mkt.summary, ['average_daily_rate','adr','avg_daily_rate','avg_rate']);
-  const mRevpar = abNum(mkt&&mkt.summary, ['revpar','rev_par','revenue_per_available_room']);
-  const mActive = abNum(mkt&&mkt.summary, ['active_listings','active_listings_count','listings_count','listing_count','supply']);
-
-  const eurSub = v => cur==='MAD' && v!=null ? `≈ €${fmt(Math.round(v*EUR))}` : '';
   document.getElementById('ab-kpi-grid').innerHTML = `
     <div class="kpi-card accent">
-      <div class="kpi-label">Geschatte jaaromzet</div>
-      <div class="kpi-value accent">${abMoney(rev, cur)}</div>
-      <div class="kpi-sub">${abSlkLbl(slk)} · model AirROI${echtMed!=null
-        ? ' · werkelijk ' + abMoney(echtMed, cur) + ' (n=' + echt.length + ')' : ''}</div>
+      <div class="kpi-label">Jaaromzet, netjes verhuurd</div>
+      <div class="kpi-value accent">${abMoney(omzet)}</div>
+      <div class="kpi-sub">${abSlkLbl(slk)} · ≈ €${fmt(Math.round((omzet||0)*EUR))}</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Gem. nachtprijs</div>
-      <div class="kpi-value">${adr!=null?fmt(Math.round(adr))+' '+cur:'—'}</div>
-      <div class="kpi-sub">${eurSub(adr)||'per nacht'}</div>
+      <div class="kpi-label">Gemiddelde nachtprijs</div>
+      <div class="kpi-value">${kw && kw.average_daily_rate!=null ? fmt(Math.round(kw.average_daily_rate))+' MAD' : '—'}</div>
+      <div class="kpi-sub">${kw && kw.length_of_stay!=null ? fmt(kw.length_of_stay,1)+' nachten per boeking' : 'per nacht'}</div>
     </div>
     <div class="kpi-card gold">
       <div class="kpi-label">Bezetting</div>
-      <div class="kpi-value gold">${occ!=null?fmt(occ,1)+'%':'—'}</div>
+      <div class="kpi-value gold">${occ!=null?fmt(occ,0)+'%':'—'}</div>
       <div class="kpi-sub">${occ!=null?Math.round(occ*3.65)+' nachten per jaar':'geen data'}</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Bruto rendement</div>
       <div class="kpi-value" style="color:${bruto==null?'var(--text)':bruto>=7?'var(--success)':bruto>=4?'var(--accent)':'var(--danger)'}">${bruto!=null?fmt(bruto,1)+'%':'—'}</div>
-      <div class="kpi-sub">${cur!=='MAD' ? 'niet te berekenen: omzet staat in '+cur+', koopprijzen in MAD'
-        : eigenPrijs>0 ? 'op jouw prijs '+fmtMAD(eigenPrijs)
+      <div class="kpi-sub">${eigen>0 ? 'op jouw prijs '+fmtMAD(eigen)
         : koop.med>0 ? 'op med. koopprijs '+fmtMAD(koop.med)+' ('+koop.lbl+', n='+koop.n+')'
-        : 'geen koopprijzen voor deze stad in ons aanbod'}</div>
+        : 'geen koopprijzen voor deze stad'}</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Markt ${stad}</div>
-      <div class="kpi-value">${mOcc!=null?fmt(mOcc,1)+'%':'—'}</div>
-      <div class="kpi-sub">bezetting alle objecten${mActive!=null?' · '+fmt(mActive)+' actief':''}</div>
+      <div class="kpi-label">Heel het aanbod</div>
+      <div class="kpi-value">${alles?abMoney(Number(alles.revenue)):'—'}</div>
+      <div class="kpi-sub">${occAlles!=null?fmt(occAlles,0)+'% bezetting · ':''}${
+        verschil ? 'jij haalt '+fmt(verschil,1)+'× zo veel' : 'hele stad, alle formaten'}</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Markt nachtprijs / RevPAR</div>
-      <div class="kpi-value">${mAdr!=null?fmt(Math.round(mAdr)):'—'}</div>
-      <div class="kpi-sub">${cur} ADR${mRevpar!=null?' · RevPAR '+fmt(Math.round(mRevpar)):''}</div>
+      <div class="kpi-label">Objecten achter dit cijfer</div>
+      <div class="kpi-value">${kw && kw.active_listings_count!=null ? fmt(Math.round(kw.active_listings_count)) : '—'}</div>
+      <div class="kpi-sub">${alles && alles.active_listings_count ? 'van '+fmt(Math.round(alles.active_listings_count))+' in de stad' : ''}</div>
     </div>`;
 
-  abRenderSeizoen(est, mkt, cur);
-  abRenderPercentielen(est, cur);
-  abRenderCmp(slk, cur);
-  abRenderComps(est, cur);
-  abRenderWijken();
-  // Objecten van deze stad nog niet in de cache? Ophalen en daarna alleen het
-  // wijkblok opnieuw tekenen.
-  if (!abListings[stad] && abLoadingStad !== stad) {
-    abLoadingStad = stad;
-    abLoadListings(stad).then(() => {
-      abLoadingStad = null;
-      if (document.getElementById('ab-stad').value === stad) abRenderWijken();
-    });
-  }
+  abRenderCmp(slk);
+  abRenderMaand(stad);
+  abRenderSlk(stad);
+  abRenderWijken(stad, slk);
 
-  const dts = [est&&est.fetched_at, mkt&&mkt.fetched_at].filter(Boolean)
-    .map(d => new Date(d)).sort((a,b)=>b-a);
-  const ds = dts.length ? dts[0].toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'}) : 'onbekend';
+  const dts = abStats.map(r=>r.fetched_at).filter(Boolean).sort();
+  const ds = dts.length ? new Date(dts[dts.length-1]).toLocaleDateString('nl-NL',
+    {day:'numeric',month:'long',year:'numeric'}) : 'onbekend';
   document.getElementById('ab-bron').innerHTML =
-    `Airbnb-cijfers komen van <strong>AirROI</strong> (bezetting, nachtprijs en omzet van werkelijke
-     Airbnb-objecten in de buurt) en zijn opgeslagen in onze eigen database — de pagina doet dus geen
-     live API-aanroepen. <strong>Laatst ververst: ${ds}.</strong> Verversen gebeurt maandelijks via de
-     backend-workflow <em>AirROI Airbnb-data verversen</em>. Koopprijzen en langetermijnhuren komen uit
-     ons eigen aanbod (Mubawab, Sarouty e.a.).`;
+    `Airbnb-cijfers komen van <strong>AirROI</strong> en zijn gemiddelden over werkelijke objecten,
+     geen model. Ze staan in onze eigen database, dus deze pagina doet geen betaalde API-aanroepen.
+     <strong>Laatst ververst: ${ds}.</strong> Verversen gebeurt maandelijks via de backend-workflow.
+     Koopprijzen komen uit ons eigen aanbod (Mubawab, Sarouty e.a.).`;
 }
 
-function abRenderSeizoen(est, mkt, cur) {
-  dcAB('seizoen');
-  const keys = ['monthly_revenue_distributions','monthly_revenue','revenue_by_month','monthly','months','seasonality'];
-  let series = est ? abSeries(est.raw, keys) : null;
-  let sub = 'Verwachte omzet per maand · schatting voor dit objectformaat';
-  if (!series && mkt) {
-    series = abSeries(mkt.summary, keys);
-    sub = 'Omzet per maand · hele markt (geen schatting per formaat beschikbaar)';
-  }
-  // AirROI levert de maandverdeling als fracties die samen 1 zijn. Vermenigvuldig
-  // met de jaaromzet, anders toont de grafiek kommagetallen in plaats van dirham.
-  if (series) {
-    const som = series.reduce((a,b)=>a+b,0), jaar = abRevenue(est);
-    if (som > 0 && som < 1.5 && jaar) series = series.map(v => v * jaar);
-  }
-  // Canvas alleen verbergen, nooit uit de DOM halen: een volgende render heeft het weer nodig.
-  document.getElementById('ab-seizoen-wrap').style.display = series ? 'block' : 'none';
-  document.getElementById('ab-seizoen-leeg').style.display = series ? 'none' : 'block';
-  document.getElementById('ab-seizoen-sub').textContent = series ? sub : 'Geen maandreeks beschikbaar';
-  if (!series) return;
-  abCharts['seizoen'] = new Chart(document.getElementById('ab-chart-seizoen').getContext('2d'), {
+function abRenderCmp(slk) {
+  const steden = [...new Set(abStats.map(r=>r.city))];
+  const rijen = steden.map(c => {
+    const k = abStat(c, '', -1, 'kwaliteit'), a = abStat(c, '', -1, 'alles');
+    return { stad:c, kw:k?Number(k.revenue):null, al:a?Number(a.revenue):null,
+             occ:k?abPct(Number(k.occupancy)):null,
+             adr:k&&k.average_daily_rate!=null?Number(k.average_daily_rate):null,
+             n:k&&k.active_listings_count!=null?Number(k.active_listings_count):null,
+             nAl:a&&a.active_listings_count!=null?Number(a.active_listings_count):null };
+  }).filter(r=>r.kw!=null).sort((a,b)=>b.kw-a.kw);
+
+  document.getElementById('ab-cmp-tbody').innerHTML = rijen.map(r => {
+    const x = (r.kw && r.al) ? r.kw/r.al : null;
+    return `<tr>
+      <td><strong>${r.stad}</strong></td>
+      <td style="text-align:right;font-family:var(--font-mono);font-size:13px;color:var(--accent)"><strong>${abMoney(r.kw)}</strong></td>
+      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${abMoney(r.al)}</td>
+      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${x?fmt(x,1)+'×':'—'}</td>
+      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${r.occ!=null?fmt(r.occ,0)+'%':'—'}</td>
+      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${r.adr!=null?fmt(Math.round(r.adr)):'—'}</td>
+      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${r.n!=null?fmt(Math.round(r.n)):'—'}<span style="color:var(--muted)">${r.nAl?' / '+fmt(Math.round(r.nAl)):''}</span></td>
+    </tr>`;
+  }).join('');
+
+  dcAB('cmp');
+  abCharts['cmp'] = new Chart(document.getElementById('ab-chart-cmp').getContext('2d'), {
     type:'bar',
-    data:{ labels:AB_MONTHS.slice(0,series.length),
-           datasets:[{ data:series, backgroundColor:'#C4622D', borderRadius:3 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>`${fmt(Math.round(c.parsed.y))} ${cur}`}}},
+    data:{ labels:rijen.map(r=>r.stad), datasets:[
+      { label:'Nette verhuurders', data:rijen.map(r=>r.kw), backgroundColor:'#C4622D', borderRadius:3 },
+      { label:'Heel het aanbod',   data:rijen.map(r=>r.al), backgroundColor:'#7a8c7a', borderRadius:3 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{labels:{font:{family:MONO,size:11},boxWidth:12,color:'#1C2E1D'}},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(Math.round(c.parsed.y))} MAD`}}},
       scales:{ x:{grid:{display:false},ticks:{font:{family:MONO,size:10},color:'#7a8c7a'}}, y:bsc } }
   });
 }
 
-function abRenderPercentielen(est, cur) {
-  dcAB('perc');
-  const pc = est ? abObj(est.raw, ['percentiles','percentile','distribution']) : null;
-  const revObj = pc ? (pc.revenue || pc.annual_revenue || pc) : null;
-  const rows = ['p25','p50','p75','p90']
-    .map(k => [k, revObj && typeof revObj[k]==='number' ? revObj[k] : null])
-    .filter(([,v]) => v!=null);
-  const ok = rows.length >= 2;
-  document.getElementById('ab-perc-wrap').style.display = ok ? 'block' : 'none';
-  document.getElementById('ab-perc-leeg').style.display = ok ? 'none' : 'block';
-  if (!ok) return;
-  abCharts['perc'] = new Chart(document.getElementById('ab-chart-perc').getContext('2d'), {
-    type:'bar',
-    data:{ labels:rows.map(r=>r[0]),
-           datasets:[{ data:rows.map(r=>r[1]),
-                       backgroundColor:rows.map(r=>r[0]==='p50'?'#1C2E1D':'#7a8c7a'), borderRadius:3 }] },
-    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>`${fmt(Math.round(c.parsed.x))} ${cur} per jaar`}}},
-      scales:{ x:bsc, y:{grid:{display:false},ticks:{font:{family:MONO,size:11},color:'#7a8c7a'}} } }
+function abRenderMaand(stad) {
+  dcAB('maand');
+  const rijen = abMonths.filter(r => r.city===stad && !r.district && r.filter_label==='kwaliteit')
+    .sort((a,b) => a.month.localeCompare(b.month));
+  const wrap = document.getElementById('ab-maand-wrap'), leeg = document.getElementById('ab-maand-leeg');
+  wrap.style.display = rijen.length ? 'block' : 'none';
+  leeg.style.display = rijen.length ? 'none' : 'block';
+  if (!rijen.length) return;
+
+  const labels = rijen.map(r => { const d = new Date(r.month); return AB_MONTHS[d.getUTCMonth()]; });
+  const pak = (r, p) => { const m = r.metrics && r.metrics.revenue; return m && m[p]!=null ? m[p] : null; };
+  document.getElementById('ab-maand-sub').textContent =
+    `Omzet per maand · mediaan met de band van p25 tot p75 · ${rijen.length} maanden`;
+
+  abCharts['maand'] = new Chart(document.getElementById('ab-chart-maand').getContext('2d'), {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'p75', data:rijen.map(r=>pak(r,'p75')), borderColor:'rgba(122,140,122,0.5)',
+        backgroundColor:'rgba(122,140,122,0.18)', fill:'+1', pointRadius:0, borderWidth:1, tension:0.3 },
+      { label:'p25', data:rijen.map(r=>pak(r,'p25')), borderColor:'rgba(122,140,122,0.5)',
+        backgroundColor:'rgba(122,140,122,0.18)', fill:false, pointRadius:0, borderWidth:1, tension:0.3 },
+      { label:'Mediaan', data:rijen.map(r=>pak(r,'p50')), borderColor:'#C4622D',
+        backgroundColor:'#C4622D', fill:false, pointRadius:3, borderWidth:2, tension:0.3 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{labels:{font:{family:MONO,size:11},boxWidth:12,color:'#1C2E1D',
+        filter:i=>i.text!=='p25'}},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(Math.round(c.parsed.y))} MAD`}}},
+      scales:{ x:{grid:{display:false},ticks:{font:{family:MONO,size:10},color:'#7a8c7a'}}, y:bsc } }
   });
 }
 
-function abRenderCmp(slk, cur) {
-  const rows = abEstimates.filter(r => r.bedrooms===slk).map(r => {
-    const rev = abRevenue(r), koop = abMedKoop(r.city, slk), huur = abMedHuur(r.city, slk);
-    const ab = (rev!=null && koop.med>0 && abCurLbl(r)==='MAD') ? rev/koop.med*100 : null;
-    const lt = (huur.med>0 && koop.med>0) ? huur.med*12/koop.med*100 : null;
-    return { city:r.city, rev, occ:abOcc(r), koop:koop.med, koopN:koop.n, ab, lt, cur:abCurLbl(r) };
-  }).sort((a,b) => (b.ab??-1)-(a.ab??-1));
-
-  document.getElementById('ab-cmp-sub').textContent =
-    `Bruto rendement op de mediane koopprijs · ${abSlkLbl(slk)} · ${rows.length} steden`;
-  document.getElementById('ab-cmp-tbody').innerHTML = rows.length ? rows.map(r => {
-    const d = (r.ab!=null && r.lt!=null) ? r.ab-r.lt : null;
-    const col = v => v==null?'var(--muted)':v>=7?'var(--success)':v>=4?'var(--accent)':'var(--danger)';
-    return `<tr>
-      <td><strong>${r.city}</strong></td>
-      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${abMoney(r.rev, r.cur)}</td>
-      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${r.occ!=null?fmt(r.occ,1)+'%':'—'}</td>
-      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${fmtMAD(r.koop)}<span style="color:var(--muted)"> (n=${r.koopN})</span></td>
-      <td style="text-align:right;font-family:var(--font-mono);font-size:13px;color:${col(r.ab)}"><strong>${r.ab!=null?fmt(r.ab,1)+'%':'—'}</strong></td>
-      <td style="text-align:right;font-family:var(--font-mono);font-size:12px;color:${col(r.lt)}">${r.lt!=null?fmt(r.lt,1)+'%':'—'}</td>
-      <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${d!=null?(d>0?'+':'')+fmt(d,1)+' pp':'—'}</td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--muted)">Geen schattingen voor ${abSlkLbl(slk)}</td></tr>`;
+function abRenderSlk(stad) {
+  dcAB('slk');
+  const rijen = abStats.filter(r => r.city===stad && !r.district && r.bedrooms>=0 && r.filter_label==='kwaliteit')
+    .sort((a,b) => a.bedrooms-b.bedrooms);
+  const wrap = document.getElementById('ab-slk-wrap'), leeg = document.getElementById('ab-slk-leeg');
+  wrap.style.display = rijen.length ? 'block' : 'none';
+  leeg.style.display = rijen.length ? 'none' : 'block';
+  if (!rijen.length) return;
+  document.getElementById('ab-slk-sub').textContent =
+    `Jaaromzet van nette verhuurders per formaat · ${stad}`;
+  abCharts['slk'] = new Chart(document.getElementById('ab-chart-slk').getContext('2d'), {
+    type:'bar',
+    data:{ labels:rijen.map(r=>abSlkLbl(r.bedrooms)),
+           datasets:[{ data:rijen.map(r=>Number(r.revenue)), backgroundColor:'#1C2E1D', borderRadius:3 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{callbacks:{label:c=>{ const r=rijen[c.dataIndex];
+          return `${fmt(Math.round(c.parsed.y))} MAD · ${fmt(Math.round(r.active_listings_count||0))} objecten`; }}}},
+      scales:{ x:{grid:{display:false},ticks:{font:{family:MONO,size:10},color:'#7a8c7a'}}, y:bsc } }
+  });
 }
 
-// ── Wijkanalyse op basis van de werkelijke objecten uit airbnb_listings ──────
-const AB_MIN_WIJK = 5;   // minder objecten dan dit → wijk niet tonen (te dun)
-
-function abRenderWijken() {
-  const stad = document.getElementById('ab-stad').value;
-  const slk  = parseInt(document.getElementById('ab-slk').value, 10);
-  const scope = document.getElementById('ab-wijk-scope').value;
-  const room  = document.getElementById('ab-wijk-room').value;
+function abRenderWijken(stad, slk) {
+  dcAB('wijk');
   document.getElementById('ab-wijk-stad').textContent = stad || '—';
+  const aanbod = {};
+  abDistricts.filter(d=>d.city===stad).forEach(d => { aanbod[d.name] = d.active_listings_count; });
 
-  const all = abListings[stad];
-  const leeg = document.getElementById('ab-wijk-leeg');
-  const wrap = document.getElementById('ab-wijk-chart-wrap');
-  const tb   = document.getElementById('ab-wijk-tbody');
-
-  if (!all) {   // nog aan het laden
-    document.getElementById('ab-wijk-sub').textContent = 'Objecten van deze stad laden…';
-    leeg.style.display='none'; wrap.style.display='none';
-    document.getElementById('ab-wijk-kpi').innerHTML=''; tb.innerHTML='';
-    return;
-  }
-
-  let d = all.filter(r => r.revenue_ttm!=null || r.adr_ttm!=null);
-  if (room !== 'all') d = d.filter(r => (r.room_type||'entire_home') === room);
-  if (scope === 'size') d = d.filter(r => r.bedrooms === slk);
-  // Een deel van de objecten stond twaalf maanden leeg (omzet 0). Die horen niet
-  // in een mediaan, maar het aandeel is zelf een marktsignaal.
-  const stil = d.filter(r => !(Number(r.revenue_ttm) > 0)).length;
-  const dv = d.filter(r => Number(r.revenue_ttm) > 0);
-
-  const cur = abCurLbl(all[0] || null);
-  document.getElementById('ab-wijk-sub').textContent = all.length
-    ? `${fmt(d.length)} van ${fmt(all.length)} objecten · ${scope==='size'?abSlkLbl(slk):'alle formaten'}`
-      + ` · ${room==='all'?'alle kamertypes':'hele woningen'} · medianen over ${fmt(dv.length)} verhuurde objecten`
-    : 'Geen objecten opgeslagen voor deze stad';
-
-  if (!d.length) {
-    leeg.style.display='block'; wrap.style.display='none';
-    document.getElementById('ab-wijk-kpi').innerHTML='';
-    tb.innerHTML = `<tr><td colspan="9" class="empty-state">${all.length
-      ? 'Geen objecten binnen deze filters.' : 'Nog geen objecten voor deze stad gedownload.'}</td></tr>`;
-    dcAB('wijk');
-    return;
-  }
-  leeg.style.display='none'; wrap.style.display='block';
-
-  // Stads-KPI's uit de werkelijke objecten
-  const med = k => median(dv.map(r=>r[k]).filter(v=>v!=null).map(Number));
-  const occAll = abPct(med('occupancy_ttm'));
-  const sh = d.filter(r=>r.superhost===true).length, pm = d.filter(r=>r.professional_management===true).length;
-  document.getElementById('ab-wijk-kpi').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Objecten</div>
-      <div class="kpi-value">${fmt(d.length)}</div>
-      <div class="kpi-sub">${fmt(stil)} zonder omzet · ${new Set(d.map(r=>r.district).filter(Boolean)).size} wijken bekend</div></div>
-    <div class="kpi-card accent"><div class="kpi-label">Med. jaaromzet</div>
-      <div class="kpi-value accent">${abMoney(med('revenue_ttm'), cur)}</div>
-      <div class="kpi-sub">werkelijk, laatste 12 mnd</div></div>
-    <div class="kpi-card"><div class="kpi-label">Med. nachtprijs</div>
-      <div class="kpi-value">${med('adr_ttm')!=null?fmt(Math.round(med('adr_ttm')))+' '+cur:'—'}</div>
-      <div class="kpi-sub">mediaan over alle objecten</div></div>
-    <div class="kpi-card gold"><div class="kpi-label">Med. bezetting</div>
-      <div class="kpi-value gold">${occAll!=null?fmt(occAll,1)+'%':'—'}</div>
-      <div class="kpi-sub">${occAll!=null?Math.round(occAll*3.65)+' nachten per jaar':'geen data'}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Superhost / beheerder</div>
-      <div class="kpi-value">${fmt(Math.round(sh/d.length*100))}%</div>
-      <div class="kpi-sub">${fmt(Math.round(pm/d.length*100))}% professioneel beheerd</div></div>`;
-
-  // Mediane koopprijs per buurt uit ons eigen aanbod, voor de naam-match
-  const eigenBuurt = {};
-  allData.filter(r => r.city===stad && abResi.has(r.property_type)
-      && (r.transaction_type==='sale'||r.transaction_type==='new_construction')
-      && r.price>5e4 && r.price<2e7 && r.neighborhood)
-    .forEach(r => { const k=abSlug(r.neighborhood); (eigenBuurt[k]=eigenBuurt[k]||[]).push(r.price); });
-
-  const wijken = Object.entries(groupBy(dv.filter(r=>r.district), 'district'))
-    .filter(([w, rows]) => w && w!=='Onbekend' && rows.length>=AB_MIN_WIJK)
-    .map(([w, rows]) => {
-      const rev = median(rows.map(r=>r.revenue_ttm).filter(v=>v!=null).map(Number));
-      const eigen = eigenBuurt[abSlug(w)];
-      const koop = eigen && eigen.length>=3 ? median(eigen) : null;
+  const rijen = abStats.filter(r => r.city===stad && r.district && r.filter_label==='kwaliteit')
+    .map(r => {
+      const koop = abMedKoop(stad, -1, r.district);
+      const omzet = Number(r.revenue);
       return {
-        wijk: w, n: rows.length,
-        adr: median(rows.map(r=>r.adr_ttm).filter(v=>v!=null).map(Number)),
-        occ: abPct(median(rows.map(r=>r.occupancy_ttm).filter(v=>v!=null).map(Number))),
-        rev, koop, koopN: eigen ? eigen.length : 0,
-        bruto: (rev!=null && koop && cur==='MAD') ? rev/koop*100 : null,
-        sh: rows.filter(r=>r.superhost===true).length / rows.length,
+        wijk: r.district, kort: abWijkKort(r.district),
+        n: r.active_listings_count!=null ? Number(r.active_listings_count) : null,
+        occ: abPct(Number(r.occupancy)), adr: r.average_daily_rate!=null ? Number(r.average_daily_rate) : null,
+        rev: omzet, koop: koop.n>=3 ? koop.med : null, koopN: koop.n,
+        bruto: (koop.n>=3 && koop.med>0 && omzet) ? omzet/koop.med*100 : null,
+        aanbod: aanbod[r.district] || null,
       };
     }).sort((a,b) => (b.rev??-1)-(a.rev??-1));
 
-  if (!wijken.length) {
-    wrap.style.display='none';
-    tb.innerHTML = `<tr><td colspan="9" class="empty-state">Geen wijk heeft ${AB_MIN_WIJK}+ objecten binnen deze filters.</td></tr>`;
-    dcAB('wijk');
-    return;
-  }
+  const wrap = document.getElementById('ab-wijk-wrap'), leeg = document.getElementById('ab-wijk-leeg');
+  wrap.style.display = rijen.length ? 'block' : 'none';
+  leeg.style.display = rijen.length ? 'none' : 'block';
+  document.getElementById('ab-wijk-sub').textContent = rijen.length
+    ? `Gemiddelden van nette verhuurders · ${rijen.length} ${rijen.length===1?'wijk':'wijken'} die AirROI kent`
+    : 'Geen wijken met genoeg objecten voor deze stad';
 
-  const col = v => v==null?'var(--muted)':v>=7?'var(--success)':v>=4?'var(--accent)':'var(--danger)';
-  tb.innerHTML = wijken.map((w,i) => `<tr>
+  const kleur = v => v==null?'var(--muted)':v>=7?'var(--success)':v>=4?'var(--accent)':'var(--danger)';
+  document.getElementById('ab-wijk-tbody').innerHTML = rijen.length ? rijen.map((w,i) => `<tr>
     <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">${i+1}</td>
-    <td><strong>${w.wijk}</strong></td>
-    <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${fmt(w.n)}</td>
+    <td><strong title="${w.wijk}">${w.kort}</strong></td>
+    <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.n!=null?fmt(Math.round(w.n)):'—'}${w.aanbod?`<span style="color:var(--muted)"> / ${fmt(w.aanbod)}</span>`:''}</td>
+    <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.occ!=null?fmt(w.occ,0)+'%':'—'}</td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.adr!=null?fmt(Math.round(w.adr)):'—'}</td>
-    <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.occ!=null?fmt(w.occ,1)+'%':'—'}</td>
-    <td style="text-align:right;font-family:var(--font-mono);font-size:13px"><strong>${abMoney(w.rev, cur)}</strong></td>
-    <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${fmt(Math.round(w.sh*100))}%</td>
+    <td style="text-align:right;font-family:var(--font-mono);font-size:13px"><strong>${abMoney(w.rev)}</strong></td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.koop?fmtMAD(w.koop)+`<span style="color:var(--muted)"> (n=${w.koopN})</span>`:'—'}</td>
-    <td style="text-align:right;font-family:var(--font-mono);font-size:13px;color:${col(w.bruto)}">${w.bruto!=null?'<strong>'+fmt(w.bruto,1)+'%</strong>':'—'}</td>
-  </tr>`).join('');
+    <td style="text-align:right;font-family:var(--font-mono);font-size:13px;color:${kleur(w.bruto)}">${w.bruto!=null?'<strong>'+fmt(w.bruto,1)+'%</strong>':'—'}</td>
+  </tr>`).join('') : `<tr><td colspan="8" class="empty-state">AirROI kent voor ${stad} geen wijken met minstens 25 objecten.</td></tr>`;
 
-  // Grafiek: top 12 wijken op mediane jaaromzet
-  dcAB('wijk');
-  const top = wijken.slice(0,12);
+  if (!rijen.length) return;
   abCharts['wijk'] = new Chart(document.getElementById('ab-chart-wijk').getContext('2d'), {
     type:'bar',
-    data:{ labels:top.map(w=>w.wijk),
-           datasets:[{ data:top.map(w=>w.rev), backgroundColor:'#1C2E1D', borderRadius:3 }] },
+    data:{ labels:rijen.map(w=>w.kort),
+           datasets:[{ data:rijen.map(w=>w.rev), backgroundColor:'#1C2E1D', borderRadius:3 }]},
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{display:false},
-        tooltip:{callbacks:{label:c=>{ const w=top[c.dataIndex];
-          return `${fmt(Math.round(c.parsed.x))} ${cur} · ${fmt(w.n)} objecten · ${w.occ!=null?fmt(w.occ,0)+'% bezet':'bezetting onbekend'}`; }}}},
+        tooltip:{callbacks:{label:c=>{ const w=rijen[c.dataIndex];
+          return `${fmt(Math.round(c.parsed.x))} MAD · ${w.n!=null?fmt(Math.round(w.n))+' objecten':''}` +
+                 `${w.occ!=null?' · '+fmt(w.occ,0)+'% bezet':''}`; }}}},
       scales:{ x:bsc, y:{grid:{display:false},ticks:{font:{family:MONO,size:11},color:'#7a8c7a'}} } }
   });
-}
-
-function abRenderComps(est, cur) {
-  const list = est ? abArr(est.raw, ['comparable_listings','comparables','comps','listings']) : null;
-  const el = document.getElementById('ab-comp-list');
-  if (!list || !list.length) {
-    document.getElementById('ab-comp-sub').textContent = 'Geen vergelijkbare objecten in de opgeslagen data';
-    el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Geen comparables beschikbaar</div>';
-    return;
-  }
-  // Een comparable is een volledig AirROI-object: listing_info, property_details,
-  // ratings en performance_metrics met platte ttm_-velden (ttm_revenue, …).
-  const rows = list.map(c => {
-    const li = c.listing_info||{}, pd = c.property_details||{}, pm = c.performance_metrics||{};
-    const rt = c.ratings||{}, loc = c.location_info||{}, ho = c.host_info||{};
-    return {
-      id: li.listing_id != null ? li.listing_id : (c.listing_id != null ? c.listing_id : null),
-      naam: li.listing_name || 'Vergelijkbaar object',
-      rev: pm.ttm_revenue != null ? pm.ttm_revenue : abNum(pm, ['revenue'], 1),
-      adr: pm.ttm_avg_rate != null ? pm.ttm_avg_rate : abNum(pm, ['avg_rate','average_daily_rate'], 1),
-      occ: abPct(pm.ttm_occupancy != null ? pm.ttm_occupancy : abNum(pm, ['occupancy'], 1)),
-      bed: pd.bedrooms, wijk: loc.district || null,
-      reviews: rt.num_reviews, superhost: ho.superhost === true,
-    };
-  }).sort((a,b) => (b.rev??-1)-(a.rev??-1));
-
-  const verhuurd = rows.filter(r => (r.rev||0) > 0);
-  document.getElementById('ab-comp-sub').textContent =
-    `${rows.length} panden waarop de schatting rust · mediaan ${abMoney(median(verhuurd.map(r=>r.rev)), cur)}`
-    + ` · ${rows.length - verhuurd.length} zonder omzet in de laatste 12 maanden`;
-
-  el.innerHTML = rows.slice(0,10).map(r => {
-    // Airbnb-id's zijn groter dan JavaScript exact kan weergeven; alleen linken als
-    // het getal veilig is, anders zou de link naar een ander pand kunnen wijzen.
-    const veilig = r.id != null && Number.isSafeInteger(Number(r.id));
-    const url = veilig ? `https://www.airbnb.com/rooms/${r.id}` : null;
-    return `<div class="comp-item">
-      ${url?`<a href="${url}" target="_blank" rel="noopener">`:''}
-      <div class="comp-name">${r.naam}${r.superhost?' <span style="color:var(--gold)">&#9733;</span>':''}</div>
-      <div class="comp-meta">${r.bed!=null?abSlkLbl(r.bed):'—'}${r.wijk?' · '+r.wijk:''}${
-        r.occ!=null?' · '+fmt(r.occ,0)+'% bezet':''}${r.reviews!=null?' · '+fmt(r.reviews)+' reviews':''}</div>
-      <div class="comp-pm2">${r.adr!=null?fmt(Math.round(r.adr))+' '+cur+'/nacht':'—'}</div>
-      <div class="comp-price">${abMoney(r.rev, cur)}</div>
-      ${url?'</a>':''}
-    </div>`;
-  }).join('');
 }
 </script>
 </body>
