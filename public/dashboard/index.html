@@ -771,6 +771,7 @@ function switchSec(s) {
   ['markt','wijk','deal','airbnb','obj'].forEach(id => {
     document.getElementById('s-'+id).style.display = id===s ? 'block' : 'none';
   });
+  if (s === 'markt' && allData.length) renderMarkt();
   if (s === 'wijk') populateWaStad();
   if (s === 'deal') populateDvStad();
   if (s === 'airbnb') initAirbnb();
@@ -1011,10 +1012,14 @@ async function init() {
   buildCityTabs();
   // Klikte je tijdens het laden al op een andere sectie, laat die dan staan.
   const actief = document.querySelector('.section-btn.active');
-  switchSec(actief ? actief.dataset.sec : 'markt');
-  renderMarkt();
-  // Wie de Airbnb-sectie opent terwijl het aanbod nog laadt, mist de koopprijzen
-  // die het rendement berekenen — opnieuw renderen zodra allData binnen is.
+  const sec = actief ? actief.dataset.sec : 'markt';
+  switchSec(sec);
+  // Het marktoverzicht alleen tekenen als het ook zichtbaar is: een Leaflet-kaart
+  // in een verborgen sectie heeft geen afmetingen en gooit dan een fout, waardoor
+  // de rest van deze functie niet meer werd uitgevoerd.
+  if (sec === 'markt') renderMarkt();
+  // Wie een sectie opent terwijl het aanbod nog laadt, mist de koopprijzen die de
+  // rendementen berekenen. Opnieuw renderen nu allData binnen is.
   if (abInited && document.getElementById('ab-content').style.display === 'block') renderAirbnb();
 }
 
