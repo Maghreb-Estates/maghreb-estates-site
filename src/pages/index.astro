@@ -5,9 +5,9 @@ import Icon from '../components/Icon.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import CardSlider from '../components/CardSlider.astro';
 import { team, teamNetwerk } from '../data/site';
-import { projecten } from '../data/projecten';
+import { uitgelichteProjecten } from '../data/projecten';
 
-const uitgelicht = projecten.slice(0, 3);
+const uitgelicht = uitgelichteProjecten;
 
 // Bewust rustige homepage: hero → data/insights → aanpak → waarom → proces →
 // team → korte CTA → footer. Geen stedenblok, geen FAQ, geen kennisbankdump.

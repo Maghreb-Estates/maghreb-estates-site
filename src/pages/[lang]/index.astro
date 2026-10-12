@@ -9,7 +9,7 @@ import ContentBlok from '../../components/ContentBlok.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import CardSlider from '../../components/CardSlider.astro';
 import { team, teamNetwerk } from '../../data/site';
-import { projecten } from '../../data/projecten';
+import { uitgelichteProjecten } from '../../data/projecten';
 import { paginas, vertaalTalen, type Taal } from '../../i18n/config';
 import { ui } from '../../i18n/ui';
 import { aanbodUi, aanbodHubPad } from '../../i18n/aanbod';
@@ -25,7 +25,7 @@ const { taal } = Astro.props;
 const t = ui[taal];
 const a = aanbodUi[taal];
 const pagina = content[taal].home;
-const uitgelicht = projecten.slice(0, 3);
+const uitgelicht = uitgelichteProjecten;
 
 // Rol en bio van het team zijn in het Nederlands opgeslagen; per taal
 // vertaald zodat de teamsectie niet uit de toon valt.

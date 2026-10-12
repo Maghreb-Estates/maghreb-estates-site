@@ -329,6 +329,14 @@ export const stedenMetAanbod = (() => {
   return [...gezien.values()];
 })();
 
+/** Uitgelicht op de homepage (alle talen), in deze volgorde. Pas hier de slugs aan. */
+const uitgelichteSlugs = ['golf-city', 'archipel', 'cabo-golf'];
+export const uitgelichteProjecten = uitgelichteSlugs.map((slug) => {
+  const p = projecten.find((x) => x.slug === slug);
+  if (!p) throw new Error(`Uitgelicht project ontbreekt: ${slug}`);
+  return p;
+});
+
 /** Projecten van één stad. */
 export const projectenVoorStad = (stad: string) => projecten.filter((p) => p.stad === stad);
 
