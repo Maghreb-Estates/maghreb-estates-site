@@ -6,6 +6,7 @@
 import type { Taal } from '../i18n/config';
 import type { Project, Kenmerk } from './projecten';
 import { steden, type Stad } from './steden';
+import { aaferVertaling } from './projectenVertalingAafer';
 
 type VertaalTaal = Exclude<Taal, 'nl'>;
 
@@ -316,6 +317,9 @@ const projectVertaling: Record<string, Record<VertaalTaal, ProjectVertaling>> = 
       prijsPerM2Tekst: 'سعر تقريبي ابتداءً من نحو 11.000 درهم للمتر المربع (حسب المطوّر)',
     },
   },
+
+  // Partner Groupe AAFER Immobilier — zie projectenVertalingAafer.ts
+  ...aaferVertaling,
 };
 
 // Resolved projectinhoud in de gevraagde taal (NL uit projecten.ts, anders vertaald).
@@ -372,6 +376,57 @@ const stadVertaling: Record<string, Record<VertaalTaal, StadVertaling>> = {
       invalshoek: 'من أسرع مدن المغرب نمواً، بنموّ قوي في القيمة وتأجير للمغتربين والمستأجرين المهنيين.',
       intro: 'طنجة بوابة بين أوروبا وإفريقيا ومن أكثر مدن المغرب حيوية. يدفع ميناء طنجة المتوسط واقتصاد نامٍ وجالية كبيرة متجذّرة في الشمال طلباً مستمراً على العقارات. تتطوّر المدينة بسرعة، من الخليج العصري إلى المدينة العتيقة.',
       verhuur: 'تشهد طنجة سوقاً تأجيرية متنوّعة: تأجير طويل الأمد للعاملين والمغتربين، وتأجير موسمي صيفاً. تعتمد الإمكانية بقوة على الحي والنوع وتُقيَّم لكل عقار على حدة.',
+    },
+  },
+  tetouan: {
+    en: {
+      invalshoek: 'Cultural city with a UNESCO medina, close to the popular seaside towns of Martil and M’diq.',
+      intro: 'Tétouan, the “white dove”, lies against the Rif mountains and close to the coast. Its UNESCO-listed medina gives the city character, while Martil and M’diq bring the coast within easy reach. Entry prices are often lower than directly by the sea.',
+      verhuur: 'Letting can be interesting to students and workers (long-term) and in summer via the nearby coast. Potential should be assessed per district and property.',
+    },
+    fr: {
+      invalshoek: 'Ville de culture à la médina classée par l’UNESCO, proche des stations balnéaires prisées de Martil et M’diq.',
+      intro: 'Tétouan, la « colombe blanche », s’adosse au Rif, à deux pas de la côte. Sa médina classée par l’UNESCO lui donne du caractère, tandis que Martil et M’diq mettent la mer à portée de main. Les prix d’entrée sont souvent plus bas qu’en front de mer.',
+      verhuur: 'La location peut intéresser étudiants et actifs (longue durée) et, l’été, la clientèle de la côte voisine. Le potentiel s’évalue par quartier et par bien.',
+    },
+    ar: {
+      invalshoek: 'مدينة ثقافية بمدينة عتيقة مصنّفة من اليونسكو، قرب المنتجعين الساحليين مرتيل والمضيق.',
+      intro: 'تطوان، «الحمامة البيضاء»، تستند إلى جبال الريف وتقع قرب الساحل. تمنح المدينة العتيقة المصنّفة من اليونسكو طابعاً خاصاً، بينما يجعل قرب مرتيل والمضيق البحر في المتناول. وغالباً ما تكون أسعار الدخول أقل من الواجهة البحرية.',
+      verhuur: 'قد يكون التأجير مجدياً للطلبة والعاملين (طويل الأمد)، وصيفاً عبر الساحل القريب. تُقيَّم الإمكانية حسب الحي والعقار.',
+    },
+  },
+  martil: {
+    en: {
+      invalshoek: 'Popular seaside town near Tétouan with a busy summer season — strong for seasonal letting.',
+      intro: 'Martil is a beloved seaside town right next to Tétouan, with a long promenade and a lively summer season. It is popular with the diaspora for summer stays and for letting in the peak months.',
+      verhuur: 'Rental potential is concentrated in the summer months and can be attractive then. For a realistic annual return, factor in the lower occupancy outside the season.',
+    },
+    fr: {
+      invalshoek: 'Station balnéaire prisée près de Tétouan, à la saison estivale animée — idéale pour la location saisonnière.',
+      intro: 'Martil est une station balnéaire appréciée tout près de Tétouan, avec une longue corniche et une saison estivale animée. La diaspora l’apprécie pour les séjours d’été et la location en haute saison.',
+      verhuur: 'Le potentiel locatif se concentre sur les mois d’été, où il peut être attractif. Pour un rendement annuel réaliste, il faut intégrer l’occupation plus faible hors saison.',
+    },
+    ar: {
+      invalshoek: 'منتجع ساحلي محبوب قرب تطوان بموسم صيفي نشيط — مناسب للتأجير الموسمي.',
+      intro: 'مرتيل منتجع ساحلي محبوب بجوار تطوان، بكورنيش طويل وموسم صيفي حيوي. تفضّله الجالية للإقامة الصيفية وللتأجير في أشهر الذروة.',
+      verhuur: 'تتركّز إمكانية التأجير في أشهر الصيف وقد تكون مجزية حينها. وللحصول على عائد سنوي واقعي ينبغي احتساب انخفاض الإشغال خارج الموسم.',
+    },
+  },
+  mdiq: {
+    en: {
+      invalshoek: 'Well-kept, modern seaside town with a marina — focused on quality coastal property, including Cabo Negro and Tamuda Bay.',
+      intro: 'M’diq lies between Tétouan and Fnideq and is regarded as one of the best-kept seaside towns in the north, with a marina and high-quality new developments. The area also includes the resorts of Cabo Negro and Tamuda Bay, and attracts buyers looking for quality by the sea.',
+      verhuur: 'M’diq has an attractive holiday-rental market in the quality segment. Achievable occupancy and returns should be assessed per property.',
+    },
+    fr: {
+      invalshoek: 'Station balnéaire moderne et soignée avec marina — axée sur l’immobilier côtier de qualité, Cabo Negro et Tamuda Bay compris.',
+      intro: 'M’diq se situe entre Tétouan et Fnideq et passe pour l’une des stations balnéaires les plus soignées du Nord, avec une marina et des programmes neufs de qualité. Le secteur comprend aussi Cabo Negro et Tamuda Bay et attire les acquéreurs en quête de qualité en bord de mer.',
+      verhuur: 'M’diq offre un marché de location de vacances attractif dans le segment qualitatif. L’occupation et le rendement atteignables s’évaluent bien par bien.',
+    },
+    ar: {
+      invalshoek: 'مدينة ساحلية عصرية وأنيقة بمارينا — تركّز على العقار الساحلي عالي الجودة، بما في ذلك كابو نيغرو وتمودة باي.',
+      intro: 'تقع المضيق بين تطوان والفنيدق وتُعدّ من أكثر المدن الساحلية أناقة في الشمال، بمارينا ومشاريع جديدة عالية الجودة. وتشمل المنطقة أيضاً منتجعَي كابو نيغرو وتمودة باي، وتجذب المشترين الباحثين عن الجودة على البحر.',
+      verhuur: 'تتمتع المضيق بسوق جذابة للتأجير السياحي في الفئة الراقية. تُقيَّم نسبة الإشغال والعائد الممكنين لكل عقار على حدة.',
     },
   },
 };

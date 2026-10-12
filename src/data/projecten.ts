@@ -15,6 +15,7 @@
 // ============================================================================
 
 import type { ImageMetadata } from 'astro';
+import { aaferProjecten } from './projectenAafer';
 
 // -- Golf City (Prestigia, Marrakech) ---------------------------------------
 import gcGolf from '../assets/aanbod/golf-city/golf-city-marrakech-golf-zwembad.jpg';
@@ -61,6 +62,8 @@ export interface Kenmerk {
 export interface Project {
   /** URL-slug binnen de stad, bv. "golf-city" → /aanbod/marrakech/golf-city/. */
   slug: string;
+  /** Nog niet in verkoop: grijze waas + label "Binnenkort beschikbaar" over de foto's. */
+  binnenkort?: boolean;
   /** Officiële projectnaam (eigennaam, blijft in elke taal gelijk). */
   naam: string;
   /** Stad-slug; moet overeenkomen met een slug in steden.ts voor de kruislinks. */
@@ -308,6 +311,9 @@ export const projecten: Project[] = [
       { src: nestMasterplan, alt: 'Overzicht van de volledige residentie Nest in Tanger' },
     ],
   },
+
+  // ── PARTNER GROUPE AAFER IMMOBILIER — zie projectenAafer.ts ───────────────
+  ...aaferProjecten,
 ];
 
 // -- Afgeleide helpers -------------------------------------------------------

@@ -74,6 +74,8 @@ export interface AanbodUi {
   filterAlle: string;
   filterAria: string;
   veegProjecten: string;                // slider-hint
+  binnenkort: string;                   // label over foto's van een project dat nog niet in verkoop is
+  binnenkortSub: string;
 
   // Hub
   hub: {
@@ -129,13 +131,14 @@ const nl: AanbodUi = {
   interesseIn: (n) => `Interesse in ${n}? Wij sturen u vrijblijvend de beschikbare projectinformatie en beantwoorden uw vragen.`,
   meerAanbod: 'Meer aanbod', bekijkOokProjecten: 'Bekijk ook deze projecten',
   filterAlle: 'Alle projecten', filterAria: 'Filter op stad', veegProjecten: 'Veeg voor meer projecten',
+  binnenkort: 'Binnenkort beschikbaar', binnenkortSub: 'Nog niet in verkoop — laat uw interesse vast weten',
   hub: {
-    title: 'Vastgoedaanbod in Marokko | Projecten in Marrakech & Tanger | Maghreb Estates',
-    description: "Ontdek geselecteerde vastgoedprojecten van Maghreb Estates in Marrakech en Tanger. Bekijk foto's, ligging en projectinformatie en vraag vrijblijvend meer informatie aan.",
+    title: 'Vastgoedaanbod in Marokko | Projecten in Tanger, Tétouan, M’diq & Marrakech | Maghreb Estates',
+    description: "Ontdek geselecteerde vastgoedprojecten van Maghreb Estates in Tanger, Tétouan, M’diq, Cabo Negro, Martil en Marrakech. Bekijk foto's, ligging en projectinformatie en vraag vrijblijvend meer informatie aan.",
     eyebrow: 'Vastgoedaanbod', h1: 'Vastgoed te koop<br /><em>in Marokko</em>',
-    sub: 'Een selectie van vastgoedprojecten die wij begeleiden in Marrakech en Tanger. Van oriëntatie tot overdracht staat Maghreb Estates naast u — onafhankelijk en meertalig.',
+    sub: 'Een selectie van vastgoedprojecten die wij begeleiden in Tanger, Tétouan, M’diq, Cabo Negro, Martil en Marrakech. Van oriëntatie tot overdracht staat Maghreb Estates naast u — onafhankelijk en meertalig.',
     intro1: 'Maghreb Estates begeleidt de aankoop van geselecteerde vastgoedprojecten in Marokko. Wij zijn geen projectontwikkelaar, maar uw onafhankelijke aanspreekpunt: wij verzamelen projecten van betrouwbare lokale ontwikkelaars, controleren de gegevens en begeleiden u van de eerste oriëntatie tot en met de overdracht bij de notaris.',
-    intro2: 'Ons aanbod is bewust compact en groeit stap voor stap. Elk project beoordelen wij op locatie, prijs, papieren en verhuurbaarheid. Hieronder vindt u de projecten die wij op dit moment begeleiden, in Marrakech en Tanger.',
+    intro2: 'Ons aanbod groeit stap voor stap. Elk project beoordelen wij op locatie, prijs, papieren en verhuurbaarheid. Hieronder vindt u de projecten die wij op dit moment begeleiden, in Tanger, Tétouan, M’diq, Cabo Negro, Martil en Marrakech.',
     projectenEyebrow: 'Beschikbare projecten', projectenTitel: 'Onze <em>projecten</em> in Marokko',
     projectenSub: "Filter op stad of bekijk alle projecten. Klik een project aan voor foto's, ligging en volledige informatie.",
     bekijkAlleInStad: (s) => `Bekijk alle projecten in ${s}`,
@@ -143,7 +146,7 @@ const nl: AanbodUi = {
     contextTekst: 'De Marokkaanse markt is lokaal en versnipperd: prijzen, kwaliteit en juridische situatie verschillen sterk per stad, wijk en ontwikkelaar. Juist bij nieuwbouw- en projectwoningen voegt onafhankelijke begeleiding waarde toe. Wij helpen u de juiste vragen te stellen: klopt de prijs met de markt, zijn de papieren in orde en hoe realistisch is de verhuurpotentie?',
     faqTitel: 'Veelgestelde vragen over ons vastgoedaanbod',
     faqs: [
-      { q: 'Welke vastgoedprojecten biedt Maghreb Estates aan?', a: 'Wij begeleiden op dit moment de aankoop van geselecteerde projecten in Marrakech en Tanger. Ons aanbod groeit doordat wij samenwerken met lokale ontwikkelaars.' },
+      { q: 'Welke vastgoedprojecten biedt Maghreb Estates aan?', a: 'Wij begeleiden op dit moment de aankoop van geselecteerde projecten in Tanger, Tétouan, M’diq, Cabo Negro, Martil en Marrakech. Ons aanbod groeit doordat wij samenwerken met lokale ontwikkelaars.' },
       { q: 'Kan ik als buitenlandse koper een appartement in deze projecten kopen?', a: 'Ja. Buitenlandse kopers kunnen vrijwel overal in Marokko kopen, ook op afstand met een volmacht. Wij controleren de eigendomstitel, het koopcontract en de betalingsroute.' },
       { q: 'Zijn de getoonde prijzen definitief?', a: 'Prijzen en beschikbaarheid verschillen per woningtype en fase en kunnen wijzigen. Waar wij een prijs tonen, komt die van de ontwikkelaar; wij bevestigen die altijd voordat u een keuze maakt.' },
     ],
@@ -186,13 +189,14 @@ const en: AanbodUi = {
   interesseIn: (n) => `Interested in ${n}? We will send you the available project information without obligation and answer your questions.`,
   meerAanbod: 'More properties', bekijkOokProjecten: 'You may also like these projects',
   filterAlle: 'All properties', filterAria: 'Filter by city', veegProjecten: 'Swipe for more projects',
+  binnenkort: 'Coming soon', binnenkortSub: 'Not yet on sale — register your interest',
   hub: {
-    title: 'Property for sale in Morocco | Projects in Marrakech & Tangier | Maghreb Estates',
-    description: 'Discover selected property projects by Maghreb Estates in Marrakech and Tangier. View photos, location and project information and request more details without obligation.',
+    title: 'Property for sale in Morocco | Projects in Tangier, Tétouan, M’diq & Marrakech | Maghreb Estates',
+    description: 'Discover selected property projects by Maghreb Estates in Tangier, Tétouan, M’diq, Cabo Negro, Martil and Marrakech. View photos, location and project information and request more details without obligation.',
     eyebrow: 'Our properties', h1: 'Property for sale<br /><em>in Morocco</em>',
-    sub: 'A selection of property projects we guide in Marrakech and Tangier. From orientation to transfer, Maghreb Estates stands beside you — independent and multilingual.',
+    sub: 'A selection of property projects we guide in Tangier, Tétouan, M’diq, Cabo Negro, Martil and Marrakech. From orientation to transfer, Maghreb Estates stands beside you — independent and multilingual.',
     intro1: 'Maghreb Estates guides the purchase of selected property projects in Morocco. We are not a developer, but your independent point of contact: we gather projects from reliable local developers, verify the details and guide you from the first orientation through to the transfer at the notary.',
-    intro2: 'Our selection is deliberately compact and grows step by step. We assess every project on location, price, paperwork and rentability. Below are the projects we currently guide, in Marrakech and Tangier.',
+    intro2: 'Our selection grows step by step. We assess every project on location, price, paperwork and rentability. Below are the projects we currently guide, in Tangier, Tétouan, M’diq, Cabo Negro, Martil and Marrakech.',
     projectenEyebrow: 'Available projects', projectenTitel: 'Our <em>projects</em> in Morocco',
     projectenSub: 'Filter by city or view all projects. Select a project for photos, location and full information.',
     bekijkAlleInStad: (s) => `View all projects in ${s}`,
@@ -200,7 +204,7 @@ const en: AanbodUi = {
     contextTekst: 'The Moroccan market is local and fragmented: prices, quality and legal status vary greatly by city, district and developer. With new-build and off-plan projects in particular, independent guidance adds value. We help you ask the right questions: is the price in line with the market, is the paperwork in order and how realistic is the rental potential?',
     faqTitel: 'Frequently asked questions about our properties',
     faqs: [
-      { q: 'Which property projects does Maghreb Estates offer?', a: 'We currently guide the purchase of selected projects in Marrakech and Tangier. Our range grows as we work with local developers.' },
+      { q: 'Which property projects does Maghreb Estates offer?', a: 'We currently guide the purchase of selected projects in Tangier, Tétouan, M’diq, Cabo Negro, Martil and Marrakech. Our range grows as we work with local developers.' },
       { q: 'Can I buy an apartment in these projects as a foreign buyer?', a: 'Yes. Foreign buyers can purchase almost anywhere in Morocco, including remotely with a power of attorney. We verify the title deed, the purchase contract and the payment route.' },
       { q: 'Are the prices shown final?', a: 'Prices and availability vary by unit type and phase and may change. Where we show a price, it comes from the developer; we always confirm it before you make a decision.' },
     ],
@@ -243,13 +247,14 @@ const fr: AanbodUi = {
   interesseIn: (n) => `Intéressé par ${n} ? Nous vous envoyons sans engagement les informations disponibles et répondons à vos questions.`,
   meerAanbod: 'Autres biens', bekijkOokProjecten: 'Découvrez aussi ces projets',
   filterAlle: 'Tous les biens', filterAria: 'Filtrer par ville', veegProjecten: 'Faites glisser pour voir plus',
+  binnenkort: 'Bientôt disponible', binnenkortSub: 'Pas encore en vente — signalez votre intérêt',
   hub: {
-    title: 'Immobilier à vendre au Maroc | Projets à Marrakech & Tanger | Maghreb Estates',
-    description: 'Découvrez une sélection de projets immobiliers de Maghreb Estates à Marrakech et Tanger. Photos, emplacement et informations, et demandez plus de détails sans engagement.',
+    title: 'Immobilier à vendre au Maroc | Projets à Tanger, Tétouan, M’diq & Marrakech | Maghreb Estates',
+    description: 'Découvrez une sélection de projets immobiliers de Maghreb Estates à Tanger, Tétouan, M’diq, Cabo Negro, Martil et Marrakech. Photos, emplacement et informations, et demandez plus de détails sans engagement.',
     eyebrow: 'Nos biens', h1: 'Immobilier à vendre<br /><em>au Maroc</em>',
-    sub: 'Une sélection de projets immobiliers que nous accompagnons à Marrakech et Tanger. De l’orientation à la remise des clés, Maghreb Estates est à vos côtés — indépendant et multilingue.',
+    sub: 'Une sélection de projets immobiliers que nous accompagnons à Tanger, Tétouan, M’diq, Cabo Negro, Martil et Marrakech. De l’orientation à la remise des clés, Maghreb Estates est à vos côtés — indépendant et multilingue.',
     intro1: 'Maghreb Estates accompagne l’achat de projets immobiliers sélectionnés au Maroc. Nous ne sommes pas promoteur, mais votre interlocuteur indépendant : nous réunissons des projets de promoteurs locaux fiables, vérifions les données et vous accompagnons de la première orientation jusqu’à la signature chez le notaire.',
-    intro2: 'Notre sélection est volontairement compacte et s’étoffe progressivement. Nous évaluons chaque projet sur l’emplacement, le prix, les documents et le potentiel locatif. Voici les projets que nous accompagnons actuellement, à Marrakech et Tanger.',
+    intro2: 'Notre sélection s’étoffe progressivement. Nous évaluons chaque projet sur l’emplacement, le prix, les documents et le potentiel locatif. Voici les projets que nous accompagnons actuellement, à Tanger, Tétouan, M’diq, Cabo Negro, Martil et Marrakech.',
     projectenEyebrow: 'Projets disponibles', projectenTitel: 'Nos <em>projets</em> au Maroc',
     projectenSub: 'Filtrez par ville ou voyez tous les projets. Cliquez sur un projet pour les photos, l’emplacement et toutes les informations.',
     bekijkAlleInStad: (s) => `Voir tous les projets à ${s}`,
@@ -257,7 +262,7 @@ const fr: AanbodUi = {
     contextTekst: 'Le marché marocain est local et fragmenté : les prix, la qualité et la situation juridique varient fortement selon la ville, le quartier et le promoteur. Pour le neuf et la VEFA en particulier, un accompagnement indépendant fait la différence. Nous vous aidons à poser les bonnes questions : le prix est-il conforme au marché, les documents sont-ils en règle et le potentiel locatif est-il réaliste ?',
     faqTitel: 'Questions fréquentes sur nos biens',
     faqs: [
-      { q: 'Quels projets immobiliers Maghreb Estates propose-t-il ?', a: 'Nous accompagnons actuellement l’achat de projets sélectionnés à Marrakech et Tanger. Notre offre s’élargit grâce à notre travail avec des promoteurs locaux.' },
+      { q: 'Quels projets immobiliers Maghreb Estates propose-t-il ?', a: 'Nous accompagnons actuellement l’achat de projets sélectionnés à Tanger, Tétouan, M’diq, Cabo Negro, Martil et Marrakech. Notre offre s’élargit grâce à notre travail avec des promoteurs locaux.' },
       { q: 'Puis-je acheter un appartement dans ces projets en tant qu’acheteur étranger ?', a: 'Oui. Les acheteurs étrangers peuvent acheter presque partout au Maroc, y compris à distance avec une procuration. Nous vérifions le titre foncier, le contrat et le circuit de paiement.' },
       { q: 'Les prix affichés sont-ils définitifs ?', a: 'Les prix et disponibilités varient selon le type de logement et la phase et peuvent évoluer. Lorsque nous affichons un prix, il provient du promoteur ; nous le confirmons toujours avant toute décision.' },
     ],
@@ -300,13 +305,14 @@ const ar: AanbodUi = {
   interesseIn: (n) => `مهتم بـ ${n}؟ سنرسل لك المعلومات المتاحة دون أي التزام ونجيب عن أسئلتك.`,
   meerAanbod: 'المزيد من العقارات', bekijkOokProjecten: 'قد تعجبك هذه المشاريع أيضاً',
   filterAlle: 'جميع العقارات', filterAria: 'تصفية حسب المدينة', veegProjecten: 'اسحب لعرض المزيد',
+  binnenkort: 'قريباً', binnenkortSub: 'غير متاح للبيع بعد — سجّل اهتمامك مسبقاً',
   hub: {
-    title: 'عقارات للبيع في المغرب | مشاريع في مراكش وطنجة | Maghreb Estates',
-    description: 'اكتشف مشاريع عقارية مختارة من Maghreb Estates في مراكش وطنجة. صور، موقع ومعلومات المشروع، واطلب مزيداً من التفاصيل دون التزام.',
+    title: 'عقارات للبيع في المغرب | مشاريع في شمال المغرب ومراكش | Maghreb Estates',
+    description: 'اكتشف مشاريع عقارية مختارة من Maghreb Estates في طنجة وتطوان والمضيق وكابو نيغرو ومرتيل ومراكش. صور، موقع ومعلومات المشروع، واطلب مزيداً من التفاصيل دون التزام.',
     eyebrow: 'عقاراتنا', h1: 'عقارات للبيع<br /><em>في المغرب</em>',
-    sub: 'مجموعة مختارة من المشاريع العقارية التي نرافقها في مراكش وطنجة. من التوجيه إلى نقل الملكية، تقف Maghreb Estates إلى جانبك — مستقلة ومتعددة اللغات.',
+    sub: 'مجموعة مختارة من المشاريع العقارية التي نرافقها في طنجة وتطوان والمضيق وكابو نيغرو ومرتيل ومراكش. من التوجيه إلى نقل الملكية، تقف Maghreb Estates إلى جانبك — مستقلة ومتعددة اللغات.',
     intro1: 'ترافق Maghreb Estates شراء مشاريع عقارية مختارة في المغرب. لسنا مطوّراً عقارياً، بل جهة اتصالك المستقلة: نجمع مشاريع من مطوّرين محليين موثوقين، ونتحقق من البيانات ونرافقك من التوجيه الأول حتى نقل الملكية لدى الموثّق.',
-    intro2: 'مجموعتنا مركّزة عن قصد وتنمو خطوة بخطوة. نقيّم كل مشروع من حيث الموقع والسعر والوثائق وإمكانية التأجير. فيما يلي المشاريع التي نرافقها حالياً في مراكش وطنجة.',
+    intro2: 'مجموعتنا تنمو خطوة بخطوة. نقيّم كل مشروع من حيث الموقع والسعر والوثائق وإمكانية التأجير. فيما يلي المشاريع التي نرافقها حالياً في طنجة وتطوان والمضيق وكابو نيغرو ومرتيل ومراكش.',
     projectenEyebrow: 'المشاريع المتاحة', projectenTitel: '<em>مشاريعنا</em> في المغرب',
     projectenSub: 'صفِّ حسب المدينة أو اعرض جميع المشاريع. اختر مشروعاً لعرض الصور والموقع والمعلومات الكاملة.',
     bekijkAlleInStad: (s) => `عرض جميع المشاريع في ${s}`,
@@ -314,7 +320,7 @@ const ar: AanbodUi = {
     contextTekst: 'السوق المغربي محلي ومتشعّب: تختلف الأسعار والجودة والوضع القانوني كثيراً حسب المدينة والحي والمطوّر. وفي مشاريع البناء الجديد والبيع على التصميم خصوصاً، تضيف المرافقة المستقلة قيمة. نساعدك على طرح الأسئلة الصحيحة: هل السعر يتوافق مع السوق، وهل الوثائق سليمة، وما مدى واقعية إمكانية التأجير؟',
     faqTitel: 'أسئلة شائعة حول عقاراتنا',
     faqs: [
-      { q: 'ما المشاريع العقارية التي تقدّمها Maghreb Estates؟', a: 'نرافق حالياً شراء مشاريع مختارة في مراكش وطنجة. تتوسّع مجموعتنا بفضل تعاوننا مع مطوّرين محليين.' },
+      { q: 'ما المشاريع العقارية التي تقدّمها Maghreb Estates؟', a: 'نرافق حالياً شراء مشاريع مختارة في طنجة وتطوان والمضيق وكابو نيغرو ومرتيل ومراكش. تتوسّع مجموعتنا بفضل تعاوننا مع مطوّرين محليين.' },
       { q: 'هل يمكنني كمشترٍ أجنبي شراء شقة في هذه المشاريع؟', a: 'نعم. يمكن للمشترين الأجانب الشراء في معظم أنحاء المغرب، بما في ذلك عن بُعد بموجب وكالة. نتحقق من الرسم العقاري والعقد ومسار الدفع.' },
       { q: 'هل الأسعار المعروضة نهائية؟', a: 'تختلف الأسعار والتوافر حسب نوع الوحدة والمرحلة وقد تتغيّر. حيثما نعرض سعراً فهو من المطوّر، ونؤكّده دائماً قبل اتخاذ القرار.' },
     ],

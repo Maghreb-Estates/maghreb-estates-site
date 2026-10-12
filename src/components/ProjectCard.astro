@@ -30,7 +30,7 @@ const pad = aanbodProjectPad(taal, p.stad, p.slug);
 const locatie = p.wijk ? `${p.stadNaam} · ${p.wijk}` : p.stadNaam;
 const prijs = c.prijsVanafTekst ?? ui.prijsOpAanvraag;
 ---
-<article class="property-card">
+<article class:list={["property-card", { "is-binnenkort": p.binnenkort }]}>
   <a class="property-card__link" href={pad} aria-label={`${p.naam} — ${locatie}`}>
     <div class="property-card__media">
       <Image
@@ -42,6 +42,7 @@ const prijs = c.prijsVanafTekst ?? ui.prijsOpAanvraag;
         loading={eager ? 'eager' : 'lazy'}
         fetchpriority={eager ? 'high' : undefined}
       />
+      {p.binnenkort && <span class="binnenkort-waas"><span class="binnenkort-waas__label">{ui.binnenkort}</span></span>}
     </div>
     <div class="property-card__body">
       <p class="property-card__loc">{locatie}, {ui.land}</p>
