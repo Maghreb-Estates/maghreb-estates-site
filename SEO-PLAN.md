@@ -83,5 +83,6 @@ BreadcrumbList + FAQPage + Service + Organization (RealEstateAgent) JSON-LD, aut
 - [x] **Site is live** op maghreb-estates.com (nieuwe Astro-site via repo `maghreb-estates-site`, GitHub Pages). Sitemap (53 URL's), robots.txt en JSON-LD staan live.
 - [x] Google Search Console — verificatie-tag staat sinds 2026-07-10 in `BaseLayout.astro` (niet verwijderen). Nog nalopen: is `sitemap-index.xml` ingediend?
 - [x] Google Analytics 4 (`G-4DY7YZK059`) — laadt pas na toestemming via de cookiemelding (`CookieConsent.astro`). Gebeurtenissen: `contact_click` en `generate_lead`.
+- [x] Microsoft Clarity (`z07kb3h2jq`) — heatmaps + opnames, zelfde toestemming als GA4. Masking in het Clarity-dashboard op "Strict" zetten.
 - [ ] Unieke OG-afbeelding(en) per hoofdpagina (nu 1 gedeelde: villa5.jpg).
 - [ ] Overweeg node_modules/dist buiten iCloud-sync (grote map, sync-conflicten).

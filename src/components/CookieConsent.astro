@@ -1,7 +1,7 @@
 ---
-// Cookiemelding + Google Analytics 4 + meting van contactmomenten.
+// Cookiemelding + Google Analytics 4 + Microsoft Clarity + meting van contactmomenten.
 //
-// AVG/cookiewet: Analytics wordt pas geladen NA een klik op "Akkoord" (Consent
+// AVG/cookiewet: Analytics en Clarity worden pas geladen NA een klik op "Akkoord" (Consent
 // Mode, basic). Zonder keuze of na "Weigeren" gaat er niets naar Google.
 // "Weigeren" is bewust even groot en zichtbaar als "Akkoord" (eis van de AP).
 // De keuze wordt 6 maanden onthouden; via "Cookie-instellingen" in de footer
@@ -54,7 +54,7 @@ const t = teksten[taal];
   </div>
 </div>
 
-<script is:inline define:vars={{ gaId: site.gaId }}>
+<script is:inline define:vars={{ gaId: site.gaId, clarityId: site.clarityId }}>
   (function () {
     var SLEUTEL = 'me_consent';
     var GELDIG_MS = 182 * 24 * 60 * 60 * 1000; // ±6 maanden
@@ -88,12 +88,26 @@ const t = teksten[taal];
       document.head.appendChild(s);
     }
 
-    // Bij intrekken: Analytics stoppen en de _ga-cookies opruimen.
+    // Microsoft Clarity (heatmaps + opnames). Zelfde toestemming als Analytics;
+    // ingevulde tekst wordt gemaskeerd (instelling "Strict" in het Clarity-dashboard).
+    function laadClarity() {
+      if (window.__meClarity || !clarityId) return;
+      window.__meClarity = true;
+      window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+      window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' });
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.clarity.ms/tag/' + clarityId;
+      document.head.appendChild(s);
+    }
+
+    // Bij intrekken: Analytics en Clarity stoppen en hun cookies opruimen.
     function stopAnalytics() {
       if (window.__meGa && window.gtag) window.gtag('consent', 'update', { analytics_storage: 'denied' });
+      if (window.__meClarity && window.clarity) window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
       document.cookie.split(';').forEach(function (c) {
         var naam = c.split('=')[0].trim();
-        if (naam.indexOf('_ga') !== 0) return;
+        if (!/^(_ga|_gid|_clck|_clsk)/.test(naam)) return;
         var verlopen = '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
         document.cookie = naam + verlopen;
         document.cookie = naam + verlopen + '; domain=.' + location.hostname.replace(/^www\./, '');
@@ -103,16 +117,18 @@ const t = teksten[taal];
     function kies(s) {
       bewaarKeuze(s);
       bar.hidden = true;
-      if (s === 'granted') laadAnalytics(); else stopAnalytics();
+      if (s === 'granted') { laadAnalytics(); laadClarity(); } else stopAnalytics();
     }
 
     // Eén centrale meetfunctie voor de hele site; doet niets zonder toestemming.
     window.meTrack = function (naam, params) {
       if (window.__meGa && window.gtag) window.gtag('event', naam, params || {});
+      // In Clarity kun je hierop filteren: "toon opnames waarin een lead binnenkwam".
+      if (window.__meClarity && window.clarity) window.clarity('event', naam);
     };
 
     var keuze = leesKeuze();
-    if (keuze === 'granted') laadAnalytics();
+    if (keuze === 'granted') { laadAnalytics(); laadClarity(); }
     else if (keuze === null) bar.hidden = false;
 
     document.addEventListener('click', function (e) {

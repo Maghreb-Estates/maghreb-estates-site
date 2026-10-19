@@ -26,6 +26,8 @@ export const site = {
   kapitaal: '100.000 MAD',
   // Google Analytics 4 — wordt pas geladen na toestemming (zie CookieConsent.astro).
   gaId: 'G-4DY7YZK059',
+  // Microsoft Clarity (heatmaps + opnames) — idem, pas na toestemming.
+  clarityId: 'z07kb3h2jq',
 };
 
 // WhatsApp-linkhelper (optioneel voorgevuld bericht).
