@@ -17,30 +17,37 @@ import { standaardTaal, type Taal } from '../i18n/config';
 interface Props { taal?: Taal }
 const { taal = standaardTaal } = Astro.props;
 
-const teksten: Record<Taal, { tekst: string; meer: string; weigeren: string; akkoord: string }> = {
+// Het privacybeleid bestaat alleen in het Nederlands; anderstalige bezoekers
+// krijgen daarom een taallabel achter de link (zelfde aanpak als de footer).
+const teksten: Record<Taal, { titel: string; tekst: string; link: string; label: string; weigeren: string; akkoord: string }> = {
   nl: {
-    tekst: 'Mogen we meten hoe onze website wordt gebruikt (Google Analytics)? Zo maken we hem beter. Geen advertenties, we verkopen niets door.',
-    meer: 'Meer info', weigeren: 'Weigeren', akkoord: 'Akkoord',
+    titel: 'Wij respecteren uw privacy',
+    tekst: 'Met uw toestemming gebruiken wij cookies om te meten hoe onze website wordt gebruikt, zodat we hem kunnen verbeteren. Meer informatie leest u in ons',
+    link: 'privacybeleid', label: '', weigeren: 'Weigeren', akkoord: 'Akkoord',
   },
   en: {
-    tekst: 'May we measure how our website is used (Google Analytics)? It helps us improve it. No advertising, and we never sell your data.',
-    meer: 'More info', weigeren: 'Decline', akkoord: 'Accept',
+    titel: 'We value your privacy',
+    tekst: 'With your consent, we use cookies to measure how our website is used so we can improve it. Please see our',
+    link: 'Privacy Policy', label: ' (in Dutch)', weigeren: 'Decline', akkoord: 'Accept',
   },
   fr: {
-    tekst: 'Pouvons-nous mesurer l’utilisation de notre site (Google Analytics) ? Cela nous aide à l’améliorer. Aucune publicité, et nous ne revendons rien.',
-    meer: 'En savoir plus', weigeren: 'Refuser', akkoord: 'Accepter',
+    titel: 'Nous respectons votre vie privée',
+    tekst: 'Avec votre accord, nous utilisons des cookies pour mesurer l’utilisation de notre site afin de l’améliorer. Pour en savoir plus, consultez notre',
+    link: 'politique de confidentialité', label: ' (en néerlandais)', weigeren: 'Refuser', akkoord: 'Accepter',
   },
   ar: {
-    tekst: 'هل تسمح لنا بقياس كيفية استخدام موقعنا (Google Analytics)؟ يساعدنا ذلك على تحسينه. لا إعلانات، ولا نبيع بياناتك.',
-    meer: 'مزيد من المعلومات', weigeren: 'رفض', akkoord: 'موافق',
+    titel: 'نحن نحترم خصوصيتك',
+    tekst: 'بموافقتك، نستخدم ملفات تعريف الارتباط لقياس كيفية استخدام موقعنا من أجل تحسينه. لمزيد من المعلومات، اطّلع على',
+    link: 'سياسة الخصوصية', label: ' (بالهولندية)', weigeren: 'رفض', akkoord: 'موافق',
   },
 };
 const t = teksten[taal];
 ---
 <div class="cookiebar" id="cookiebar" role="region" aria-label="Cookies" hidden>
-  <p class="cookiebar__tekst">
-    {t.tekst} <a href="/privacybeleid/#cookies">{t.meer}</a>
-  </p>
+  <div class="cookiebar__tekst">
+    <p class="cookiebar__titel">{t.titel}</p>
+    <p>{t.tekst} <a href="/privacybeleid/#cookies">{t.link}</a>{t.label}.</p>
+  </div>
   <div class="cookiebar__knoppen">
     <button type="button" class="btn btn--outline cookiebar__knop" data-cookie="denied">{t.weigeren}</button>
     <button type="button" class="btn btn--primary cookiebar__knop" data-cookie="granted">{t.akkoord}</button>
@@ -148,7 +155,9 @@ const t = teksten[taal];
     font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5;
   }
   .cookiebar[hidden] { display: none; }
-  .cookiebar__tekst { margin: 0; flex: 1; }
+  .cookiebar__tekst { flex: 1; }
+  .cookiebar__tekst p { margin: 0; }
+  .cookiebar__tekst .cookiebar__titel { font-family: var(--font-serif); font-size: 19px; font-weight: 600; line-height: 1.2; margin-bottom: 4px; }
   .cookiebar__tekst a { color: var(--green-mid); text-decoration: underline; text-underline-offset: 3px; }
   .cookiebar__knoppen { display: flex; gap: 10px; flex-shrink: 0; }
   /* Weigeren en Akkoord bewust even groot. */
