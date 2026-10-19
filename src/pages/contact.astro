@@ -175,6 +175,7 @@ const path = '/contact/';
 
       document.getElementById('sendWhatsapp').addEventListener('click', function () {
         var msg = build(); if (!msg) return;
+        window.meTrack && window.meTrack('generate_lead', { form: 'contact', method: 'whatsapp' });
         // De klant ziet de volledige inhoud zelf terug in zijn WhatsApp-gesprek.
         window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
         toonBevestiging();
@@ -182,6 +183,7 @@ const path = '/contact/';
 
       document.getElementById('sendMail').addEventListener('click', function () {
         var msg = build(); if (!msg) return;
+        window.meTrack && window.meTrack('generate_lead', { form: 'contact', method: 'email' });
         // Kopie naar de klant zelf, alleen als er een e-mailadres is ingevuld.
         var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
         var kopie = val('email')

@@ -123,6 +123,7 @@ const waAdvies = waLink('Hallo Maghreb Estates, ik heb een woning of project op 
       }
       document.getElementById('sendChecklist').addEventListener('click', function () {
         const msg = build(); if (!msg) return;
+        window.meTrack && window.meTrack('generate_lead', { form: 'checklist', method: 'email' });
         const wa = 'https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg);
         document.getElementById('checklistWa').setAttribute('href', wa);
         document.getElementById('checklistDone').style.display = 'block';

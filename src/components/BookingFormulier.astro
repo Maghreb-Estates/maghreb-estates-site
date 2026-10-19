@@ -166,12 +166,14 @@ const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00
 
     document.getElementById('sendWhatsapp').addEventListener('click', function () {
       var msg = build(); if (!msg) return;
+      window.meTrack && window.meTrack('generate_lead', { form: 'adviesgesprek', method: 'whatsapp' });
       window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
       toonBevestiging();
     });
 
     document.getElementById('sendMail').addEventListener('click', function () {
       var msg = build(); if (!msg) return;
+      window.meTrack && window.meTrack('generate_lead', { form: 'adviesgesprek', method: 'email' });
       var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
       var kopie = val('email') ? '\n\n---\n' + kopieTekst : '';
       window.location.href = 'mailto:' + email

@@ -1,0 +1,160 @@
+---
+// Cookiemelding + Google Analytics 4 + meting van contactmomenten.
+//
+// AVG/cookiewet: Analytics wordt pas geladen NA een klik op "Akkoord" (Consent
+// Mode, basic). Zonder keuze of na "Weigeren" gaat er niets naar Google.
+// "Weigeren" is bewust even groot en zichtbaar als "Akkoord" (eis van de AP).
+// De keuze wordt 6 maanden onthouden; via "Cookie-instellingen" in de footer
+// (data-cookie-instellingen) is hij altijd te wijzigen.
+//
+// Contactmomenten (zichtbaar in GA4 → Rapporten → Betrokkenheid → Gebeurtenissen):
+//   contact_click  — klik op een WhatsApp-, telefoon- of e-maillink (method, location)
+//   generate_lead  — een formulier is verzonden (form, method); aangeroepen vanuit
+//                    de formulierscripts via window.meTrack(...)
+import { site } from '../data/site';
+import { standaardTaal, type Taal } from '../i18n/config';
+
+interface Props { taal?: Taal }
+const { taal = standaardTaal } = Astro.props;
+
+const teksten: Record<Taal, { tekst: string; meer: string; weigeren: string; akkoord: string }> = {
+  nl: {
+    tekst: 'Mogen we meten hoe onze website wordt gebruikt (Google Analytics)? Zo maken we hem beter. Geen advertenties, we verkopen niets door.',
+    meer: 'Meer info', weigeren: 'Weigeren', akkoord: 'Akkoord',
+  },
+  en: {
+    tekst: 'May we measure how our website is used (Google Analytics)? It helps us improve it. No advertising, and we never sell your data.',
+    meer: 'More info', weigeren: 'Decline', akkoord: 'Accept',
+  },
+  fr: {
+    tekst: 'Pouvons-nous mesurer l’utilisation de notre site (Google Analytics) ? Cela nous aide à l’améliorer. Aucune publicité, et nous ne revendons rien.',
+    meer: 'En savoir plus', weigeren: 'Refuser', akkoord: 'Accepter',
+  },
+  ar: {
+    tekst: 'هل تسمح لنا بقياس كيفية استخدام موقعنا (Google Analytics)؟ يساعدنا ذلك على تحسينه. لا إعلانات، ولا نبيع بياناتك.',
+    meer: 'مزيد من المعلومات', weigeren: 'رفض', akkoord: 'موافق',
+  },
+};
+const t = teksten[taal];
+---
+<div class="cookiebar" id="cookiebar" role="region" aria-label="Cookies" hidden>
+  <p class="cookiebar__tekst">
+    {t.tekst} <a href="/privacybeleid/#cookies">{t.meer}</a>
+  </p>
+  <div class="cookiebar__knoppen">
+    <button type="button" class="btn btn--outline cookiebar__knop" data-cookie="denied">{t.weigeren}</button>
+    <button type="button" class="btn btn--primary cookiebar__knop" data-cookie="granted">{t.akkoord}</button>
+  </div>
+</div>
+
+<script is:inline define:vars={{ gaId: site.gaId }}>
+  (function () {
+    var SLEUTEL = 'me_consent';
+    var GELDIG_MS = 182 * 24 * 60 * 60 * 1000; // ±6 maanden
+    var bar = document.getElementById('cookiebar');
+
+    function leesKeuze() {
+      try {
+        var k = JSON.parse(localStorage.getItem(SLEUTEL) || 'null');
+        if (k && (k.s === 'granted' || k.s === 'denied') && Date.now() - k.t < GELDIG_MS) return k.s;
+      } catch (e) {}
+      return null;
+    }
+    function bewaarKeuze(s) {
+      try { localStorage.setItem(SLEUTEL, JSON.stringify({ s: s, t: Date.now() })); } catch (e) {}
+    }
+
+    function laadAnalytics() {
+      if (window.__meGa) return;
+      window.__meGa = true;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag('consent', 'default', {
+        analytics_storage: 'granted',
+        ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+      });
+      window.gtag('js', new Date());
+      window.gtag('config', gaId);
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+      document.head.appendChild(s);
+    }
+
+    // Bij intrekken: Analytics stoppen en de _ga-cookies opruimen.
+    function stopAnalytics() {
+      if (window.__meGa && window.gtag) window.gtag('consent', 'update', { analytics_storage: 'denied' });
+      document.cookie.split(';').forEach(function (c) {
+        var naam = c.split('=')[0].trim();
+        if (naam.indexOf('_ga') !== 0) return;
+        var verlopen = '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        document.cookie = naam + verlopen;
+        document.cookie = naam + verlopen + '; domain=.' + location.hostname.replace(/^www\./, '');
+      });
+    }
+
+    function kies(s) {
+      bewaarKeuze(s);
+      bar.hidden = true;
+      if (s === 'granted') laadAnalytics(); else stopAnalytics();
+    }
+
+    // Eén centrale meetfunctie voor de hele site; doet niets zonder toestemming.
+    window.meTrack = function (naam, params) {
+      if (window.__meGa && window.gtag) window.gtag('event', naam, params || {});
+    };
+
+    var keuze = leesKeuze();
+    if (keuze === 'granted') laadAnalytics();
+    else if (keuze === null) bar.hidden = false;
+
+    document.addEventListener('click', function (e) {
+      var knop = e.target.closest('[data-cookie]');
+      if (knop) { kies(knop.getAttribute('data-cookie')); return; }
+
+      if (e.target.closest('[data-cookie-instellingen]')) {
+        e.preventDefault();
+        bar.hidden = false;
+        return;
+      }
+
+      // Klik op een WhatsApp-, telefoon- of e-maillink = contactmoment.
+      var a = e.target.closest('a[href]');
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      var methode = href.indexOf('https://wa.me/') === 0 ? 'whatsapp'
+        : href.indexOf('tel:') === 0 ? 'telefoon'
+        : href.indexOf('mailto:') === 0 ? 'email'
+        : null;
+      if (!methode) return;
+      var plek = a.closest('.sticky-wa') ? 'sticky'
+        : a.closest('footer') ? 'footer'
+        : a.closest('nav, header') ? 'navigatie'
+        : 'pagina';
+      window.meTrack('contact_click', { method: methode, location: plek });
+    });
+  })();
+</script>
+
+<style>
+  .cookiebar {
+    position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 100;
+    max-width: 760px; margin: 0 auto;
+    display: flex; align-items: center; gap: 18px 24px;
+    background: var(--cream); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    box-shadow: var(--shadow);
+    padding: 16px 20px;
+    font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5;
+  }
+  .cookiebar[hidden] { display: none; }
+  .cookiebar__tekst { margin: 0; flex: 1; }
+  .cookiebar__tekst a { color: var(--green-mid); text-decoration: underline; text-underline-offset: 3px; }
+  .cookiebar__knoppen { display: flex; gap: 10px; flex-shrink: 0; }
+  /* Weigeren en Akkoord bewust even groot. */
+  .cookiebar__knop { min-width: 112px; text-align: center; padding: 10px 22px; }
+  @media (max-width: 640px) {
+    .cookiebar { flex-direction: column; align-items: stretch; left: 10px; right: 10px; bottom: 10px; padding: 14px 16px; font-size: 14px; }
+    .cookiebar__knoppen > * { flex: 1; }
+  }
+</style>

@@ -24,6 +24,8 @@ export const site = {
   rc: '199575',            // Registre de Commerce (Tribunal de Commerce, Rabat)
   ice: '003968179000032',  // Identifiant Commun de l'Entreprise
   kapitaal: '100.000 MAD',
+  // Google Analytics 4 — wordt pas geladen na toestemming (zie CookieConsent.astro).
+  gaId: 'G-4DY7YZK059',
 };
 
 // WhatsApp-linkhelper (optioneel voorgevuld bericht).

@@ -176,12 +176,14 @@ const interesse = interesseTpl[taal];
 
     document.getElementById('sendWhatsapp').addEventListener('click', function () {
       var msg = build(); if (!msg) return;
+      window.meTrack && window.meTrack('generate_lead', { form: 'contact', method: 'whatsapp' });
       window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
       toonBevestiging();
     });
 
     document.getElementById('sendMail').addEventListener('click', function () {
       var msg = build(); if (!msg) return;
+      window.meTrack && window.meTrack('generate_lead', { form: 'contact', method: 'email' });
       var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
       var kopie = val('email') ? '\n\n---\n' + kopieTekst : '';
       window.location.href = 'mailto:' + email

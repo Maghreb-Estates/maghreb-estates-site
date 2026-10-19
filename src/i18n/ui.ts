@@ -11,7 +11,7 @@ export interface UiStrings {
     tagline: string; contact: string; services: string; insights: string; markets: string;
     aankoop: string; investering: string; nieuwbouw: string; verkoop: string;
     kosten: string; juridisch: string; kennisbank: string; alleMarkten: string;
-    rechten: string; whatsapp: string;
+    rechten: string; whatsapp: string; cookies: string;
     // Verwijst naar de Nederlandstalige gidsen; expliciet gelabeld zodat een
     // anderstalige bezoeker weet dat hij naar Nederlandse inhoud klikt.
     nlLabel: string;
@@ -48,7 +48,7 @@ export const ui: Record<Taal, UiStrings> = {
       contact: 'Contact', services: 'Services', insights: 'Insights', markets: 'Markets',
       aankoop: 'Aankoopbegeleiding', investering: 'Investeringsadvies', nieuwbouw: 'Nieuwbouw & off-plan', verkoop: 'Verkoopbegeleiding',
       kosten: 'Kosten bij aankoop', juridisch: 'Juridische documenten', kennisbank: 'Kennisbank', alleMarkten: 'Alle markten',
-      rechten: 'Alle rechten voorbehouden.', whatsapp: 'WhatsApp', nlLabel: '',
+      rechten: 'Alle rechten voorbehouden.', whatsapp: 'WhatsApp', cookies: 'Cookie-instellingen', nlLabel: '',
     },
     formulier: {
       naam: 'Naam', naamPlaceholder: 'Uw volledige naam',
@@ -83,7 +83,7 @@ export const ui: Record<Taal, UiStrings> = {
       contact: 'Contact', services: 'Services', insights: 'Insights', markets: 'Markets',
       aankoop: 'Buying guidance', investering: 'Investment advice', nieuwbouw: 'New-build & off-plan', verkoop: 'Selling guidance',
       kosten: 'Purchase costs', juridisch: 'Legal documents', kennisbank: 'Knowledge base', alleMarkten: 'All markets',
-      rechten: 'All rights reserved.', whatsapp: 'WhatsApp', nlLabel: ' (in Dutch)',
+      rechten: 'All rights reserved.', whatsapp: 'WhatsApp', cookies: 'Cookie settings', nlLabel: ' (in Dutch)',
     },
     formulier: {
       naam: 'Name', naamPlaceholder: 'Your full name',
@@ -118,7 +118,7 @@ export const ui: Record<Taal, UiStrings> = {
       contact: 'Contact', services: 'Services', insights: 'Ressources', markets: 'Marchés',
       aankoop: 'Accompagnement à l’achat', investering: 'Conseil en investissement', nieuwbouw: 'Neuf & VEFA', verkoop: 'Accompagnement à la vente',
       kosten: 'Frais d’acquisition', juridisch: 'Documents juridiques', kennisbank: 'Base de connaissances', alleMarkten: 'Tous les marchés',
-      rechten: 'Tous droits réservés.', whatsapp: 'WhatsApp', nlLabel: ' (en néerlandais)',
+      rechten: 'Tous droits réservés.', whatsapp: 'WhatsApp', cookies: 'Paramètres des cookies', nlLabel: ' (en néerlandais)',
     },
     formulier: {
       naam: 'Nom', naamPlaceholder: 'Votre nom complet',
@@ -153,7 +153,7 @@ export const ui: Record<Taal, UiStrings> = {
       contact: 'اتصل بنا', services: 'خدماتنا', insights: 'موارد', markets: 'الأسواق',
       aankoop: 'مرافقة الشراء', investering: 'استشارات الاستثمار', nieuwbouw: 'مشاريع جديدة', verkoop: 'مرافقة البيع',
       kosten: 'تكاليف الشراء', juridisch: 'الوثائق القانونية', kennisbank: 'قاعدة المعرفة', alleMarkten: 'جميع الأسواق',
-      rechten: 'جميع الحقوق محفوظة.', whatsapp: 'واتساب', nlLabel: ' (بالهولندية)',
+      rechten: 'جميع الحقوق محفوظة.', whatsapp: 'واتساب', cookies: 'إعدادات ملفات تعريف الارتباط', nlLabel: ' (بالهولندية)',
     },
     formulier: {
       naam: 'الاسم', naamPlaceholder: 'اسمك الكامل',
