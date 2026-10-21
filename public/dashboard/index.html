@@ -266,6 +266,11 @@
     .kw-cur { display:inline-flex; border:1.5px solid var(--border); border-radius:2px; overflow:hidden; flex-shrink:0; }
     .kw-cur button { font-family:var(--font-mono); font-size:11px; padding:0 12px; border:none; background:var(--cream); color:var(--muted); cursor:pointer; }
     .kw-cur button.active { background:var(--green); color:var(--cream); }
+    .kw-steden { display:flex; flex-wrap:wrap; gap:6px; max-height:170px; overflow-y:auto; margin-top:6px; padding:2px; }
+    .kw-chip { font-family:var(--font-sans); font-size:12px; padding:5px 10px; border:1.5px solid var(--border); border-radius:14px; background:var(--cream); color:var(--text); cursor:pointer; }
+    .kw-chip:hover { border-color:var(--accent); }
+    .kw-chip span { font-family:var(--font-mono); font-size:10px; opacity:.6; }
+    .kw-chip.active { background:var(--green); border-color:var(--green); color:var(--cream); }
     .kw-check { display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); cursor:pointer; }
     .kw-actions { display:flex; gap:10px; margin-top:6px; flex-wrap:wrap; }
     .kw-actions .deal-submit { padding:12px 20px; flex:1; }
@@ -482,10 +487,9 @@
           <div class="deal-form-title">Klantwens-<em style="font-style:italic">check</em></div>
           <div class="deal-form-sub">Vul de wensen van de klant in. De uitslag rekent direct mee.</div>
           <div class="kw-fields">
-            <div class="deal-field"><label>Vanaf plaats</label><select id="kw-ref"></select></div>
-            <div class="kw-pair">
-              <div class="deal-field"><label>Ideaal ≤ min</label><input type="number" id="kw-t1" value="30" min="0" /></div>
-              <div class="deal-field"><label>Uiterlijk ≤ min</label><input type="number" id="kw-t2" value="45" min="0" /></div>
+            <div class="deal-field"><label>Steden <span class="kw-hint" id="kw-stad-teller">(niets gekozen = alle)</span></label>
+              <input type="text" id="kw-stad-zoek" placeholder="zoek stad…" autocomplete="off" />
+              <div class="kw-steden" id="kw-steden"></div>
             </div>
             <div class="deal-field"><label>Woningtype</label>
               <select id="kw-type">
@@ -554,11 +558,11 @@
           </div>
 
           <div class="chart-card">
-            <div class="chart-title">Per plaats</div>
-            <div class="chart-sub" id="kw-plaats-sub">Aanbod dat aan alle eisen behalve budget voldoet</div>
+            <div class="chart-title">Per stad</div>
+            <div class="chart-sub" id="kw-plaats-sub">Aanbod dat aan alle eisen behalve stad en budget voldoet · klik een stad om hem aan of uit te zetten</div>
             <div class="kw-scroll">
               <table class="wijk-table">
-                <thead><tr><th>Plaats</th><th style="text-align:right">Rijtijd</th><th style="text-align:right">Profiel</th><th style="text-align:right">Binnen budget</th><th style="text-align:right">Goedkoopste</th><th style="text-align:right">Mediaan</th></tr></thead>
+                <thead><tr><th>Stad</th><th style="text-align:right">Profiel</th><th style="text-align:right">Binnen budget</th><th style="text-align:right">Goedkoopste</th><th style="text-align:right">Mediaan</th></tr></thead>
                 <tbody id="kw-plaats-tbody"></tbody>
               </table>
             </div>
@@ -569,7 +573,7 @@
             <div class="chart-sub" id="kw-lijst-sub">Goedkoopste eerst</div>
             <div class="kw-scroll">
               <table class="wijk-table">
-                <thead><tr><th>Plaats</th><th style="text-align:right">Rijtijd</th><th>Type</th><th style="text-align:right">Slpk</th><th style="text-align:right">m²</th><th style="text-align:right">Prijs</th><th></th><th>Titel</th><th></th></tr></thead>
+                <thead><tr><th>Stad</th><th>Type</th><th style="text-align:right">Slpk</th><th style="text-align:right">m²</th><th style="text-align:right">Prijs</th><th></th><th>Titel</th><th></th></tr></thead>
                 <tbody id="kw-lijst-tbody"></tbody>
               </table>
             </div>
@@ -1067,47 +1071,21 @@ function objCSV(){
 // ── KLANTWENS-CHECK ───────────────────────────────────────────────────────────
 // Legt de wensen van een klant naast het actuele te-koop-aanbod en laat in één
 // blik zien of het haalbaar is en welke eis het knelpunt is.
-// Rijtijd is een schatting: hemelsbreed × 1,3 (omrijfactor) bij ~85 km/u + 5 min.
-// Plaatsen die hier ontbreken vallen buiten de check (zie de melding onder de lijst).
-const KW_PLAATSEN = {
-  'Harhoura':[33.948,-6.946],       'Skhirat':[33.852,-7.031],        'Bouznika':[33.789,-7.160],
-  'Ain Aouda':[33.807,-6.793],      'Sidi Allal El Bahraoui':[33.983,-6.517], 'Tiflet':[33.894,-6.306],
-  'Khemisset':[33.824,-6.066],      'Mehdia':[34.257,-6.650],         'Bouknadel':[34.125,-6.742],
-  'Sala Al Jadida':[33.993,-6.751], 'Tamesna':[33.819,-6.913],        'Sidi Yahya Zaer':[33.705,-6.866],
-  'Rommani':[33.528,-6.606],        'Sidi Slimane':[34.264,-5.925],   'Sidi Kacem':[34.221,-5.708],
-  'Sidi Yahya El Gharb':[34.306,-6.307], 'Benslimane':[33.618,-7.121], 'Mansouria':[33.743,-7.299],
-  'Dar Bouazza':[33.530,-7.820],    'Bouskoura':[33.449,-7.651],      'Berrechid':[33.265,-7.587],
-  'Tit Mellil':[33.556,-7.484],     'Had Soualem':[33.420,-7.850],    'Martil':[35.617,-5.275],
-  "M'diq":[35.685,-5.325],          'Fnideq':[35.849,-5.357],         'Asilah':[35.465,-6.034],
-  'Larache':[35.193,-6.156],        'Ifrane':[33.533,-5.110],         'Taghazout':[30.545,-9.709],
-  'Tamraght':[30.510,-9.680],       'Inezgane':[30.355,-9.546],       'Ait Melloul':[30.334,-9.497],
-  'Saïdia':[35.085,-2.237],         'Al Hoceima':[35.247,-3.932],     'Ouarzazate':[30.919,-6.893],
-  'Tamansourt':[31.746,-8.107],     'Ait Ourir':[31.564,-7.663],
-};
+// Locatie = de stad waar de advertentie onder valt; die steden klik je zelf aan.
 const KW_TYPES = { vrijstaand:['villa','house'], apartment:['apartment'], riad:['riad'], land:['land'] };
 const KW_TYPE_LBL = { vrijstaand:'Vrijstaand huis / villa', apartment:'Appartement', riad:'Riad', land:'Grond', '':'Alle types' };
 const KW_STAAT_LBL = { '':'Maakt niet uit', nieuw:'Alleen nieuwbouw', bestaand:'Bestaand (renovatie mag)', reno:'Alleen renovatieprojecten' };
 const KW_KOSTEN = 0.07;
 const KW_RENO = /(?:\b[aà]\s*r[ée]nover|\b[aà]\s*restaurer|r[ée]novation\s+(?:compl[eè]te\s+)?[aà]\s+pr[ée]voir|travaux\s+[aà]\s+pr[ée]voir|n[ée]cessite\s+des\s+travaux|\bruine|to\s+renovate|fixer)/i;
-let kwInited = false, kwCur = 'EUR', kwCoords = null, kwLaatste = null;
+let kwInited = false, kwCur = 'EUR', kwLaatste = null, kwSteden = new Set(), kwStadTelling = [];
 
 const kwNorm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]+/g,' ').trim();
 const kwEsc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const kwEur = mad => '€' + fmt(Math.round(mad*EUR/1000)*1000);
 const kwVal = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+const kwIsSale = r => r.transaction_type==='sale' || r.transaction_type==='new_construction';
+const kwStedenLbl = () => kwSteden.size ? [...kwSteden].join(', ') : 'alle steden';
 
-function kwCoordMap() {
-  if (kwCoords) return kwCoords;
-  kwCoords = {};
-  Object.entries({...CITY_COORDS, ...KW_PLAATSEN}).forEach(([n,c]) => { kwCoords[kwNorm(n)] = { naam:n, c }; });
-  return kwCoords;
-}
-function kwRijtijd(a, b) {
-  const toR = Math.PI/180, dLat = (b[0]-a[0])*toR, dLon = (b[1]-a[1])*toR;
-  const h = Math.sin(dLat/2)**2 + Math.cos(a[0]*toR)*Math.cos(b[0]*toR)*Math.sin(dLon/2)**2;
-  const km = 2*6371*Math.asin(Math.sqrt(h));
-  return km < 4 ? 10 : Math.round(km*1.3/85*60 + 5);
-}
 // Perceelgrootte staat niet als veld in de data; probeer hem uit de titel te halen.
 function kwPerceel(titel) {
   const t = String(titel||'');
@@ -1117,15 +1095,32 @@ function kwPerceel(titel) {
   return m ? parseInt(m[1].replace(/[ .]/g,''),10) : null;
 }
 
+function kwToggleStad(stad) {
+  if (kwSteden.has(stad)) kwSteden.delete(stad); else kwSteden.add(stad);
+  kwRenderSteden(); kwRun();
+}
+function kwRenderSteden() {
+  const zoek = kwNorm(document.getElementById('kw-stad-zoek').value);
+  // Gekozen steden altijd bovenaan, daarna op aanbod.
+  const lijst = kwStadTelling
+    .filter(([c]) => kwSteden.has(c) || !zoek || kwNorm(c).includes(zoek))
+    .sort((a,b) => (kwSteden.has(b[0]) - kwSteden.has(a[0])) || b[1]-a[1]);
+  const box = document.getElementById('kw-steden');
+  box.innerHTML = lijst.map(([c,n]) =>
+    `<button type="button" class="kw-chip${kwSteden.has(c)?' active':''}" data-stad="${kwEsc(c)}">${kwEsc(c)} <span>${fmt(n)}</span></button>`).join('')
+    || '<span class="kw-hint">Geen stad gevonden</span>';
+  box.querySelectorAll('.kw-chip').forEach(b => b.addEventListener('click', () => kwToggleStad(b.dataset.stad)));
+  document.getElementById('kw-stad-teller').textContent = kwSteden.size ? `(${kwSteden.size} gekozen)` : '(niets gekozen = alle)';
+}
+
 function initWens() {
   if (!kwInited) {
     kwInited = true;
-    const sel = document.getElementById('kw-ref');
-    Object.keys({...CITY_COORDS, ...KW_PLAATSEN}).sort((a,b)=>a.localeCompare(b)).forEach(n => {
-      const o = document.createElement('option'); o.value = o.textContent = n; if (n==='Rabat') o.selected = true; sel.appendChild(o);
+    document.querySelectorAll('#s-wens .kw-fields input, #s-wens .kw-fields select').forEach(el => {
+      if (el.id === 'kw-stad-zoek') return;
+      el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox' ? 'change' : 'input', kwRun);
     });
-    document.querySelectorAll('#s-wens .kw-fields input, #s-wens .kw-fields select').forEach(el =>
-      el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox' ? 'change' : 'input', kwRun));
+    document.getElementById('kw-stad-zoek').addEventListener('input', kwRenderSteden);
     document.querySelectorAll('#s-wens .kw-cur button').forEach(b => b.addEventListener('click', () => {
       const v = kwVal('kw-budget');
       if (v != null && b.dataset.cur !== kwCur) document.getElementById('kw-budget').value = Math.round(b.dataset.cur==='MAD' ? v/EUR : v*EUR);
@@ -1135,12 +1130,18 @@ function initWens() {
     }));
     document.getElementById('kw-copy').addEventListener('click', kwKopieer);
     document.getElementById('kw-reset').addEventListener('click', () => {
-      ['kw-t1','kw-t2','kw-slk','kw-m2','kw-perceel','kw-budget','kw-notes'].forEach(id => document.getElementById(id).value = '');
+      ['kw-slk','kw-m2','kw-perceel','kw-budget','kw-notes','kw-stad-zoek'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('kw-type').value = ''; document.getElementById('kw-staat').value = '';
       document.getElementById('kw-termijn').value = ''; document.getElementById('kw-kosten').checked = false;
-      kwRun();
+      kwSteden.clear(); kwRenderSteden(); kwRun();
     });
   }
+  if (allData.length && !kwStadTelling.length) {
+    const t = {};
+    allData.forEach(r => { if (kwIsSale(r) && r.city && r.city!=='Onbekend') t[r.city] = (t[r.city]||0)+1; });
+    kwStadTelling = Object.entries(t);
+  }
+  kwRenderSteden();
   kwRun();
 }
 
@@ -1149,8 +1150,6 @@ function kwLees() {
   let maxMad = budget == null ? null : (kwCur==='EUR' ? budget/EUR : budget);
   if (maxMad != null && document.getElementById('kw-kosten').checked) maxMad /= (1+KW_KOSTEN);
   return {
-    ref: document.getElementById('kw-ref').value,
-    t1: kwVal('kw-t1'), t2: kwVal('kw-t2'),
     type: document.getElementById('kw-type').value,
     staat: document.getElementById('kw-staat').value,
     slk: kwVal('kw-slk'), m2: kwVal('kw-m2'), perceel: kwVal('kw-perceel'),
@@ -1162,30 +1161,20 @@ function kwLees() {
 
 function kwRun() {
   if (!allData.length) return;
-  const f = kwLees(), coords = kwCoordMap();
-  const ref = coords[kwNorm(f.ref)];
-  const t2 = f.t2 != null ? f.t2 : (f.t1 != null ? f.t1 : 9999);
-  const ruim = t2 + 30;   // voor "zonder locatie-eis": kijk een half uur verder
+  const f = kwLees();
 
-  // Te-koop-pool met plaats en rijtijd. Een buurtnaam die zelf een bekende plaats is
-  // (bijv. Harhoura onder Temara) gaat voor, anders de stad.
-  const pool = [], zonderLoc = {};
+  const pool = [];
   for (const r of allData) {
-    if (r.transaction_type!=='sale' && r.transaction_type!=='new_construction') continue;
-    if (!r.price || r.price < 50000) continue;
-    const loc = coords[kwNorm(r.neighborhood)] || coords[kwNorm(r.city)];
-    if (!loc) { const c = r.city||'Onbekend'; zonderLoc[c] = (zonderLoc[c]||0)+1; continue; }
-    const min = kwRijtijd(ref.c, loc.c);
-    if (min > ruim) continue;
-    pool.push({ r, min, plaats: loc.naam, reno: KW_RENO.test(r.title||''), perceel: kwPerceel(r.title) });
+    if (!kwIsSale(r) || !r.price || r.price < 50000) continue;
+    pool.push({ r, plaats: r.city || 'Onbekend', reno: KW_RENO.test(r.title||''), perceel: kwPerceel(r.title) });
   }
 
   const typeSet = f.type ? new Set(KW_TYPES[f.type]) : null;
   const isNieuw = x => x.r.transaction_type==='new_construction' || x.r.property_type==='new_build';
   const minOk = (v, eis) => eis == null || eis <= 0 || (v == null ? f.onbekend : v >= eis);
   const eisen = [
-    { key:'loc',   lbl:'Locatie',      wens: f.t2!=null||f.t1!=null ? `≤ ${t2} min van ${f.ref}` : 'geen eis',
-      ok: x => x.min <= t2 },
+    { key:'loc',   lbl:'Stad',         wens: kwStedenLbl(),
+      ok: x => !kwSteden.size || kwSteden.has(x.plaats) },
     { key:'type',  lbl:'Woningtype',   wens: KW_TYPE_LBL[f.type],
       ok: x => !typeSet || typeSet.has(x.r.property_type) },
     { key:'staat', lbl:'Nieuw / bestaand', wens: KW_STAAT_LBL[f.staat],
@@ -1197,13 +1186,12 @@ function kwRun() {
   ];
   const passAll = (x, behalve) => eisen.every(e => e.key===behalve || e.ok(x));
 
-  const binnen  = pool.filter(x => x.min <= t2);
+  const binnen  = pool.filter(x => eisen[0].ok(x));
   const matches = pool.filter(x => passAll(x)).sort((a,b) => a.r.price-b.r.price);
   const profiel = pool.filter(x => passAll(x, 'budget'));
   const profPrijs = profiel.map(x => x.r.price).sort((a,b)=>a-b);
   const pct = p => profPrijs.length ? profPrijs[Math.min(profPrijs.length-1, Math.floor(p*(profPrijs.length-1)))] : null;
   const p25 = pct(0.25), med = median(profPrijs);
-  const ideaal = f.t1 != null ? matches.filter(x => x.min <= f.t1).length : null;
 
   // Trechter + "zonder deze eis" per eis; de eis die zonder hem de meeste panden oplevert is het knelpunt.
   let rest = pool, rijen = [];
@@ -1220,13 +1208,13 @@ function kwRun() {
   const knelTxt = heeftKnel ? ` Grootste knelpunt: <strong>${knel.lbl.toLowerCase()}</strong> (zonder die eis: ${fmt(knel.zonder)} panden).` : '';
   if (matches.length >= 5) {
     cls = 'deal'; icoon = '✓'; kop = 'Haalbaar';
-    uitleg = `${fmt(matches.length)} panden voldoen aan alle wensen${ideaal!=null?`, waarvan ${fmt(ideaal)} binnen ${f.t1} min`:''}.`;
+    uitleg = `${fmt(matches.length)} panden voldoen aan alle wensen.`;
   } else if (matches.length > 0) {
     cls = 'fair'; icoon = '~'; kop = 'Krap';
     uitleg = `Maar ${matches.length} ${matches.length===1?'pand voldoet':'panden voldoen'} aan alle wensen. Weinig keus, verwacht concurrentie of onderhandelen.` + knelTxt;
   } else if (profiel.length === 0 && binnen.length < 10) {
     cls = 'nodata'; icoon = '?'; kop = 'Te weinig data';
-    uitleg = `In de data staat te weinig te-koop-aanbod binnen ${t2} min van ${f.ref} om hier iets over te zeggen.` + knelTxt;
+    uitleg = `In de data staat te weinig te-koop-aanbod in ${kwEsc(kwStedenLbl())} om hier iets over te zeggen.` + knelTxt;
   } else {
     cls = 'expensive'; icoon = '✕'; kop = 'Niet haalbaar zoals gevraagd';
     uitleg = 'Geen enkel pand voldoet aan alle wensen.' + knelTxt;
@@ -1241,26 +1229,26 @@ function kwRun() {
   // KPI's
   const budgetPos = (f.maxMad != null && profPrijs.length) ? Math.round(100*profPrijs.filter(p => p <= f.maxMad).length/profPrijs.length) : null;
   document.getElementById('kw-kpis').innerHTML = [
-    ['Passende panden', fmt(matches.length), f.t1!=null ? `${fmt(ideaal)} binnen ${f.t1} min` : `binnen ${t2} min`, matches.length ? '' : 'accent'],
+    ['Passende panden', fmt(matches.length), kwSteden.size ? `in ${kwSteden.size} ${kwSteden.size===1?'stad':'steden'}` : 'in alle steden', matches.length ? '' : 'accent'],
     ['Profiel zonder budget', fmt(profiel.length), budgetPos!=null ? `${budgetPos}% valt binnen budget` : 'alle eisen behalve budget', ''],
     ['Mediaan profiel', med ? kwEur(med) : '—', med ? fmtMAD(med) : 'geen vergelijkbaar aanbod', 'gold'],
     ['Instap (p25)', p25 ? kwEur(p25) : '—', p25 ? 'goedkoopste kwart begint hier' : '—', 'accent'],
   ].map(([l,v,s,c]) => `<div class="kpi-card ${c}"><div class="kpi-label">${l}</div><div class="kpi-value ${c}">${v}</div><div class="kpi-sub">${s}</div></div>`).join('');
 
   // Eisen-tabel
-  const top = Math.max(1, binnen.length, ...rijen.map(r=>r.over));
+  const top = Math.max(1, pool.length, ...rijen.map(r=>r.over));
   document.getElementById('kw-crit-tbody').innerHTML =
-    `<tr><td>Te koop in de regio</td><td class="kw-wens">${t2<9999?`≤ ${t2} min`:'alles'}</td><td class="num">${fmt(binnen.length)}</td><td></td><td class="num"></td><td></td></tr>` +
+    `<tr><td>Totaal te koop</td><td class="kw-wens">alle steden</td><td class="num">${fmt(pool.length)}</td><td></td><td class="num"></td><td></td></tr>` +
     rijen.map(e => {
       const isKnel = heeftKnel && e.key===knel.key;
       const tag = isKnel ? '<span class="kw-tag kw-tag--rood">Knelpunt</span>'
+                : e.key==='loc' ? '<span class="kw-tag kw-tag--grijs">Keuze</span>'
                 : e.winst > 0 ? '<span class="kw-tag kw-tag--oranje">Beperkt</span>'
                 : '<span class="kw-tag kw-tag--groen">Geen probleem</span>';
-      const zonderLbl = e.key==='loc' ? `${fmt(e.zonder)} <span style="color:var(--muted)">(≤ ${ruim} min)</span>` : fmt(e.zonder);
-      return `<tr class="${isKnel?'knelpunt':''}"><td>${e.lbl}</td><td class="kw-wens">${kwEsc(e.wens)}</td>` +
+      return `<tr class="${isKnel?'knelpunt':''}"><td>${e.lbl}</td><td class="kw-wens" style="white-space:normal">${kwEsc(e.wens)}</td>` +
         `<td class="num">${fmt(e.over)}</td>` +
         `<td><div class="wijk-bar"><div class="wijk-bar-fill" style="width:${Math.round(100*e.over/top)}%;background:${isKnel?'var(--danger)':'var(--green)'}"></div></div></td>` +
-        `<td class="num">${zonderLbl}</td><td>${tag}</td></tr>`;
+        `<td class="num">${fmt(e.zonder)}</td><td>${tag}</td></tr>`;
     }).join('') +
     (f.perceel ? (() => {
       const bekend = matches.filter(x => x.perceel != null), groot = bekend.filter(x => x.perceel >= f.perceel).length;
@@ -1278,26 +1266,27 @@ function kwRun() {
   else noten.push(`Let op: daarbovenop komt ~${Math.round(KW_KOSTEN*100)}% aankoopkosten (registratie, notaris, kadaster).`);
   document.getElementById('kw-termijn-note').textContent = noten.join(' ');
 
-  // Per plaats
-  const perPlaats = {};
-  const profielRuim = pool.filter(x => eisen.every(e => e.key==='budget' || e.key==='loc' || e.ok(x)));
-  for (const x of profielRuim) (perPlaats[x.plaats] = perPlaats[x.plaats] || { min:x.min, p:[] }).p.push(x.r.price);
-  const plaatsRijen = Object.entries(perPlaats).map(([n,o]) => {
-    o.p.sort((a,b)=>a-b);
-    return { n, min:o.min, cnt:o.p.length, ok: f.maxMad==null ? o.p.length : o.p.filter(p=>p<=f.maxMad).length, laag:o.p[0], med:median(o.p) };
-  }).sort((a,b) => a.min-b.min);
-  document.getElementById('kw-plaats-sub').textContent = `Aanbod dat aan alle eisen behalve budget voldoet · tot ${ruim} min`;
-  document.getElementById('kw-plaats-tbody').innerHTML = plaatsRijen.length ? plaatsRijen.map(p =>
-    `<tr style="${p.min>t2?'opacity:.55':''}"><td>${p.n}${p.min>t2?' <span class="kw-tag kw-tag--grijs">te ver</span>':''}</td>` +
-    `<td class="num" style="text-align:right;font-family:var(--font-mono);font-size:12px">≈ ${p.min} min</td>` +
-    `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${p.cnt}</td>` +
-    `<td style="text-align:right"><span class="kw-tag ${p.ok?'kw-tag--groen':'kw-tag--rood'}">${p.ok}</span></td>` +
-    `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${kwEur(p.laag)}</td>` +
-    `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${kwEur(p.med)}</td></tr>`).join('')
-    : '<tr><td colspan="6" class="empty-state">Geen aanbod met dit profiel in de buurt.</td></tr>';
+  // Per stad: alle steden met dit profiel (zonder stad- en budgeteis). Klik = (de)selecteren.
+  const perStad = {};
+  for (const x of pool) if (eisen.every(e => e.key==='budget' || e.key==='loc' || e.ok(x))) (perStad[x.plaats] = perStad[x.plaats] || []).push(x.r.price);
+  const plaatsRijen = Object.entries(perStad).map(([n,p]) => {
+    p.sort((a,b)=>a-b);
+    return { n, gekozen: kwSteden.has(n), cnt:p.length, ok: f.maxMad==null ? p.length : p.filter(v=>v<=f.maxMad).length, laag:p[0], med:median(p) };
+  }).sort((a,b) => (b.gekozen-a.gekozen) || (b.ok-a.ok) || (b.cnt-a.cnt));
+  const getoond = plaatsRijen.filter((p,i) => p.gekozen || i < 25);
+  document.getElementById('kw-plaats-tbody').innerHTML = getoond.length ? getoond.map(p => {
+    const grijs = kwSteden.size && !p.gekozen;
+    return `<tr class="kw-stadrij" data-stad="${kwEsc(p.n)}" style="cursor:pointer;${grijs?'opacity:.55':''}" title="Klik om ${p.gekozen?'uit te zetten':'aan te klikken'}">` +
+      `<td>${kwEsc(p.n)} ${p.gekozen?'<span class="kw-tag kw-tag--groen">gekozen</span>':''}</td>` +
+      `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${p.cnt}</td>` +
+      `<td style="text-align:right"><span class="kw-tag ${p.ok?'kw-tag--groen':'kw-tag--rood'}">${p.ok}</span></td>` +
+      `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${kwEur(p.laag)}</td>` +
+      `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${kwEur(p.med)}</td></tr>`;
+  }).join('') : '<tr><td colspan="5" class="empty-state">Geen aanbod met dit profiel.</td></tr>';
+  document.querySelectorAll('#kw-plaats-tbody .kw-stadrij').forEach(tr => tr.addEventListener('click', () => kwToggleStad(tr.dataset.stad)));
 
   // Lijst: passende panden, of anders de goedkoopste uit het profiel
-  const lijst = matches.length ? matches : profiel.filter(x => x.min <= t2).sort((a,b) => a.r.price-b.r.price);
+  const lijst = matches.length ? matches : [...profiel].sort((a,b) => a.r.price-b.r.price);
   document.getElementById('kw-lijst-title').textContent = matches.length ? 'Panden die passen' : 'Dichtstbij: alles behalve budget';
   document.getElementById('kw-lijst-sub').textContent = matches.length
     ? `${fmt(matches.length)} panden · goedkoopste eerst`
@@ -1308,8 +1297,7 @@ function kwRun() {
     if (isNieuw(x)) tags.push('<span class="kw-tag kw-tag--groen">Nieuwbouw</span>');
     if (x.perceel) tags.push(`<span class="kw-tag ${f.perceel && x.perceel>=f.perceel?'kw-tag--groen':'kw-tag--grijs'}">Perceel ${fmt(x.perceel)} m²</span>`);
     const over = f.maxMad != null && x.r.price > f.maxMad;
-    return `<tr><td>${x.plaats}${x.r.neighborhood && kwNorm(x.r.neighborhood)!==kwNorm(x.plaats)?`<br><span style="font-size:11px;color:var(--muted)">${kwEsc(x.r.neighborhood)}</span>`:''}</td>` +
-      `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">≈ ${x.min} min</td>` +
+    return `<tr><td>${kwEsc(x.plaats)}${x.r.neighborhood && kwNorm(x.r.neighborhood)!==kwNorm(x.plaats)?`<br><span style="font-size:11px;color:var(--muted)">${kwEsc(x.r.neighborhood)}</span>`:''}</td>` +
       `<td>${objType(x.r.property_type)}</td>` +
       `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${x.r.bedrooms!=null?x.r.bedrooms:'—'}</td>` +
       `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${x.r.surface_m2!=null?fmt(x.r.surface_m2):'—'}</td>` +
@@ -1317,38 +1305,36 @@ function kwRun() {
       `<td>${tags.join(' ')}</td>` +
       `<td class="kw-title" title="${kwEsc(x.r.title)}">${kwEsc(x.r.title)}</td>` +
       `<td>${x.r.url?`<a class="kw-link" href="${kwEsc(x.r.url)}" target="_blank" rel="noopener">Bekijk ↗</a>`:''}</td></tr>`;
-  }).join('') : '<tr><td colspan="9" class="empty-state">Geen panden om te tonen.</td></tr>';
+  }).join('') : '<tr><td colspan="8" class="empty-state">Geen panden om te tonen.</td></tr>';
 
-  const onb = Object.entries(zonderLoc).sort((a,b)=>b[1]-a[1]);
-  const nOnb = onb.reduce((s,[,n])=>s+n, 0);
   document.getElementById('kw-loc-note').textContent =
-    `Rijtijden zijn schattingen (hemelsbreed × 1,3). Perceel en renovatie worden uit de advertentietitel gehaald en zijn indicatief.` +
-    (nOnb ? ` ${fmt(nOnb)} te-koop-panden in plaatsen zonder bekende ligging zijn niet meegenomen (o.a. ${onb.slice(0,6).map(([c,n])=>`${c} ${n}`).join(', ')}).` : '');
+    'Stad = de stad waar de advertentie onder valt. Perceel en renovatie worden uit de advertentietitel gehaald en zijn indicatief.';
 
-  kwLaatste = { f, t2, kop, matches, profiel, binnen, knel: heeftKnel ? knel : null, med, p25, ideaal, plaatsRijen };
+  kwLaatste = { f, kop, matches, profiel, binnen, knel: heeftKnel ? knel : null, med, p25, plaatsRijen };
 }
 
 function kwKopieer() {
   if (!kwLaatste) return;
-  const { f, t2, kop, matches, profiel, binnen, knel, med, p25, ideaal, plaatsRijen } = kwLaatste;
+  const { f, kop, matches, profiel, binnen, knel, med, p25, plaatsRijen } = kwLaatste;
   const wens = [
     KW_TYPE_LBL[f.type],
     f.slk ? `≥ ${f.slk} slaapkamers` : null,
     f.m2 ? `≥ ${fmt(f.m2)} m² woonopp.` : null,
     f.perceel ? `perceel ≥ ${fmt(f.perceel)} m²` : null,
     KW_STAAT_LBL[f.staat].toLowerCase(),
-    t2 < 9999 ? `≤ ${t2} min van ${f.ref}${f.t1!=null && f.t1!==t2 ? ` (ideaal ${f.t1})` : ''}` : null,
-    f.budget != null ? `budget ${f.budget ? (kwCur==='EUR' ? '€'+fmt(f.budget) : fmt(f.budget)+' MAD') : '—'}${document.getElementById('kw-kosten').checked?' incl. kosten':''}` : null,
+    `steden: ${kwStedenLbl()}`,
+    f.budget != null ? `budget ${kwCur==='EUR' ? '€'+fmt(f.budget) : fmt(f.budget)+' MAD'}${document.getElementById('kw-kosten').checked?' incl. kosten':''}` : null,
   ].filter(Boolean).join(' · ');
-  const wel = plaatsRijen.filter(p => p.ok && p.min <= t2).slice(0,5).map(p => `${p.n} (≈${p.min} min, ${p.ok})`).join(', ');
+  const wel = plaatsRijen.filter(p => p.ok).slice(0,5).map(p => `${p.n} (${p.ok})`).join(', ');
+  const notes = document.getElementById('kw-notes').value.trim();
   const regels = [
     `Klantwens-check ${new Date().toLocaleDateString('nl-NL')}`,
     `Wens: ${wens}`,
-    `Uitslag: ${kop.toUpperCase()} · ${matches.length} van ${binnen.length} te-koop-panden in de regio voldoen${ideaal!=null?` (${ideaal} binnen ${f.t1} min)`:''}.`,
+    `Uitslag: ${kop.toUpperCase()} · ${matches.length} van ${binnen.length} te-koop-panden in ${kwStedenLbl()} voldoen.`,
     knel ? `Knelpunt: ${knel.lbl.toLowerCase()} (zonder die eis: ${knel.zonder} panden).` : null,
     med ? `Profiel zonder budget: ${profiel.length} panden · mediaan ${kwEur(med)} · goedkoopste kwart vanaf ${kwEur(p25)}.` : null,
-    wel ? `Waar het binnen budget kan: ${wel}.` : null,
-    document.getElementById('kw-notes').value.trim() ? `Notities: ${document.getElementById('kw-notes').value.trim()}` : null,
+    wel ? `Steden waar het binnen budget kan: ${wel}.` : null,
+    notes ? `Notities: ${notes}` : null,
   ].filter(Boolean);
   const btn = document.getElementById('kw-copy'), oud = btn.textContent;
   const klaar = () => { btn.textContent = 'Gekopieerd ✓'; setTimeout(() => btn.textContent = oud, 1600); };
