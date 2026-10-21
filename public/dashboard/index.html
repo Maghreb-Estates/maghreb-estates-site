@@ -1087,6 +1087,13 @@ const kwNorm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowe
 const kwEsc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const kwEur = mad => '€' + fmt(Math.round(mad*EUR/1000)*1000);
 const kwVal = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+// sale/Salé-fout in de Mubawab-scraper: valt hij terug op de vrije tekst, dan wordt
+// het Engelse "for sale" als de stad Salé gelezen. Zulke records hebben geen wijk en
+// noemen Salé niet echt in de titel; die tellen we als stad onbekend.
+const KW_ECHT_SALE = /sal[eé]\s*(?:al|el)?[\s-]*jadida|\bsala\b|\bin\s+sal[eé]\b|[aà]\s+sal[eé]\b/i;
+const kwSaleVerdacht = r => r.city === 'Salé' && (r.source||'').toLowerCase().includes('mubawab')
+  && !r.neighborhood && !KW_ECHT_SALE.test(r.title||'') && !/salé/i.test(r.title||'');
+const kwStad = r => kwSaleVerdacht(r) ? null : r.city;
 const kwIsSale = r => r.transaction_type==='sale' || r.transaction_type==='new_construction';
 const kwStedenLbl = () => kwSteden.size ? [...kwSteden].join(', ') : 'alle steden';
 
@@ -1142,7 +1149,7 @@ function initWens() {
   }
   if (allData.length && !kwStadTelling.length) {
     const t = {};
-    allData.forEach(r => { if (kwIsSale(r) && r.city && r.city!=='Onbekend') t[r.city] = (t[r.city]||0)+1; });
+    allData.forEach(r => { const c = kwStad(r); if (kwIsSale(r) && c && c!=='Onbekend') t[c] = (t[c]||0)+1; });
     kwStadTelling = Object.entries(t);
   }
   kwRenderSteden();
@@ -1167,11 +1174,12 @@ function kwRun() {
   if (!allData.length) return;
   const f = kwLees();
 
-  const pool = []; let weg = 0;
+  const pool = []; let weg = 0, saleFout = 0;
   for (const r of allData) {
     if (!kwIsSale(r) || !r.price) continue;
     if (r.price < KW_MIN_KOOP || KW_HUUR.test(r.title||'')) { weg++; continue; }
-    pool.push({ r, plaats: r.city || 'Onbekend', reno: KW_RENO.test(r.title||''), perceel: kwPerceel(r.title) });
+    if (kwSaleVerdacht(r)) saleFout++;
+    pool.push({ r, plaats: kwStad(r) || 'Onbekend', reno: KW_RENO.test(r.title||''), perceel: kwPerceel(r.title) });
   }
 
   const typeSet = f.type ? new Set(KW_TYPES[f.type]) : null;
@@ -1314,7 +1322,8 @@ function kwRun() {
 
   document.getElementById('kw-loc-note').textContent =
     'Alleen koopobjecten (te koop en nieuwbouw); prijzen zijn vraagprijzen. Stad = de stad waar de advertentie onder valt. Perceel en renovatie worden uit de advertentietitel gehaald en zijn indicatief.' +
-    (weg ? ` ${fmt(weg)} advertenties die als koop staan maar op huur lijken (titel of prijs onder ${fmt(KW_MIN_KOOP)} MAD) zijn weggelaten.` : '');
+    (weg ? ` ${fmt(weg)} advertenties die als koop staan maar op huur lijken (titel of prijs onder ${fmt(KW_MIN_KOOP)} MAD) zijn weggelaten.` : '') +
+    (saleFout ? ` ${fmt(saleFout)} Mubawab-advertenties die de scraper ten onrechte onder Salé zette ("for sale") staan onder stad Onbekend.` : '');
 
   kwLaatste = { f, kop, matches, profiel, binnen, knel: heeftKnel ? knel : null, med, p25, plaatsRijen };
 }
