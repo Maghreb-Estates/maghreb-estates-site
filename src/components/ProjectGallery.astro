@@ -11,8 +11,10 @@ import type { ProjectFoto } from '../data/projecten';
 import { standaardTaal, type Taal } from '../i18n/config';
 import { aanbodUi } from '../i18n/aanbod';
 
-interface Props { fotos: ProjectFoto[]; projectNaam: string; taal?: Taal; binnenkort?: boolean }
-const { fotos, projectNaam, taal = standaardTaal, binnenkort = false } = Astro.props;
+// `lazy`: voor een galerij lager op de pagina (bv. de verkoopcase), waar de
+// hoofdfoto niet het LCP-beeld is en dus niet met voorrang hoeft te laden.
+interface Props { fotos: ProjectFoto[]; projectNaam: string; taal?: Taal; binnenkort?: boolean; lazy?: boolean }
+const { fotos, projectNaam, taal = standaardTaal, binnenkort = false, lazy = false } = Astro.props;
 const ui = aanbodUi[taal];
 
 // Full-size webp voor in de lightbox (los van de kleinere grid-varianten).
@@ -32,8 +34,8 @@ const extra = rest.length - zichtbareThumbs.length; // aantal achter "alle foto'
       alt={hoofd.alt}
       widths={[800, 1200, 1600]}
       sizes="(max-width: 760px) 100vw, 66vw"
-      loading="eager"
-      fetchpriority="high"
+      loading={lazy ? 'lazy' : 'eager'}
+      fetchpriority={lazy ? undefined : 'high'}
       class="pgallery__img"
     />
     <span class="pgallery__count">

@@ -808,3 +808,72 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
 .pgallery .binnenkort-waas__label { font-size: .9rem; padding: .7rem 1.4rem; }
 [dir="rtl"] .binnenkort-waas__label { letter-spacing: 0; }
 .lightbox.is-binnenkort .lightbox__img { filter: grayscale(.85) brightness(.92); }
+
+/* ============================================================================
+   WONING VERKOPEN (/huis-verkopen-marokko/) — vergelijking, netwerk, case en
+   aanmeldformulier. Bouwt op de bestaande blokken (compare, datacards,
+   stappen, pgallery, project__specs, split).
+   ========================================================================== */
+#case, #aanmelden { scroll-margin-top: 84px; }
+
+.verkoop-compare th[scope='row'] { width: 150px; }
+.verkoop-compare td:last-child { color: var(--green); font-weight: 400; background: #f6f9f4; }
+.verkoop-compare thead th:last-child { background: var(--green); color: var(--cream); }
+
+.stappen--5 { grid-template-columns: repeat(5, 1fr); gap: 26px; }
+
+.section--dark .netwerk__tekst { color: rgba(245,241,232,0.85); font-size: 17.5px; margin-top: 20px; }
+.section--dark .checks li { color: rgba(245,241,232,0.8); }
+.section--dark .checks strong { color: var(--cream); }
+.section--dark .checks li::before { background: var(--gold); }
+.netwerk__transparant { margin-top: 28px; padding: 22px 24px; }
+.netwerk__transparant p { color: rgba(245,241,232,0.85); font-size: 15.5px; margin: 0; }
+.netwerk__transparant strong { color: var(--cream); font-weight: 500; }
+
+.case__label {
+  display: inline-block; margin-top: 18px; padding: 6px 14px; border-radius: 999px;
+  background: #fbf6ec; border: 1px solid #e6d9bf; color: #7a5b1f;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.case__lead { margin-top: 40px; }
+.case__kop { font-size: 23px; margin-bottom: 10px; }
+.case__kop:not(:first-child) { margin-top: 30px; }
+.case__tekst { color: var(--text-muted); font-size: 16.5px; margin: 0; }
+.case__aanpak { margin: 0 0 0 20px; color: var(--text-muted); font-size: 16px; }
+.case__aanpak li { margin-bottom: 10px; padding-left: 4px; }
+.case__aanpak strong { color: var(--text); font-weight: 500; }
+.case__video { display: block; width: 100%; aspect-ratio: 16 / 9; margin-top: 16px; border-radius: var(--radius); background: var(--green); }
+
+/* Leeg fotovak: zichtbaar als plek voor een foto, niet als kapotte afbeelding. */
+.foto-leeg {
+  display: flex; align-items: center; justify-content: center; cursor: default;
+  background: repeating-linear-gradient(135deg, var(--cream) 0 14px, var(--cream-dark) 14px 28px);
+  border: 1px dashed var(--border);
+}
+.foto-leeg span {
+  font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);
+  background: var(--white); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+}
+
+.veld-rij { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+
+@media (max-width: 1100px) { .stappen--5 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 940px) { .stappen--5 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 760px) {
+  /* Op mobiel zijn de thumbs smal: kleiner label, zodat de tekst in het vak past. */
+  .foto-leeg span { font-size: 10.5px; padding: 4px 8px; }
+}
+@media (max-width: 560px) {
+  .stappen--5 { grid-template-columns: 1fr; gap: 0; }
+  /* Vergelijking gestapeld per onderwerp, zodat de kolom "Maghreb Estates"
+     niet buiten beeld valt in een horizontaal scrollende tabel. */
+  table.verkoop-compare { min-width: 0; }
+  .verkoop-compare thead { display: none; }
+  .verkoop-compare tbody, .verkoop-compare tr, .verkoop-compare th, .verkoop-compare td { display: block; width: auto; }
+  .verkoop-compare tr { border-bottom: 1px solid var(--border); }
+  .verkoop-compare tr:last-child { border-bottom: none; }
+  .verkoop-compare th[scope='row'] { width: auto; border-bottom: none; padding-bottom: 4px; font-family: var(--font-serif); font-size: 19px; color: var(--green); }
+  .verkoop-compare td { border-bottom: none; padding-top: 6px; }
+  .verkoop-compare td::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; }
+  .verkoop-compare td:last-child::before { color: var(--green-mid); }
+}

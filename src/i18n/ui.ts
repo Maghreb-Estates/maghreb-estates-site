@@ -191,6 +191,8 @@ export const navVoorTaal = (taal: Taal) => {
     { label: a.alleProjecten, href: aanbodHubPad(taal) },
     { label: 'Marrakech', href: aanbodStadPad(taal, 'marrakech') },
     { label: 'Tanger', href: aanbodStadPad(taal, 'tanger') },
+    // De verkooppagina bestaat alleen in het Nederlands.
+    ...(taal === 'nl' ? [{ label: 'Uw woning verkopen', href: '/huis-verkopen-marokko/' }] : []),
   ] };
   return [
     aanbodItem,
