@@ -1076,6 +1076,10 @@ const KW_TYPES = { vrijstaand:['villa','house'], apartment:['apartment'], riad:[
 const KW_TYPE_LBL = { vrijstaand:'Vrijstaand huis / villa', apartment:'Appartement', riad:'Riad', land:'Grond', '':'Alle types' };
 const KW_STAAT_LBL = { '':'Maakt niet uit', nieuw:'Alleen nieuwbouw', bestaand:'Bestaand (renovatie mag)', reno:'Alleen renovatieprojecten' };
 const KW_KOSTEN = 0.07;
+// Alleen koop: huuradvertenties die bij de bron per ongeluk als 'te koop' staan,
+// herken je aan de titel of aan een prijs die eerder een maandhuur is.
+const KW_HUUR = /(?:[aà]\s+louer|\ben\s+location|\blocation\s+(?:longue|courte|meubl|saison|vacances)|\blou[eé]e?(?![a-z])|\brent(?:al)?\b|for\s+rent|par\s+mois|\/\s*mois|per\s+month|par\s+nuit|par\s+jour|vacances|saisonni)/i;
+const KW_MIN_KOOP = 100000;   // MAD; daaronder is het vrijwel altijd huur of een fout
 const KW_RENO = /(?:\b[aà]\s*r[ée]nover|\b[aà]\s*restaurer|r[ée]novation\s+(?:compl[eè]te\s+)?[aà]\s+pr[ée]voir|travaux\s+[aà]\s+pr[ée]voir|n[ée]cessite\s+des\s+travaux|\bruine|to\s+renovate|fixer)/i;
 let kwInited = false, kwCur = 'EUR', kwLaatste = null, kwSteden = new Set(), kwStadTelling = [];
 
@@ -1163,9 +1167,10 @@ function kwRun() {
   if (!allData.length) return;
   const f = kwLees();
 
-  const pool = [];
+  const pool = []; let weg = 0;
   for (const r of allData) {
-    if (!kwIsSale(r) || !r.price || r.price < 50000) continue;
+    if (!kwIsSale(r) || !r.price) continue;
+    if (r.price < KW_MIN_KOOP || KW_HUUR.test(r.title||'')) { weg++; continue; }
     pool.push({ r, plaats: r.city || 'Onbekend', reno: KW_RENO.test(r.title||''), perceel: kwPerceel(r.title) });
   }
 
@@ -1238,7 +1243,7 @@ function kwRun() {
   // Eisen-tabel
   const top = Math.max(1, pool.length, ...rijen.map(r=>r.over));
   document.getElementById('kw-crit-tbody').innerHTML =
-    `<tr><td>Totaal te koop</td><td class="kw-wens">alle steden</td><td class="num">${fmt(pool.length)}</td><td></td><td class="num"></td><td></td></tr>` +
+    `<tr><td>Totaal koopobjecten</td><td class="kw-wens">alle steden</td><td class="num">${fmt(pool.length)}</td><td></td><td class="num"></td><td></td></tr>` +
     rijen.map(e => {
       const isKnel = heeftKnel && e.key===knel.key;
       const tag = isKnel ? '<span class="kw-tag kw-tag--rood">Knelpunt</span>'
@@ -1308,7 +1313,8 @@ function kwRun() {
   }).join('') : '<tr><td colspan="8" class="empty-state">Geen panden om te tonen.</td></tr>';
 
   document.getElementById('kw-loc-note').textContent =
-    'Stad = de stad waar de advertentie onder valt. Perceel en renovatie worden uit de advertentietitel gehaald en zijn indicatief.';
+    'Alleen koopobjecten (te koop en nieuwbouw); prijzen zijn vraagprijzen. Stad = de stad waar de advertentie onder valt. Perceel en renovatie worden uit de advertentietitel gehaald en zijn indicatief.' +
+    (weg ? ` ${fmt(weg)} advertenties die als koop staan maar op huur lijken (titel of prijs onder ${fmt(KW_MIN_KOOP)} MAD) zijn weggelaten.` : '');
 
   kwLaatste = { f, kop, matches, profiel, binnen, knel: heeftKnel ? knel : null, med, p25, plaatsRijen };
 }
