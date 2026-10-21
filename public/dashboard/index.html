@@ -512,7 +512,7 @@
               <div class="deal-field"><label>Slaapkamers ≥</label><input type="number" id="kw-slk" value="3" min="0" /></div>
               <div class="deal-field"><label>Woonopp. ≥ m²</label><input type="number" id="kw-m2" value="150" min="0" /></div>
             </div>
-            <div class="deal-field"><label>Perceel / tuin ≥ m² <span class="kw-hint">(indicatief, uit titel)</span></label><input type="number" id="kw-perceel" value="1000" min="0" /></div>
+            <div class="deal-field"><label>Perceel / tuin ≥ m² <span class="kw-hint">(indicatief)</span></label><input type="number" id="kw-perceel" value="1000" min="0" /></div>
             <div class="deal-field"><label>Budget</label>
               <div class="kw-budget">
                 <input type="number" id="kw-budget" value="150000" min="0" />
@@ -597,9 +597,10 @@
         <div class="filter-group">
           <div class="filter-label">Transactietype</div>
           <select class="filter-select" id="wa-tx" onchange="renderWijkAnalyse()">
-            <option value="sale">Te koop</option>
+            <option value="koop">Alle koop</option>
+            <option value="sale">Bestaand te koop</option>
+            <option value="new_construction">Nieuwbouw</option>
             <option value="long_term_rental">Lange termijn huur</option>
-            <option value="">Alle types</option>
           </select>
         </div>
       </div>
@@ -734,13 +735,7 @@
           </table>
           <div class="yield-info">
             <div class="yield-info-title">Wat je hier ziet</div>
-            <div class="yield-info-text">
-              Links de gemiddelden van objecten die aan onze eisen voldoen: beoordeling 4 of hoger,
-              minstens 120 geboekte nachten in twaalf maanden, en ook geboekt in de laatste negentig
-              dagen. Rechts hetzelfde cijfer over het complete aanbod, inclusief advertenties die
-              nauwelijks draaien. Het verschil is wat goed verhuren oplevert, niet wat de markt
-              vanzelf geeft.
-            </div>
+            <div class="yield-info-text" id="ab-filter-tekst">—</div>
           </div>
         </div>
 
@@ -781,7 +776,7 @@
           <div class="yield-info">
             <div class="yield-info-title">Over de wijkcijfers</div>
             <div class="yield-info-text">
-              AirROI kent niet elke wijk, en een wijk met minder dan 25 objecten weigert hij. Namen
+              AirROI kent niet elke wijk, en wijken met minder dan 100 objecten slaan we over. Namen
               staan er soms in drie schriften; ik toon ze ingekort. De laatste twee kolommen
               verschijnen alleen als de wijknaam overeenkomt met een buurtnaam uit ons eigen aanbod.
             </div>
@@ -863,9 +858,9 @@
   </div>
 
   <div class="dash-footer">
-    <span>© 2026 Maghreb Estates · Data: Mubawab · Avito · Sarouty · Agenz</span>
+    <span>© 2026 Maghreb Estates · Data: Mubawab · Sarouty · Agenz</span>
     <span id="footer-meta">—</span>
-    <span id="footer-date">—</span>
+    <span id="footer-versheid">—</span>
   </div>
 
 </div><!-- #dashboard -->
@@ -888,9 +883,13 @@ const CITY_COORDS = {
   'Temara':[33.9287,-6.9088],     'Béni Mellal':[32.3372,-6.3498],
   'Nador':[35.1740,-2.9337],      'Settat':[33.0015,-7.6207],
   'Safi':[32.2994,-9.2372],       'Laâyoune':[27.1536,-13.2033],
+  'Al Hoceima':[35.2517,-3.9372],
+  // Mubawab geeft deze sinds oktober 2026 als eigen stad (eigen locatieregel),
+  // niet meer onder Casablanca.
+  'Dar Bouazza':[33.5236,-7.8255], 'Bouskoura':[33.4489,-7.6486],
 };
 const STAD_COLORS = ['#1C2E1D','#C4622D','#C9A84C','#34522e','#7a8c7a','#b8a89a','#4a7a5a','#d4945e','#a8c4a8','#8b6f47'];
-const TYPE_LBL = { apartment:'Appartement', villa:'Villa', house:'Woning', land:'Grond', commercial:'Commercieel', riad:'Riad', new_build:'Nieuwbouw', other:'Overig' };
+const TYPE_LBL = { apartment:'Appartement', villa:'Villa', house:'Woning', land:'Grond', commercial:'Commercieel', riad:'Riad', other:'Overig', unknown:'Onbekend' };
 const MONO = 'DM Mono';
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -927,8 +926,8 @@ function switchSec(s) {
   });
   if (s === 'markt' && allData.length) renderMarkt();
   if (s === 'wens') initWens();
-  if (s === 'wijk') populateWaStad();
-  if (s === 'deal') populateDvStad();
+  if (s === 'wijk') vulStadSelect('wa-stad');
+  if (s === 'deal') vulStadSelect('dv-stad');
   if (s === 'airbnb') initAirbnb();
   if (s === 'obj') initObj();
 }
@@ -937,10 +936,9 @@ function switchSec(s) {
 let objData = [], objFiltered = [], objPage = 1, objInited = false;
 let objSort = { col:'city', dir:'asc' }, objCur = 'MAD';
 const OBJ_PAGE = 100;
-const OBJ_SALE = new Set(['sale','new_construction']);
-const objIsSale = t => OBJ_SALE.has(t);
-const objTransLbl = t => objIsSale(t) ? 'Te koop' : 'Te huur';
-const objType = t => TYPE_LBL[t] || (t==='new_construction'?'Nieuwbouw':(t==='unknown'?'Onbekend':(t||'—')));
+// 'Koop?' = staat bij de bron als koop, maar titel of prijs wijst op huur (zie schoneKoop).
+const objTransLbl = r => r.koop ? 'Te koop' : r.koopTwijfel ? 'Koop?' : 'Te huur';
+const objType = t => TYPE_LBL[t] || t || '—';
 
 function initObj() {
   if (objInited) return;
@@ -949,15 +947,16 @@ function initObj() {
     const ppm2 = (r.surface_m2>0 && r.price>0) ? Math.round(r.price/r.surface_m2) : null;
     return { city:r.city, neighborhood:r.neighborhood, price:r.price, surface_m2:r.surface_m2,
              transaction_type:r.transaction_type, property_type:r.property_type,
+             koop:r.koop, koopTwijfel:r.koopTwijfel, huur:r.huur,
              bedrooms:r.bedrooms, bathrooms:r.bathrooms, url:r.url, source:r.source,
              eur: r.price!=null?Math.round(r.price*EUR):null, ppm2 };
   });
   const cities=[...new Set(objData.map(r=>r.city).filter(c=>c&&c!=='Onbekend'))].sort();
-  document.getElementById('o-stad').innerHTML='<option value="all">Alle steden</option>'+cities.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('o-stad').innerHTML='<option value="all">Alle steden</option>'+cities.map(c=>`<option value="${kwEsc(c)}">${kwEsc(c)}</option>`).join('');
   const types=[...new Set(objData.map(r=>r.property_type).filter(Boolean))].sort((a,b)=>objType(a).localeCompare(objType(b)));
   document.getElementById('o-type').innerHTML='<option value="all">Alle types</option>'+types.map(t=>`<option value="${t}">${objType(t)}</option>`).join('');
   const srcs=[...new Set(objData.map(r=>r.source).filter(Boolean))].sort();
-  document.getElementById('o-src').innerHTML='<option value="all">Alle bronnen</option>'+srcs.map(s=>`<option value="${s}">${s}</option>`).join('');
+  document.getElementById('o-src').innerHTML='<option value="all">Alle bronnen</option>'+srcs.map(s=>`<option value="${kwEsc(s)}">${kwEsc(s)}</option>`).join('');
   objWire();
   objApply();
 }
@@ -1004,8 +1003,8 @@ function objApply(){
     if(stad!=='all'&&r.city!==stad)return false;
     if(type!=='all'&&r.property_type!==type)return false;
     if(src!=='all'&&r.source!==src)return false;
-    if(trans==='koop'&&!objIsSale(r.transaction_type))return false;
-    if(trans==='huur'&&objIsSale(r.transaction_type))return false;
+    if(trans==='koop'&&!r.koop)return false;
+    if(trans==='huur'&&!r.huur)return false;
     if(buurt&&!((r.neighborhood||'').toLowerCase().includes(buurt)))return false;
     if(!isNaN(pmin)&&!(r.price>=pmin))return false;
     if(!isNaN(pmax)&&!(r.price<=pmax))return false;
@@ -1040,20 +1039,20 @@ function objRender(){
   const tb=document.getElementById('o-tbody');
   if(!slice.length){ tb.innerHTML='<tr><td colspan="12" class="obj-empty">Geen objecten voor deze filters.</td></tr>'; return; }
   tb.innerHTML=slice.map(r=>{
-    const koop=objIsSale(r.transaction_type);
+    const twijfel=r.koopTwijfel?' title="Staat bij de bron als koop, maar titel of prijs wijst op huur"':'';
     return `<tr>
-      <td class="stad">${r.city||'—'}</td>
-      <td class="wijk">${r.neighborhood||'—'}</td>
-      <td>${objType(r.property_type)}</td>
-      <td><span class="tag ${koop?'tag--koop':'tag--huur'}">${objTransLbl(r.transaction_type)}</span></td>
+      <td class="stad">${kwEsc(r.city||'—')}</td>
+      <td class="wijk">${kwEsc(r.neighborhood||'—')}</td>
+      <td>${kwEsc(objType(r.property_type))}</td>
+      <td><span class="tag ${r.koop?'tag--koop':'tag--huur'}"${twijfel}>${objTransLbl(r)}</span></td>
       <td class="num">${fmt(r.price)}</td>
       <td class="num eur">€${fmt(r.eur)}</td>
       <td class="num">${r.bedrooms!=null?r.bedrooms:'—'}</td>
       <td class="num">${r.bathrooms!=null?r.bathrooms:'—'}</td>
       <td class="num">${r.surface_m2!=null?fmt(r.surface_m2):'—'}</td>
       <td class="num">${r.ppm2!=null?fmt(r.ppm2):'—'}</td>
-      <td class="src">${r.source||'—'}</td>
-      <td>${r.url?`<a class="link" href="${r.url}" target="_blank" rel="noopener">Bekijk ↗</a>`:'—'}</td>
+      <td class="src">${kwEsc(r.source||'—')}</td>
+      <td>${r.url?`<a class="link" href="${kwEsc(r.url)}" target="_blank" rel="noopener">Bekijk ↗</a>`:'—'}</td>
     </tr>`;
   }).join('');
   const sc=document.querySelector('#s-obj .obj-scroll'); if(sc) sc.scrollTop=0;
@@ -1063,7 +1062,7 @@ function objCSV(){
   const cols=[['city','Stad'],['neighborhood','Buurt'],['property_type','Type'],['transaction_type','Transactie'],['price','Prijs_MAD'],['eur','Prijs_EUR'],['bedrooms','Slaapkamers'],['bathrooms','Badkamers'],['surface_m2','Opp_m2'],['ppm2','MAD_per_m2'],['source','Bron'],['url','Link']];
   const esc=v=>{ if(v==null)return''; const s=String(v); return /[",;\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
   const head=cols.map(c=>c[1]).join(';');
-  const body=objFiltered.map(r=>cols.map(([k])=>{ if(k==='property_type')return esc(objType(r[k])); if(k==='transaction_type')return esc(objTransLbl(r[k])); return esc(r[k]); }).join(';')).join('\n');
+  const body=objFiltered.map(r=>cols.map(([k])=>{ if(k==='property_type')return esc(objType(r[k])); if(k==='transaction_type')return esc(objTransLbl(r)); return esc(r[k]); }).join(';')).join('\n');
   const blob=new Blob(['﻿'+head+'\n'+body],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`maghreb-objecten-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
 }
@@ -1076,10 +1075,6 @@ const KW_TYPES = { vrijstaand:['villa','house'], apartment:['apartment'], riad:[
 const KW_TYPE_LBL = { vrijstaand:'Vrijstaand huis / villa', apartment:'Appartement', riad:'Riad', land:'Grond', '':'Alle types' };
 const KW_STAAT_LBL = { '':'Maakt niet uit', nieuw:'Alleen nieuwbouw', bestaand:'Bestaand (renovatie mag)', reno:'Alleen renovatieprojecten' };
 const KW_KOSTEN = 0.07;
-// Alleen koop: huuradvertenties die bij de bron per ongeluk als 'te koop' staan,
-// herken je aan de titel of aan een prijs die eerder een maandhuur is.
-const KW_HUUR = /(?:[aà]\s+louer|\ben\s+location|\blocation\s+(?:longue|courte|meubl|saison|vacances)|\blou[eé]e?(?![a-z])|\brent(?:al)?\b|for\s+rent|par\s+mois|\/\s*mois|per\s+month|par\s+nuit|par\s+jour|vacances|saisonni)/i;
-const KW_MIN_KOOP = 100000;   // MAD; daaronder is het vrijwel altijd huur of een fout
 const KW_RENO = /(?:\b[aà]\s*r[ée]nover|\b[aà]\s*restaurer|r[ée]novation\s+(?:compl[eè]te\s+)?[aà]\s+pr[ée]voir|travaux\s+[aà]\s+pr[ée]voir|n[ée]cessite\s+des\s+travaux|\bruine|to\s+renovate|fixer)/i;
 let kwInited = false, kwCur = 'EUR', kwLaatste = null, kwSteden = new Set(), kwStadTelling = [];
 
@@ -1087,17 +1082,9 @@ const kwNorm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowe
 const kwEsc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const kwEur = mad => '€' + fmt(Math.round(mad*EUR/1000)*1000);
 const kwVal = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
-// sale/Salé-fout in de Mubawab-scraper: valt hij terug op de vrije tekst, dan wordt
-// het Engelse "for sale" als de stad Salé gelezen. Zulke records hebben geen wijk en
-// noemen Salé niet echt in de titel; die tellen we als stad onbekend.
-const KW_ECHT_SALE = /sal[eé]\s*(?:al|el)?[\s-]*jadida|\bsala\b|\bin\s+sal[eé]\b|[aà]\s+sal[eé]\b/i;
-const kwSaleVerdacht = r => r.city === 'Salé' && (r.source||'').toLowerCase().includes('mubawab')
-  && !r.neighborhood && !KW_ECHT_SALE.test(r.title||'') && !/salé/i.test(r.title||'');
-const kwStad = r => kwSaleVerdacht(r) ? null : r.city;
-const kwIsSale = r => r.transaction_type==='sale' || r.transaction_type==='new_construction';
 const kwStedenLbl = () => kwSteden.size ? [...kwSteden].join(', ') : 'alle steden';
 
-// Perceelgrootte staat niet als veld in de data; probeer hem uit de titel te halen.
+// Perceel: land_area_m2 als de scraper hem vond, anders een poging uit de titel.
 function kwPerceel(titel) {
   const t = String(titel||'');
   const ha = t.match(/(\d+(?:[.,]\d+)?)\s*(?:ha\b|hectare)/i);
@@ -1149,7 +1136,7 @@ function initWens() {
   }
   if (allData.length && !kwStadTelling.length) {
     const t = {};
-    allData.forEach(r => { const c = kwStad(r); if (kwIsSale(r) && c && c!=='Onbekend') t[c] = (t[c]||0)+1; });
+    allData.forEach(r => { if (r.koop && r.city) t[r.city] = (t[r.city]||0)+1; });
     kwStadTelling = Object.entries(t);
   }
   kwRenderSteden();
@@ -1174,16 +1161,16 @@ function kwRun() {
   if (!allData.length) return;
   const f = kwLees();
 
-  const pool = []; let weg = 0, saleFout = 0;
+  const pool = []; let weg = 0;
   for (const r of allData) {
-    if (!kwIsSale(r) || !r.price) continue;
-    if (r.price < KW_MIN_KOOP || KW_HUUR.test(r.title||'')) { weg++; continue; }
-    if (kwSaleVerdacht(r)) saleFout++;
-    pool.push({ r, plaats: kwStad(r) || 'Onbekend', reno: KW_RENO.test(r.title||''), perceel: kwPerceel(r.title) });
+    if (r.koopTwijfel) { weg++; continue; }
+    if (!r.koop) continue;
+    pool.push({ r, plaats: r.city || 'Onbekend', reno: KW_RENO.test(r.title||''),
+                perceel: r.land_area_m2 > 0 ? Math.round(r.land_area_m2) : kwPerceel(r.title) });
   }
 
   const typeSet = f.type ? new Set(KW_TYPES[f.type]) : null;
-  const isNieuw = x => x.r.transaction_type==='new_construction' || x.r.property_type==='new_build';
+  const isNieuw = x => x.r.transaction_type==='new_construction';
   const minOk = (v, eis) => eis == null || eis <= 0 || (v == null ? f.onbekend : v >= eis);
   const eisen = [
     { key:'loc',   lbl:'Stad',         wens: kwStedenLbl(),
@@ -1266,7 +1253,7 @@ function kwRun() {
     (f.perceel ? (() => {
       const bekend = matches.filter(x => x.perceel != null), groot = bekend.filter(x => x.perceel >= f.perceel).length;
       return `<tr><td>Perceel / tuin</td><td class="kw-wens">≥ ${fmt(f.perceel)} m²</td>` +
-        `<td class="num">${bekend.length ? fmt(groot) : '—'}</td><td colspan="2" class="kw-wens" style="text-align:right">${bekend.length} van ${matches.length} noemen perceel in titel</td>` +
+        `<td class="num">${bekend.length ? fmt(groot) : '—'}</td><td colspan="2" class="kw-wens" style="text-align:right">${bekend.length} van ${matches.length} noemen een perceel</td>` +
         `<td><span class="kw-tag kw-tag--grijs">Handmatig checken</span></td></tr>`;
     })() : '');
 
@@ -1311,7 +1298,7 @@ function kwRun() {
     if (x.perceel) tags.push(`<span class="kw-tag ${f.perceel && x.perceel>=f.perceel?'kw-tag--groen':'kw-tag--grijs'}">Perceel ${fmt(x.perceel)} m²</span>`);
     const over = f.maxMad != null && x.r.price > f.maxMad;
     return `<tr><td>${kwEsc(x.plaats)}${x.r.neighborhood && kwNorm(x.r.neighborhood)!==kwNorm(x.plaats)?`<br><span style="font-size:11px;color:var(--muted)">${kwEsc(x.r.neighborhood)}</span>`:''}</td>` +
-      `<td>${objType(x.r.property_type)}</td>` +
+      `<td>${kwEsc(objType(x.r.property_type))}</td>` +
       `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${x.r.bedrooms!=null?x.r.bedrooms:'—'}</td>` +
       `<td style="text-align:right;font-family:var(--font-mono);font-size:12px">${x.r.surface_m2!=null?fmt(x.r.surface_m2):'—'}</td>` +
       `<td style="text-align:right"><span class="wijk-pm2" style="font-size:16px;${over?'color:var(--danger)':''}">${kwEur(x.r.price)}</span><br><span style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">${fmt(x.r.price)} MAD</span></td>` +
@@ -1321,9 +1308,8 @@ function kwRun() {
   }).join('') : '<tr><td colspan="8" class="empty-state">Geen panden om te tonen.</td></tr>';
 
   document.getElementById('kw-loc-note').textContent =
-    'Alleen koopobjecten (te koop en nieuwbouw); prijzen zijn vraagprijzen. Stad = de stad waar de advertentie onder valt. Perceel en renovatie worden uit de advertentietitel gehaald en zijn indicatief.' +
-    (weg ? ` ${fmt(weg)} advertenties die als koop staan maar op huur lijken (titel of prijs onder ${fmt(KW_MIN_KOOP)} MAD) zijn weggelaten.` : '') +
-    (saleFout ? ` ${fmt(saleFout)} Mubawab-advertenties die de scraper ten onrechte onder Salé zette ("for sale") staan onder stad Onbekend.` : '');
+    'Alleen koopobjecten (te koop en nieuwbouw); prijzen zijn vraagprijzen. Stad = de stad waar de advertentie onder valt. Perceel komt uit de advertentie (perceeloppervlak of titel), renovatie uit de titel; beide zijn indicatief.' +
+    (weg ? ` ${fmt(weg)} advertenties die als koop staan maar op huur lijken (titel of prijs onder ${fmt(MIN_KOOPPRIJS)} MAD) zijn weggelaten.` : '');
 
   kwLaatste = { f, kop, matches, profiel, binnen, knel: heeftKnel ? knel : null, med, p25, plaatsRijen };
 }
@@ -1384,34 +1370,95 @@ function withM2(data) {
     return p>=500 && p<=150000;
   });
 }
-function onlySale(d) { return d.filter(r => r.transaction_type==='sale'||r.transaction_type==='new_construction'); }
 function dc(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+// Prijsklassen voor de prijsverdeling (Marktoverzicht) en de wijk-analyse.
+const PRIJS_BINS = [
+  {l:'<500k',a:0,b:5e5},{l:'500k–1M',a:5e5,b:1e6},{l:'1M–2M',a:1e6,b:2e6},
+  {l:'2M–3M',a:2e6,b:3e6},{l:'3M–5M',a:3e6,b:5e6},{l:'5M–10M',a:5e6,b:1e7},{l:'>10M',a:1e7,b:Infinity}
+];
+
+// Mediaan prijs/m² per wijk, voor de wijktabellen en de wijkgrafiek: alleen rijen
+// met bruikbare m² (withM2), wijken met minstens minN panden, duurste eerst.
+function wijkStats(rows, minN = 3) {
+  const by = groupBy(withM2(rows).filter(r => r.neighborhood && r.neighborhood !== 'Onbekend'), 'neighborhood');
+  return Object.entries(by)
+    .map(([n, rs]) => ({ n, ppm2: median(rs.map(r => r.price / r.surface_m2)), count: rs.length }))
+    .filter(x => x.count >= minN).sort((a, b) => b.ppm2 - a.ppm2);
+}
+
+function wijkTabelHtml(stats) {
+  const maxP = stats[0].ppm2;
+  return stats.map((s,i)=>`
+    <tr>
+      <td><span class="wijk-rank">${String(i+1).padStart(2,'0')}</span></td>
+      <td><strong>${kwEsc(s.n)}</strong></td>
+      <td><span class="wijk-pm2">${fmt(Math.round(s.ppm2))}</span></td>
+      <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">€${fmt(Math.round(s.ppm2*EUR))}</td>
+      <td><div class="wijk-bar-wrap"><div class="wijk-bar"><div class="wijk-bar-fill" style="width:${Math.round(s.ppm2/maxP*100)}%"></div></div><span style="font-size:10px;color:var(--muted);font-family:var(--font-mono)">${Math.round(s.ppm2/maxP*100)}%</span></div></td>
+      <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">${s.count} panden</td>
+    </tr>`).join('');
+}
+
+// Vult een stadkeuzelijst één keer met allCities; de eerste optie blijft staan.
+function vulStadSelect(id) {
+  const sel = document.getElementById(id);
+  if (sel.options.length > 1) return;
+  allCities.forEach(c => { const o = document.createElement('option'); o.value = o.textContent = c; sel.appendChild(o); });
+}
+
+// ── Koop of huur ──────────────────────────────────────────────────────────────
+// Eén definitie voor alle secties, zodat dezelfde vraag overal hetzelfde getal
+// geeft. isKoop = wat de bron zegt (te koop of nieuwbouw). schoneKoop = daarvan
+// alleen wat ook echt een koopprijs heeft: huuradvertenties die bij de bron als
+// 'te koop' staan, herken je aan de titel of aan een prijs die eerder een
+// maandhuur is.
+const KOOP_TX = new Set(['sale','new_construction']);
+const HUUR_IN_TITEL = /(?:[aà]\s+louer|\ben\s+location|\blocation\s+(?:longue|courte|meubl|saison|vacances)|\blou[eé]e?(?![a-z])|\brent(?:al)?\b|for\s+rent|par\s+mois|\/\s*mois|per\s+month|par\s+nuit|par\s+jour|vacances|saisonni)/i;
+const MIN_KOOPPRIJS = 100000;   // MAD; daaronder is het vrijwel altijd huur of een fout
+const isKoop = r => KOOP_TX.has(r.transaction_type);
+const schoneKoop = r => isKoop(r) && r.price >= MIN_KOOPPRIJS && !HUUR_IN_TITEL.test(r.title||'');
+
+// Eén keer per rij bij het laden: de prijs in MAD, en in welke bak hij telt.
+//   koop        te koop of nieuwbouw met een echte koopprijs (schoneKoop)
+//   koopTwijfel staat bij de bron als koop, maar lijkt huur
+//   huur        lange of korte termijn huur
+//   huurMaand   lange termijn met een maandprijs (mediane huur, rendement)
+function prepRow(r) {
+  if (r.price_currency === 'EUR' && r.price != null) r.price = Math.round(r.price / EUR);
+  r.koop = schoneKoop(r);
+  r.koopTwijfel = isKoop(r) && !r.koop;
+  r.huur = r.transaction_type === 'long_term_rental' || r.transaction_type === 'short_term_rental';
+  r.huurMaand = r.transaction_type === 'long_term_rental' && (!r.price_period || r.price_period === 'month');
+  return r;
+}
 
 const bsc = { grid:{color:'#d8d1c4'}, ticks:{font:{family:MONO,size:10},color:'#7a8c7a'} };
 
 // ── Load ──────────────────────────────────────────────────────────────────────
-// Toon panden die in de laatste N dagen zijn gezien i.p.v. de is_active-vlag.
-// Reden: een onvolledige/afgebroken scrape zet listings die niet opnieuw gezien
-// zijn ten onrechte op is_active=false, waardoor het aanbod instort. last_seen_at
-// blijft bij zo'n gemiste scrape onveranderd, dus dit venster geeft het echte
-// recente aanbod. Zet terug op .eq('is_active', true) zodra de scrape weer
-// volledig en betrouwbaar draait.
-const ACTIEF_DAGEN = 10;
+// Aanbod = status 'active' of 'possibly_inactive'. De scraper zet een woning pas
+// na drie gemiste volle runs op 'inactive', en verschuift geen statussen na een
+// halve crawl, dus is_active/last_seen_at-lapmiddelen zijn niet meer nodig.
+const ACTIEVE_STATUS = ['active','possibly_inactive'];
+let _sb = null;
+const sbClient = () => _sb || (_sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON));
+
 async function loadData() {
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-  const cutoff = new Date(Date.now() - ACTIEF_DAGEN * 86400000).toISOString();
+  const sb = sbClient();
   const rows = []; let from = 0;
   while (true) {
     const { data, error } = await sb.from('listings')
-      .select('city,neighborhood,price,surface_m2,transaction_type,property_type,last_seen_at,url,title,source,bedrooms,bathrooms')
-      .gte('last_seen_at', cutoff).not('price','is',null)
+      .select('city,neighborhood,price,price_currency,price_period,surface_m2,land_area_m2,transaction_type,property_type,status,last_seen_at,url,title,source,bedrooms,bathrooms')
+      .in('status', ACTIEVE_STATUS).not('price','is',null)
       .order('id',{ascending:true}).range(from, from+999);
     if (error) {
+      const migratie = /status|land_area_m2/.test(error.message)
+        ? ' De databasemigraties van 2026-10-21 (backend) zijn nog niet gedraaid.' : '';
       document.getElementById('loading').innerHTML =
-        `<div style="color:var(--danger);font-family:var(--font-mono);padding:40px">Fout: ${error.message}</div>`;
+        `<div style="color:var(--danger);font-family:var(--font-mono);padding:40px">Fout: ${kwEsc(error.message)}.${migratie}</div>`;
       return null;
     }
-    rows.push(...data);
+    rows.push(...data.map(prepRow));
     document.getElementById('load-progress').textContent = `${rows.length.toLocaleString('nl-NL')} listings geladen…`;
     // Supabase geeft standaard max. 1000 rijen per request terug — pagineer in
     // stappen van 1000 tot de laatste (kortere) pagina binnen is.
@@ -1421,14 +1468,33 @@ async function loadData() {
   return rows;
 }
 
+// Versheid per bron: de laatste geslaagde run in scrape_runs. Ouder dan 8 dagen
+// kleurt rood, want de scrape draait elke maandag.
+async function loadVersheid() {
+  const { data, error } = await sbClient().from('scrape_runs')
+    .select('source,started_at,listings_scraped,status')
+    .order('started_at', { ascending:false }).limit(40);
+  if (error || !data) return;
+  const laatste = {};
+  data.forEach(r => { if (r.status === 'success' && !laatste[r.source]) laatste[r.source] = r; });
+  const delen = Object.values(laatste).sort((a,b) => a.source.localeCompare(b.source)).map(r => {
+    const d = new Date(r.started_at), oud = Date.now() - d.getTime() > 8 * 86400000;
+    const ds = d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
+    return `<span title="${fmt(r.listings_scraped)} objecten gescraped"${oud ? ' style="color:var(--danger)"' : ''}>` +
+      `${kwEsc(r.source)} ${ds}${oud ? ' ⚠' : ''}</span>`;
+  });
+  document.getElementById('footer-versheid').innerHTML = delen.length ? 'Laatste scrape: ' + delen.join(' · ') : '—';
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   const data = await loadData();
   if (!data) return;
   allData = data;
 
-  const koop  = allData.filter(r => r.transaction_type==='sale'||r.transaction_type==='new_construction');
-  const huur  = allData.filter(r => r.transaction_type==='long_term_rental'||r.transaction_type==='short_term_rental');
+  loadVersheid();
+  const koop  = allData.filter(r => r.koop);
+  const huur  = allData.filter(r => r.huur);
   const citySet = new Set(allData.filter(r=>r.city&&r.city!=='Onbekend').map(r=>r.city));
 
   document.getElementById('h-totaal').textContent = fmt(allData.length);
@@ -1441,7 +1507,6 @@ async function init() {
   const ds = dd.toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'});
   document.getElementById('nav-meta').textContent   = `${fmt(allData.length)} panden · ${ds}`;
   document.getElementById('footer-meta').textContent = `${fmt(allData.length)} panden geanalyseerd`;
-  document.getElementById('footer-date').textContent = `Bijgewerkt ${ds}`;
 
   allCities = Object.entries(groupBy(allData,'city'))
     .filter(([c,r])=>c&&c!=='Onbekend'&&r.length>=5)
@@ -1449,8 +1514,7 @@ async function init() {
 
   yieldData = computeYield(allData);
 
-  const ys = document.getElementById('yield-stad');
-  allCities.forEach(c => { const o=document.createElement('option'); o.value=o.textContent=c; ys.appendChild(o); });
+  vulStadSelect('yield-stad');
 
   document.getElementById('loading').style.display = 'none';
   buildCityTabs();
@@ -1504,9 +1568,9 @@ function renderMarkt() {
 }
 
 function renderKPIs(d) {
-  const sale = onlySale(d);
+  const sale = d.filter(r=>r.koop);
   const m2d  = withM2(sale);
-  const huur = d.filter(r=>r.transaction_type==='long_term_rental');
+  const huur = d.filter(r=>r.huurMaand);
   const medPm2  = median(m2d.map(r=>r.price/r.surface_m2));
   const medPrijs = median(sale.map(r=>r.price).filter(Boolean));
   const medHuur  = median(huur.map(r=>r.price).filter(Boolean));
@@ -1534,24 +1598,21 @@ function renderKPIs(d) {
     <div class="kpi-card">
       <div class="kpi-label">Te koop / te huur</div>
       <div class="kpi-value">${fmt(sale.length)}</div>
-      <div class="kpi-sub">${fmt(d.filter(r=>r.transaction_type!=='sale'&&r.transaction_type!=='new_construction').length)} huurpanden</div>
+      <div class="kpi-sub">${fmt(d.filter(r=>r.huur).length)} huurpanden</div>
     </div>`;
 }
 
 function renderDistChart(d) {
   dc('dist');
   const ctx = document.getElementById('chartDist').getContext('2d');
-  const BINS = [
-    {l:'<500k',a:0,b:5e5},{l:'500k–1M',a:5e5,b:1e6},{l:'1M–2M',a:1e6,b:2e6},
-    {l:'2M–3M',a:2e6,b:3e6},{l:'3M–5M',a:3e6,b:5e6},{l:'5M–10M',a:5e6,b:1e7},{l:'>10M',a:1e7,b:Infinity}
-  ];
-  const sale = onlySale(d).filter(r=>r.price>5e4&&r.price<2e7);
+  const BINS = PRIJS_BINS;
+  const sale = d.filter(r=>r.koop&&r.price<2e7);
   if (curStad === 'all') {
     const topC = allCities.slice(0,5);
     const colors = ['#1C2E1D','#C4622D','#C9A84C','#34522e','#7a8c7a'];
     const datasets = topC.map((c,i) => ({
       label:c, borderRadius:3, backgroundColor:colors[i],
-      data: BINS.map(b => allData.filter(r=>r.city===c&&(r.transaction_type==='sale'||r.transaction_type==='new_construction')&&r.price>5e4&&r.price<2e7&&r.price>=b.a&&r.price<b.b).length)
+      data: BINS.map(b => allData.filter(r=>r.city===c&&r.koop&&r.price<2e7&&r.price>=b.a&&r.price<b.b).length)
     }));
     charts['dist'] = new Chart(ctx, {
       type:'bar', data:{labels:BINS.map(b=>b.l),datasets},
@@ -1582,7 +1643,7 @@ function renderTypeChart(d) {
 function renderPm2Chart() {
   dc('steden');
   const ctx = document.getElementById('chartSteden').getContext('2d');
-  const m2d = withM2(onlySale(allData));
+  const m2d = withM2(allData.filter(r=>r.koop));
   const by  = groupBy(m2d,'city');
   const stats = Object.entries(by).filter(([c])=>c&&c!=='Onbekend')
     .map(([city,rows])=>({city,ppm2:median(rows.map(r=>r.price/r.surface_m2)),n:rows.length}))
@@ -1602,8 +1663,8 @@ function renderKoopHuurChart() {
   charts['kh'] = new Chart(ctx, {
     type:'bar',
     data:{labels:topC,datasets:[
-      {label:'Te koop',data:topC.map(c=>allData.filter(r=>r.city===c&&(r.transaction_type==='sale'||r.transaction_type==='new_construction')).length),backgroundColor:'#1C2E1D',borderRadius:3},
-      {label:'Te huur',data:topC.map(c=>allData.filter(r=>r.city===c&&(r.transaction_type==='long_term_rental'||r.transaction_type==='short_term_rental')).length),backgroundColor:'#C4622D',borderRadius:3},
+      {label:'Te koop',data:topC.map(c=>allData.filter(r=>r.city===c&&r.koop).length),backgroundColor:'#1C2E1D',borderRadius:3},
+      {label:'Te huur',data:topC.map(c=>allData.filter(r=>r.city===c&&r.huur).length),backgroundColor:'#C4622D',borderRadius:3},
     ]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:MONO,size:11},boxWidth:12,color:'#1C2E1D'}}},
       scales:{x:{grid:{display:false},ticks:{font:{family:MONO,size:10},color:'#7a8c7a'}},y:bsc}}
@@ -1615,21 +1676,9 @@ function renderWijkTable(d) {
   document.getElementById('wijk-table-sub').textContent =
     `${stad}${curStad==='all'?' (selecteer een stad voor wijkdetails)':''} · mediaan prijs per m²`;
   if (!stad) { document.getElementById('wijk-tbody').innerHTML=''; return; }
-  const src  = withM2(onlySale(allData.filter(r=>r.city===stad)));
-  const by   = groupBy(src.filter(r=>r.neighborhood&&r.neighborhood!=='Onbekend'),'neighborhood');
-  const stats = Object.entries(by).map(([n,rows])=>({n,ppm2:median(rows.map(r=>r.price/r.surface_m2)),count:rows.length}))
-    .filter(x=>x.count>=3).sort((a,b)=>b.ppm2-a.ppm2).slice(0,15);
+  const stats = wijkStats(allData.filter(r=>r.city===stad&&r.koop)).slice(0,15);
   if (!stats.length) { document.getElementById('wijk-tbody').innerHTML='<tr><td colspan="6" class="empty-state">Onvoldoende wijkdata voor deze stad.</td></tr>'; return; }
-  const maxP = stats[0].ppm2;
-  document.getElementById('wijk-tbody').innerHTML = stats.map((s,i)=>`
-    <tr>
-      <td><span class="wijk-rank">${String(i+1).padStart(2,'0')}</span></td>
-      <td><strong>${s.n}</strong></td>
-      <td><span class="wijk-pm2">${fmt(Math.round(s.ppm2))}</span></td>
-      <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">€${fmt(Math.round(s.ppm2*EUR))}</td>
-      <td><div class="wijk-bar-wrap"><div class="wijk-bar"><div class="wijk-bar-fill" style="width:${Math.round(s.ppm2/maxP*100)}%"></div></div><span style="font-size:10px;color:var(--muted);font-family:var(--font-mono)">${Math.round(s.ppm2/maxP*100)}%</span></div></td>
-      <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">${s.count} panden</td>
-    </tr>`).join('');
+  document.getElementById('wijk-tbody').innerHTML = wijkTabelHtml(stats);
 }
 
 // ── Map ───────────────────────────────────────────────────────────────────────
@@ -1642,7 +1691,7 @@ function renderMap() {
   const byCity = groupBy(allData.filter(r=>r.city in CITY_COORDS),'city');
   const cityStats = {};
   Object.entries(byCity).forEach(([city,rows])=>{
-    const s = withM2(onlySale(rows));
+    const s = withM2(rows.filter(r=>r.koop));
     cityStats[city] = {count:rows.length, ppm2:median(s.map(r=>r.price/r.surface_m2))};
   });
   const maxCount = Math.max(...Object.values(cityStats).map(x=>x.count),1);
@@ -1682,8 +1731,8 @@ function computeYield(data) {
     if (!r.city||!r.neighborhood||r.neighborhood==='Onbekend'||!r.price||r.price<=0) return;
     const key = `${r.city}|${r.neighborhood}|${r.property_type||'other'}`;
     if (!groups[key]) groups[key] = {koop:[],huur:[],stad:r.city,wijk:r.neighborhood,type:r.property_type||'other'};
-    if ((r.transaction_type==='sale'||r.transaction_type==='new_construction') && r.price>=50000) groups[key].koop.push(r.price);
-    else if (r.transaction_type==='long_term_rental' && r.price>=500) groups[key].huur.push(r.price);
+    if (r.koop) groups[key].koop.push(r.price);
+    else if (r.huurMaand && r.price>=500) groups[key].huur.push(r.price);
   });
   return Object.values(groups).filter(g=>g.koop.length>=3&&g.huur.length>=3).map(g=>{
     const mk=median(g.koop), mh=median(g.huur);
@@ -1714,7 +1763,7 @@ function renderYield() {
     const c = r.yld>=7?'g':r.yld>=4?'o':'r';
     const q = r.quality==='Betrouwbaar'?'b':'i';
     return `<tr>
-      <td><strong>${r.wijk}</strong></td><td style="color:var(--muted)">${r.stad}</td><td style="color:var(--muted)">${r.type}</td>
+      <td><strong>${kwEsc(r.wijk)}</strong></td><td style="color:var(--muted)">${kwEsc(r.stad)}</td><td style="color:var(--muted)">${kwEsc(r.type)}</td>
       <td class="num">${fmt(r.med_koop)}</td><td class="num">${fmt(r.med_huur)}</td>
       <td style="text-align:right"><span class="yield-pct yield-pct--${c}">${r.yld.toFixed(1)}%</span></td>
       <td class="num">${r.n_koop}</td><td class="num">${r.n_huur}</td>
@@ -1724,26 +1773,29 @@ function renderYield() {
 }
 
 // ── WIJK-ANALYSE ──────────────────────────────────────────────────────────────
-function populateWaStad() {
-  const sel = document.getElementById('wa-stad');
-  if (sel.options.length<=1) allCities.forEach(c=>{const o=document.createElement('option');o.value=o.textContent=c;sel.appendChild(o);});
-}
+// Koop en huur worden nooit samen in één mediaan gegooid.
+const WA_TX = {
+  koop:             r => r.koop,
+  sale:             r => r.koop && r.transaction_type === 'sale',
+  new_construction: r => r.koop && r.transaction_type === 'new_construction',
+  long_term_rental: r => r.huurMaand,
+};
+const WA_TX_LBL = { koop:'alle koop', sale:'bestaand te koop', new_construction:'nieuwbouw', long_term_rental:'lange termijn huur' };
 
 function renderWijkAnalyse() {
   const stad = document.getElementById('wa-stad').value;
   const tx   = document.getElementById('wa-tx').value;
   if (!stad) { document.getElementById('wa-prompt').style.display='block'; document.getElementById('wa-content').style.display='none'; return; }
   document.getElementById('wa-prompt').style.display='none'; document.getElementById('wa-content').style.display='block';
-  let d = allData.filter(r=>r.city===stad);
-  if (tx) d = d.filter(r=>r.transaction_type===tx);
+  const d = allData.filter(r=>r.city===stad && WA_TX[tx](r));
   const m2d    = withM2(d);
   const medPm2 = median(m2d.map(r=>r.price/r.surface_m2));
   const medPr  = median(d.map(r=>r.price).filter(Boolean));
   const wijken = Object.entries(groupBy(d.filter(r=>r.neighborhood&&r.neighborhood!=='Onbekend'),'neighborhood')).filter(([,r])=>r.length>=3);
   document.getElementById('wa-kpi-grid').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Listings</div><div class="kpi-value">${fmt(d.length)}</div><div class="kpi-sub">${stad}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Listings</div><div class="kpi-value">${fmt(d.length)}</div><div class="kpi-sub">${kwEsc(stad)}</div></div>
     <div class="kpi-card accent"><div class="kpi-label">Mediaan prijs/m²</div><div class="kpi-value accent">${medPm2?fmt(Math.round(medPm2)):'—'}</div><div class="kpi-sub">MAD/m²</div></div>
-    <div class="kpi-card gold"><div class="kpi-label">Mediaan vraagprijs</div><div class="kpi-value gold">${fmtMAD(medPr)}</div><div class="kpi-sub">${tx||'alle types'}</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Mediaan vraagprijs</div><div class="kpi-value gold">${fmtMAD(medPr)}</div><div class="kpi-sub">${WA_TX_LBL[tx]}</div></div>
     <div class="kpi-card"><div class="kpi-label">Actieve wijken</div><div class="kpi-value">${wijken.length}</div><div class="kpi-sub">met ≥3 listings</div></div>
     <div class="kpi-card"><div class="kpi-label">Met m²-data</div><div class="kpi-value">${fmt(m2d.length)}</div><div class="kpi-sub">${Math.round(m2d.length/Math.max(d.length,1)*100)}% van totaal</div></div>`;
   renderWAHist(d); renderWAType(d); renderWACmp(d,stad); renderWATable(d,stad);
@@ -1756,7 +1808,7 @@ function renderWAHist(d) {
   const rows = d.filter(r=>r.price>1e4&&r.price<5e7);
   document.getElementById('wa-hist-sub').textContent = `${fmt(rows.length)} listings`;
   if (rows.length<5) return;
-  const BINS=[{l:'<500k',a:0,b:5e5},{l:'500k–1M',a:5e5,b:1e6},{l:'1M–2M',a:1e6,b:2e6},{l:'2M–3M',a:2e6,b:3e6},{l:'3M–5M',a:3e6,b:5e6},{l:'5M–10M',a:5e6,b:1e7},{l:'>10M',a:1e7,b:Infinity}];
+  const BINS = PRIJS_BINS;
   const med = median(rows.map(r=>r.price));
   const medBin = BINS.findIndex(b=>med>=b.a&&med<b.b);
   waCharts['hist'] = new Chart(document.getElementById('wa-chart-hist').getContext('2d'),{
@@ -1782,10 +1834,7 @@ function renderWAType(d) {
 
 function renderWACmp(d,stad) {
   dcWA('cmp');
-  const m2d  = withM2(d);
-  const by   = groupBy(m2d.filter(r=>r.neighborhood&&r.neighborhood!=='Onbekend'),'neighborhood');
-  const stats = Object.entries(by).map(([n,rows])=>({n,ppm2:median(rows.map(r=>r.price/r.surface_m2)),count:rows.length}))
-    .filter(x=>x.count>=3).sort((a,b)=>b.ppm2-a.ppm2).slice(0,15);
+  const stats = wijkStats(d).slice(0,15);
   if (!stats.length) return;
   document.getElementById('wa-cmp-sub').textContent = `${stad} · top ${stats.length} wijken`;
   waCharts['cmp'] = new Chart(document.getElementById('wa-chart-cmp').getContext('2d'),{
@@ -1796,29 +1845,13 @@ function renderWACmp(d,stad) {
 }
 
 function renderWATable(d,stad) {
-  const m2d  = withM2(d);
-  const by   = groupBy(m2d.filter(r=>r.neighborhood&&r.neighborhood!=='Onbekend'),'neighborhood');
-  const stats = Object.entries(by).map(([n,rows])=>({n,ppm2:median(rows.map(r=>r.price/r.surface_m2)),count:rows.length}))
-    .filter(x=>x.count>=3).sort((a,b)=>b.ppm2-a.ppm2).slice(0,20);
+  const stats = wijkStats(d).slice(0,20);
   document.getElementById('wa-table-sub').textContent = `${stad} · ${stats.length} wijken met ≥3 listings`;
   if (!stats.length) { document.getElementById('wa-wijk-tbody').innerHTML='<tr><td colspan="6" class="empty-state">Onvoldoende wijkdata.</td></tr>'; return; }
-  const maxP = stats[0].ppm2;
-  document.getElementById('wa-wijk-tbody').innerHTML = stats.map((s,i)=>`
-    <tr>
-      <td><span class="wijk-rank">${String(i+1).padStart(2,'0')}</span></td>
-      <td><strong>${s.n}</strong></td>
-      <td><span class="wijk-pm2">${fmt(Math.round(s.ppm2))}</span></td>
-      <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">€${fmt(Math.round(s.ppm2*EUR))}</td>
-      <td><div class="wijk-bar-wrap"><div class="wijk-bar"><div class="wijk-bar-fill" style="width:${Math.round(s.ppm2/maxP*100)}%"></div></div><span style="font-size:10px;color:var(--muted);font-family:var(--font-mono)">${Math.round(s.ppm2/maxP*100)}%</span></div></td>
-      <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">${s.count} panden</td>
-    </tr>`).join('');
+  document.getElementById('wa-wijk-tbody').innerHTML = wijkTabelHtml(stats);
 }
 
 // ── DEAL VALIDATOR ────────────────────────────────────────────────────────────
-function populateDvStad() {
-  const sel = document.getElementById('dv-stad');
-  if (sel.options.length<=1) allCities.forEach(c=>{const o=document.createElement('option');o.value=o.textContent=c;sel.appendChild(o);});
-}
 
 function validateDeal() {
   const stad  = document.getElementById('dv-stad').value;
@@ -1829,7 +1862,9 @@ function validateDeal() {
   if (!stad||!m2||!prijs) { alert('Vul minimaal stad, oppervlakte en vraagprijs in.'); return; }
 
   const inputPm2 = prijs/m2;
-  let comp = allData.filter(r=>r.city===stad&&r.transaction_type===tx&&(type===''||r.property_type===type)&&r.price>0&&r.surface_m2>0);
+  // Koop alleen tegen echte koopprijzen, huur alleen tegen maandhuur.
+  const txOk = tx==='long_term_rental' ? (r => r.huurMaand) : (r => r.koop && r.transaction_type===tx);
+  let comp = allData.filter(r=>r.city===stad&&txOk(r)&&(type===''||r.property_type===type)&&r.price>0&&r.surface_m2>0);
   let similar = comp.filter(r=>r.surface_m2>=m2*0.5&&r.surface_m2<=m2*1.5);
   if (similar.length < 5) similar = comp;
   const valid = withM2(similar);
@@ -1858,7 +1893,7 @@ function validateDeal() {
     <div class="deal-score ${score}">
       <div class="deal-score-icon">${icons[score]}</div>
       <div>
-        <div class="deal-score-label">${stad} · ${type||'alle types'} · ${tx}</div>
+        <div class="deal-score-label">${kwEsc(stad)} · ${type?kwEsc(objType(type)):'alle types'} · ${tx}</div>
         <div class="deal-score-headline">${titles[score]}</div>
         <div class="deal-score-desc">${descs[score]}</div>
       </div>
@@ -1872,9 +1907,9 @@ function validateDeal() {
     <div class="comp-list">
       ${top5.map(r=>`
         <div class="comp-item">
-          ${r.url?`<a href="${r.url}" target="_blank" rel="noopener">`:''}
-          <div class="comp-name">${r.title||r.neighborhood||r.city||'—'}</div>
-          <div class="comp-meta">${r.surface_m2?fmt(r.surface_m2)+'m²':'—'} · ${r.source||''}</div>
+          ${r.url?`<a href="${kwEsc(r.url)}" target="_blank" rel="noopener">`:''}
+          <div class="comp-name">${kwEsc(r.title||r.neighborhood||r.city||'—')}</div>
+          <div class="comp-meta">${r.surface_m2?fmt(r.surface_m2)+'m²':'—'} · ${kwEsc(r.source||'')}</div>
           <div class="comp-pm2">${fmt(Math.round(r.price/r.surface_m2))} MAD/m²</div>
           <div class="comp-price">${fmtMAD(r.price)}</div>
           ${r.url?'</a>':''}
@@ -1888,8 +1923,9 @@ function validateDeal() {
 //   airbnb_market_stats   — gemiddelden per stad, woninggrootte en wijk
 //   airbnb_market_months  — dezelfde cijfers per maand, met spreiding p25 t/m p90
 //   airbnb_districts      — de wijken die AirROI kent, met hun aanbod
-// 'kwaliteit' = objecten met beoordeling 4+, 120+ geboekte nachten en recent
-// nog geboekt. 'alles' = het complete aanbod, als contrast.
+// 'kwaliteit' = de objecten die door het AirROI-filter komen; welk filter dat
+// was, staat per rij in de kolom filter (zie abFilterTekst). 'alles' = het
+// complete aanbod, als contrast.
 let abStats = [], abMonths = [], abDistricts = [], abCharts = {}, abInited = false;
 const AB_MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
 const abSlkLbl = n => n < 0 ? 'Alle formaten' : n === 0 ? 'Studio' : `${n} slaapkamer${n>1?'s':''}`;
@@ -1909,6 +1945,23 @@ const abWijkKort = n => {
 const abSlug = v => String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
   .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 
+// Het AirROI-filter uit de data als leesbare tekst, zodat de uitleg altijd klopt
+// met wat de workflow echt heeft opgehaald.
+function abFilterTekst(filter) {
+  let f = filter || {};
+  if (typeof f === 'string') { try { f = JSON.parse(f); } catch (e) { f = {}; } }
+  const delen = [];
+  for (const [veld, cond] of Object.entries(f)) {
+    if (veld === 'bedrooms') continue;
+    const v = cond && (cond.gte ?? cond.gt ?? cond.eq);
+    if (veld === 'rating_overall') delen.push(`beoordeling ${fmt(v,1)} of hoger`);
+    else if (veld === 'ttm_days_booked') delen.push(`minstens ${fmt(v)} geboekte nachten in twaalf maanden`);
+    else if (/^l90d_/.test(veld)) delen.push('ook geboekt in de laatste negentig dagen');
+    else delen.push(`${veld} ${cond && cond.gte!=null ? '≥' : cond && cond.gt!=null ? '>' : '='} ${v}`);
+  }
+  return delen.length ? delen.join(', ') : 'geen extra eisen';
+}
+
 function abStat(city, district, bedrooms, label) {
   return abStats.find(r => r.city===city && (r.district||'')===(district||'')
     && r.bedrooms===bedrooms && r.filter_label===label) || null;
@@ -1917,12 +1970,12 @@ function abStat(city, district, bedrooms, label) {
 async function initAirbnb() {
   if (abInited) return;
   abInited = true;
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const sb = sbClient();
   let ok = true;
   try {
     const [st, mo, di] = await Promise.all([
       sb.from('airbnb_market_stats').select(
-        'city,district,bedrooms,filter_label,occupancy,average_daily_rate,rev_par,revenue,' +
+        'city,district,bedrooms,filter_label,filter,occupancy,average_daily_rate,rev_par,revenue,' +
         'booking_lead_time,length_of_stay,active_listings_count,currency,fetched_at'),
       sb.from('airbnb_market_months').select('city,district,filter_label,month,metrics'),
       sb.from('airbnb_districts').select('city,name,active_listings_count'),
@@ -1936,7 +1989,7 @@ async function initAirbnb() {
   document.getElementById('ab-content').style.display = 'block';
 
   const steden = [...new Set(abStats.map(r=>r.city))].sort();
-  document.getElementById('ab-stad').innerHTML = steden.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('ab-stad').innerHTML = steden.map(c=>`<option value="${kwEsc(c)}">${kwEsc(c)}</option>`).join('');
   const maten = [...new Set(abStats.filter(r=>!r.district).map(r=>r.bedrooms))].sort((a,b)=>a-b);
   document.getElementById('ab-slk').innerHTML =
     maten.map(n=>`<option value="${n}"${n===-1?' selected':''}>${abSlkLbl(n)}</option>`).join('');
@@ -1946,8 +1999,7 @@ async function initAirbnb() {
 // Mediane koopprijs uit ons eigen aanbod, zo dicht mogelijk bij de gekozen maat.
 function abMedKoop(city, bedrooms, buurt) {
   let base = allData.filter(r => r.city===city && abResi.has(r.property_type)
-    && (r.transaction_type==='sale'||r.transaction_type==='new_construction')
-    && r.price>5e4 && r.price<2e7);
+    && r.koop && r.price<2e7);
   if (buurt) base = base.filter(r => abSlug(r.neighborhood) === abSlug(buurt));
   let sel = bedrooms >= 0 ? base.filter(r => r.bedrooms===bedrooms) : base;
   let lbl = bedrooms >= 0 ? abSlkLbl(bedrooms) : 'alle groottes';
@@ -2013,6 +2065,11 @@ function renderAirbnb() {
       <div class="kpi-sub">${alles && alles.active_listings_count ? 'van '+fmt(Math.round(alles.active_listings_count))+' in de stad' : ''}</div>
     </div>`;
 
+  document.getElementById('ab-filter-tekst').textContent =
+    `Links de gemiddelden van objecten die aan onze eisen voldoen: ${abFilterTekst(kwStad && kwStad.filter)}. ` +
+    'Rechts hetzelfde cijfer over het complete aanbod, inclusief advertenties die nauwelijks draaien. ' +
+    'Het verschil is wat goed verhuren oplevert, niet wat de markt vanzelf geeft.';
+
   abRenderCmp(slk);
   abRenderMaand(stad);
   abRenderSlk(stad);
@@ -2042,7 +2099,7 @@ function abRenderCmp(slk) {
   document.getElementById('ab-cmp-tbody').innerHTML = rijen.map(r => {
     const x = (r.kw && r.al) ? r.kw/r.al : null;
     return `<tr>
-      <td><strong>${r.stad}</strong></td>
+      <td><strong>${kwEsc(r.stad)}</strong></td>
       <td style="text-align:right;font-family:var(--font-mono);font-size:13px;color:var(--accent)"><strong>${abMoney(r.kw)}</strong></td>
       <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${abMoney(r.al)}</td>
       <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${x?fmt(x,1)+'×':'—'}</td>
@@ -2148,14 +2205,14 @@ function abRenderWijken(stad, slk) {
   const kleur = v => v==null?'var(--muted)':v>=7?'var(--success)':v>=4?'var(--accent)':'var(--danger)';
   document.getElementById('ab-wijk-tbody').innerHTML = rijen.length ? rijen.map((w,i) => `<tr>
     <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">${i+1}</td>
-    <td><strong title="${w.wijk}">${w.kort}</strong></td>
+    <td><strong title="${kwEsc(w.wijk)}">${kwEsc(w.kort)}</strong></td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.n!=null?fmt(Math.round(w.n)):'—'}${w.aanbod?`<span style="color:var(--muted)"> / ${fmt(w.aanbod)}</span>`:''}</td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.occ!=null?fmt(w.occ,0)+'%':'—'}</td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.adr!=null?fmt(Math.round(w.adr)):'—'}</td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:13px"><strong>${abMoney(w.rev)}</strong></td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:12px">${w.koop?fmtMAD(w.koop)+`<span style="color:var(--muted)"> (n=${w.koopN})</span>`:'—'}</td>
     <td style="text-align:right;font-family:var(--font-mono);font-size:13px;color:${kleur(w.bruto)}">${w.bruto!=null?'<strong>'+fmt(w.bruto,1)+'%</strong>':'—'}</td>
-  </tr>`).join('') : `<tr><td colspan="8" class="empty-state">AirROI kent voor ${stad} geen wijken met minstens 25 objecten.</td></tr>`;
+  </tr>`).join('') : `<tr><td colspan="8" class="empty-state">AirROI kent voor ${kwEsc(stad)} geen wijken met minstens 100 objecten.</td></tr>`;
 
   if (!rijen.length) return;
   abCharts['wijk'] = new Chart(document.getElementById('ab-chart-wijk').getContext('2d'), {
