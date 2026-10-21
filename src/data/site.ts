@@ -8,8 +8,9 @@ export const site = {
   email: 'a.douider@maghreb-estates.com',
   whatsapp: '31683498715',
   land: 'NL',
-  // TODO: replace logo with transparent-background version from Canva.
+  // Transparant logo: groen voor lichte achtergronden, crème voor donkere (footer).
   logo: '/images/logo.png',
+  logoLicht: '/images/logo-licht.png',
   ogImage: '/images/villa5.jpg',
   // Entity SEO: vul social-/profiel-URL's aan zodra beschikbaar (Instagram, LinkedIn,
   // Facebook, YouTube, Google Business Profile). Leeg laten is beter dan verzinnen.
