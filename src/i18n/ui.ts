@@ -5,7 +5,7 @@ import { paginas } from './config';
 import { aanbodUi, aanbodHubPad, aanbodStadPad } from './aanbod';
 
 export interface UiStrings {
-  nav: { kopen: string; investeren: string; nieuwbouw: string; verkopen: string; overOns: string; contact: string; cta: string; menu: string; taalKiezen: string };
+  nav: { kopen: string; investeren: string; nieuwbouw: string; overOns: string; contact: string; cta: string; menu: string; taalKiezen: string };
   cta: { advies: string; objectanalyse: string; meer: string };
   footer: {
     tagline: string; contact: string; services: string; insights: string; markets: string;
@@ -42,7 +42,7 @@ export interface UiStrings {
 
 export const ui: Record<Taal, UiStrings> = {
   nl: {
-    nav: { kopen: 'Vastgoed kopen', investeren: 'Investeren', nieuwbouw: 'Nieuwbouw & off-plan', verkopen: 'Uw woning verkopen', overOns: 'Over ons', contact: 'Contact', cta: 'Plan adviesgesprek', menu: 'Menu openen', taalKiezen: 'Taal kiezen' },
+    nav: { kopen: 'Vastgoed kopen', investeren: 'Investeren', nieuwbouw: 'Nieuwbouw & off-plan', overOns: 'Over ons', contact: 'Contact', cta: 'Plan adviesgesprek', menu: 'Menu openen', taalKiezen: 'Taal kiezen' },
     cta: { advies: 'Plan adviesgesprek', objectanalyse: 'Laat een object analyseren', meer: 'Lees meer' },
     footer: {
       tagline: 'International real estate advisory in Morocco.',
@@ -78,7 +78,7 @@ export const ui: Record<Taal, UiStrings> = {
   },
 
   en: {
-    nav: { kopen: 'Buying property', investeren: 'Investment', nieuwbouw: 'New-build & off-plan', verkopen: 'Sell your property', overOns: 'About us', contact: 'Contact', cta: 'Book a consultation', menu: 'Open menu', taalKiezen: 'Choose language' },
+    nav: { kopen: 'Buying property', investeren: 'Investment', nieuwbouw: 'New-build & off-plan', overOns: 'About us', contact: 'Contact', cta: 'Book a consultation', menu: 'Open menu', taalKiezen: 'Choose language' },
     cta: { advies: 'Book a consultation', objectanalyse: 'Have a property analysed', meer: 'Read more' },
     footer: {
       tagline: 'International real estate advisory in Morocco.',
@@ -114,7 +114,7 @@ export const ui: Record<Taal, UiStrings> = {
   },
 
   fr: {
-    nav: { kopen: 'Acheter', investeren: 'Investir', nieuwbouw: 'Neuf & VEFA', verkopen: 'Vendre votre bien', overOns: 'À propos', contact: 'Contact', cta: 'Prendre rendez-vous', menu: 'Ouvrir le menu', taalKiezen: 'Choisir la langue' },
+    nav: { kopen: 'Acheter', investeren: 'Investir', nieuwbouw: 'Neuf & VEFA', overOns: 'À propos', contact: 'Contact', cta: 'Prendre rendez-vous', menu: 'Ouvrir le menu', taalKiezen: 'Choisir la langue' },
     cta: { advies: 'Prendre rendez-vous', objectanalyse: 'Faire analyser un bien', meer: 'En savoir plus' },
     footer: {
       tagline: 'International real estate advisory in Morocco.',
@@ -150,7 +150,7 @@ export const ui: Record<Taal, UiStrings> = {
   },
 
   ar: {
-    nav: { kopen: 'شراء العقارات', investeren: 'الاستثمار', nieuwbouw: 'مشاريع جديدة', verkopen: 'بيع عقارك', overOns: 'من نحن', contact: 'اتصل بنا', cta: 'احجز استشارة', menu: 'فتح القائمة', taalKiezen: 'اختر اللغة' },
+    nav: { kopen: 'شراء العقارات', investeren: 'الاستثمار', nieuwbouw: 'مشاريع جديدة', overOns: 'من نحن', contact: 'اتصل بنا', cta: 'احجز استشارة', menu: 'فتح القائمة', taalKiezen: 'اختر اللغة' },
     cta: { advies: 'احجز استشارة', objectanalyse: 'اطلب تحليل عقار', meer: 'اقرأ المزيد' },
     footer: {
       tagline: 'استشارات عقارية دولية في المغرب.',
@@ -196,7 +196,6 @@ export const navVoorTaal = (taal: Taal) => {
     { label: a.alleProjecten, href: aanbodHubPad(taal) },
     { label: 'Marrakech', href: aanbodStadPad(taal, 'marrakech') },
     { label: 'Tanger', href: aanbodStadPad(taal, 'tanger') },
-    { label: t.nav.verkopen, href: paginas.verkopen[taal] },
   ] };
   return [
     aanbodItem,

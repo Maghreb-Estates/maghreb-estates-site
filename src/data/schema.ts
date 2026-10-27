@@ -16,16 +16,20 @@ export function faqSchema(items: { q: string; a: string }[]) {
   };
 }
 
-export function serviceSchema(opts: { naam: string; beschrijving: string; path: string }) {
+// `steden` beperkt het werkgebied tot die steden (verkooppagina); zonder steden
+// geldt heel Marokko.
+export function serviceSchema(opts: { naam: string; beschrijving: string; path: string; steden?: readonly string[]; type?: string }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
     name: opts.naam,
     description: opts.beschrijving,
     url: new URL(opts.path, site.url).href,
-    areaServed: { '@type': 'Country', name: 'Marokko' },
+    areaServed: opts.steden
+      ? opts.steden.map((naam) => ({ '@type': 'City', name: naam }))
+      : { '@type': 'Country', name: 'Marokko' },
     provider: { '@id': site.url + '/#organization' },
-    serviceType: 'Vastgoedbegeleiding Marokko',
+    serviceType: opts.type ?? 'Vastgoedbegeleiding Marokko',
   };
 }
 

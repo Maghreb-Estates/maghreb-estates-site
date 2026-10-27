@@ -2,14 +2,21 @@
 // De opmaak staat in src/components/VerkoopPagina.astro. Elke taal heeft
 // dezelfde vorm (VerkoopTekst), dus een ontbrekende vertaling valt op.
 //
-// Placeholders: {steden} = "Tanger, Rabat, … en Agadir", {stedenOf} = "… of
-// Agadir", {stad} = één stad (keuzelijst in het formulier).
+// Placeholders: {steden} = "Rabat, Casablanca, … en Agadir", {stedenOf} = "… of
+// Agadir", {stad} = één stad (keuzelijst in het formulier). In het prijsblok:
+// {datum}, {n}, {bronnen}, {min}, {prijzen} (zie VerkoopPagina.astro).
+//
+// SEO-afspraak (documenten/analyses/seo-verkooppagina-marokko-2026-10/): verkopen
+// is een nevendienst. Deze pagina mag scherp op verkoopintentie mikken ("vendre
+// appartement Maroc"), maar brede termen als "agence immobilière" en "immobilier
+// Maroc" blijven voor de hoofdsite. Geen stadspagina's voor verkopers zolang
+// Search Console daar geen vraag naar laat zien.
 
 import type { Taal } from './config';
 
 /** Werkgebied: alleen deze vijf steden en hun directe omgeving. De Latijnse
  *  naam is ook de waarde die het formulier meestuurt. */
-export const werkgebied = ['Tanger', 'Rabat', 'Casablanca', 'Marrakech', 'Agadir'] as const;
+export const werkgebied = ['Rabat', 'Casablanca', 'Tanger', 'Marrakech', 'Agadir'] as const;
 export type WerkgebiedStad = (typeof werkgebied)[number];
 
 // TODO: vervang de voorbeeldcase (`case` per taal hieronder) door het echte
@@ -29,15 +36,38 @@ export interface VerkoopTekst {
   steden: Record<WerkgebiedStad, string>;
   /** Opsomming: scheidingsteken en voegwoorden, inclusief spaties. */
   lijst: { komma: string; en: string; of: string };
-  hero: { eyebrow: string; titel: string; sub: string; aanmelden: string; case: string; trust: string[] };
+  /** Twee CTA's: estimatie en aanbieden. Beide openen het formulier met de
+   *  bijbehorende keuze bij "Uw vraag" al ingevuld. */
+  hero: { eyebrow: string; titel: string; sub: string; estimatie: string; aanbieden: string; trust: string[] };
   kruimel: string;
   aanmelden: {
     eyebrow: string; titel: string; intro: string;
     werkgebiedTitel: string; werkgebiedTekst: string;
     voordelen: string[];
     direct: string; directWa: string; directBel: string; waBericht: string;
+    /** Label voor het +31-nummer zodra +212 het hoofdnummer is (fr/ar). */
+    internationaal: string;
   };
+  /** Vraagprijzen per m² uit src/data/marktprijzen.json, als gewone HTML-tabel. */
+  prijzen: {
+    eyebrow: string; titel: string; intro: string;
+    bijgewerkt: string; advertenties: string; bron: string; bronTekst: string; letOp: string; letOpTekst: string;
+    kolomStad: string; kolomType: string; kolomMediaan: string; kolomBereik: string; kolomN: string;
+    types: { appartement: string; villa: string };
+    eenheid: string;
+    wijkenTitel: string; wijkenIntro: string; kolomWijk: string;
+    methodeKop: string; methode: string[];
+    knop: string;
+    /** Eén stad in de FAQ-opsomming, bv. "{prijs} à {stad}". */
+    inStad: string;
+    faq: { q: string; a: string };
+  };
+  /** Wijknamen in eigen schrift (alleen Arabisch); anders de Latijnse naam. */
+  wijkNamen?: Record<string, string>;
+  /** Eén subtiele regel op de homepage, onderaan. Niet in de hero. */
+  homeBlok: { vraag: string; link: string };
   form: {
+    doel: string; doelen: [string, string];
     naam: string; naamPh: string; telefoon: string; telefoonPh: string;
     email: string; emailPh: string; optioneel: string;
     stad: string; stadKies: string; stadOptie: string; wijk: string; wijkPh: string;
@@ -50,7 +80,7 @@ export interface VerkoopTekst {
   };
   /** Regels van het WhatsApp-/e-mailbericht dat het formulier opstelt. */
   bericht: {
-    kop: string; naam: string; telefoon: string; email: string; woont: string; type: string;
+    kop: string; doel: string; naam: string; telefoon: string; email: string; woont: string; type: string;
     stad: string; wijk: string; oppervlak: string; kamers: string; titel: string; prijs: string; toelichting: string;
   };
   waarom: {
@@ -83,25 +113,25 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
   // ---------------------------------------------------------------- NEDERLANDS
   nl: {
     meta: {
-      title: 'Huis verkopen in Marokko: wij nemen het uit handen | Maghreb Estates',
-      description: "Verkoop uw woning in {stedenOf} via een professioneel bedrijf. Waardebepaling met marktdata, foto's en video, al het klantcontact en kopers in Marokko en Europa.",
-      dienst: 'Woning verkopen in Marokko',
+      title: 'Huis verkopen in Marokko | Maghreb Estates',
+      description: "Verkoop uw woning in Marokko: waardebepaling, foto's, bezichtigingen, onderhandeling en notaris in {steden}.",
+      dienst: 'Verkoopbegeleiding van woningen in Marokko',
       dienstBeschrijving: 'Volledige verkoopbegeleiding van woningen in {steden} en directe omgeving: waardebepaling, fotografie en video, presentatie, klantcontact, bezichtigingen, onderhandeling en overdracht bij de notaris.',
     },
     steden: { Tanger: 'Tanger', Rabat: 'Rabat', Casablanca: 'Casablanca', Marrakech: 'Marrakech', Agadir: 'Agadir' },
     lijst: { komma: ', ', en: ' en ', of: ' of ' },
     hero: {
       eyebrow: 'Woning verkopen',
-      titel: 'Uw woning verkopen?<br /><em>Wij nemen het volledig uit handen</em>',
-      sub: 'In {steden}. Van de waardebepaling tot de akte bij de notaris, met één professioneel bedrijf in plaats van een willekeurige tussenpersoon. Of u nu in Marokko woont of in het buitenland.',
-      aanmelden: 'Meld uw woning aan',
-      case: 'Bekijk een case',
+      titel: 'Uw appartement, huis of villa <br /><em>verkopen in Marokko</em>',
+      sub: 'Wilt u een appartement, huis, villa of grond in Marokko verkopen? Maghreb Estates begeleidt u van de waardebepaling tot de akte bij de notaris, in {steden}.',
+      estimatie: 'Vraag een waardebepaling aan',
+      aanbieden: 'Bied uw woning aan',
       trust: ['Professionele foto’s en video', 'Kopers in Marokko én Europa', 'Eén vast aanspreekpunt', 'Tot en met de notaris'],
     },
     kruimel: 'Woning verkopen',
     aanmelden: {
-      eyebrow: 'Woning aanmelden',
-      titel: 'Meld uw woning aan',
+      eyebrow: 'Waardebepaling of verkoop',
+      titel: 'Vertel ons over uw woning',
       intro: 'Vertel ons kort over de woning. Wij nemen binnen 24 uur contact op. Vrijblijvend: u zit nergens aan vast tot u een verkoopopdracht tekent.',
       werkgebiedTitel: 'Ons werkgebied',
       werkgebiedTekst: 'Wij verkopen alleen woningen in deze vijf steden en hun directe omgeving. Daar kennen wij de markt en zijn wij snel ter plaatse.',
@@ -115,8 +145,37 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       directWa: 'WhatsApp ons',
       directBel: 'of bel',
       waBericht: 'Hallo Maghreb Estates, ik wil mijn woning in Marokko verkopen.',
+      internationaal: 'Vanuit het buitenland:',
     },
+    prijzen: {
+      eyebrow: 'Marktcijfers',
+      titel: 'Woning verkopen in Marokko: de marktcijfers',
+      intro: 'Wat vragen verkopers nu per vierkante meter? Wij analyseren elke week de koopadvertenties op de grote Marokkaanse portals. Dit zijn de mediane vraagprijzen in onze vijf steden.',
+      bijgewerkt: 'Laatst bijgewerkt', advertenties: 'Geanalyseerde advertenties',
+      bron: 'Bron', bronTekst: 'openbare advertenties op {bronnen}',
+      letOp: 'Let op', letOpTekst: 'een vraagprijs is geen verkoopprijs',
+      kolomStad: 'Stad', kolomType: 'Type', kolomMediaan: 'Mediane vraagprijs', kolomBereik: 'Middelste helft van de advertenties', kolomN: 'Advertenties',
+      types: { appartement: 'Appartement', villa: 'Villa / huis' },
+      eenheid: 'MAD/m²',
+      wijkenTitel: 'Appartementen per wijk',
+      wijkenIntro: 'Alleen wijken met minstens {min} advertenties.',
+      kolomWijk: 'Wijk',
+      methodeKop: 'Methode',
+      methode: [
+        'Deze cijfers zijn vraagprijzen uit advertenties, niet de definitieve verkoopprijzen bij de notaris. De prijs waarvoor een woning echt verkocht wordt, ligt vaak lager.',
+        'Bron: openbare vastgoedadvertenties op {bronnen}, die Maghreb Estates elke week verzamelt en analyseert. Meegeteld zijn koopadvertenties in dirham die tussen {van} en {datum} online stonden. Dubbele advertenties tellen één keer. Advertenties zonder oppervlakte of met een onwaarschijnlijke prijs per m² (onder 500 of boven 150.000 MAD) tellen niet mee.',
+        'Steekproef: {n} advertenties. De mediaan is de middelste waarde: de helft van de advertenties vraagt meer, de helft minder. De oppervlakte is die uit de advertentie. Bij een villa kan dat ook het perceel zijn.',
+      ],
+      knop: 'Vraag een waardebepaling voor uw woning aan',
+      inStad: '{prijs} in {stad}',
+      faq: {
+        q: 'Wat kost een appartement per m² in Marokko?',
+        a: 'In de {n} advertenties die wij tot {datum} analyseerden, is de mediane vraagprijs voor een appartement {prijzen}. Dat zijn vraagprijzen, geen verkoopprijzen bij de notaris. Per wijk en per woning kan de waarde sterk verschillen. Een waardebepaling vergelijkt uw woning daarom met vergelijkbare woningen in uw eigen wijk.',
+      },
+    },
+    homeBlok: { vraag: 'Bent u eigenaar en wilt u uw woning in Marokko verkopen?', link: 'Bekijk onze verkoopbegeleiding' },
     form: {
+      doel: 'Uw vraag', doelen: ['Een waardebepaling', 'Mijn woning verkopen'],
       naam: 'Naam', naamPh: 'Uw volledige naam',
       telefoon: 'Telefoon / WhatsApp', telefoonPh: '+212 6 … of +31 6 …',
       email: 'E-mailadres', emailPh: 'uw@email.com', optioneel: '(optioneel)',
@@ -135,7 +194,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       validatie: 'Vul uw naam, telefoonnummer, stad, type woning en woonplaats in.',
     },
     bericht: {
-      kop: 'Woning aangemeld via maghreb-estates.com', naam: 'Naam', telefoon: 'Telefoon / WhatsApp', email: 'E-mail',
+      kop: 'Woning aangemeld via maghreb-estates.com', doel: 'Vraag', naam: 'Naam', telefoon: 'Telefoon / WhatsApp', email: 'E-mail',
       woont: 'Woont', type: 'Type woning', stad: 'Stad', wijk: 'Wijk', oppervlak: 'Oppervlakte (m²)', kamers: 'Slaapkamers',
       titel: 'Eigendomstitel', prijs: 'Gewenste vraagprijs', toelichting: 'Toelichting',
     },
@@ -229,6 +288,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
     faqTitel: 'Veelgestelde vragen over verkopen',
     faqs: [
       { q: 'In welke steden zijn jullie actief?', a: 'Alleen in {steden}, en hun directe omgeving. Daar kennen wij de markt en zijn wij snel ter plaatse. Woningen buiten dit gebied nemen wij niet in verkoop.' },
+      { q: 'Hoe verkoop ik een appartement in Marokko?', a: 'In vijf stappen: een realistische vraagprijs op basis van vergelijkbare woningen, het dossier op orde (eigendomstitel, plattegrond, stukken van de syndicus), een sterke presentatie met foto’s en video, bezichtigingen met serieuze kopers, en tot slot de onderhandeling en de akte bij de notaris. Wij nemen die stappen van u over in {steden}.' },
       { q: 'Wat kost het om mijn woning via Maghreb Estates te verkopen?', a: 'Dat hangt af van de woning en van wat u uit handen geeft. U ontvangt vooraf een schriftelijk voorstel met de vergoeding en wat daaronder valt. Wij beginnen pas als u daarmee akkoord bent.' },
       { q: 'Ik woon in Marokko. Waarom niet gewoon een simsar?', a: 'Een simsar kan een koper vinden in uw eigen stad. Wij doen meer: een onderbouwde vraagprijs, professionele foto’s en video, een gecontroleerd dossier en kopers in Europa die een lokale tussenpersoon niet bereikt. U heeft één aanspreekpunt, schriftelijke afspraken, en wij doen de bezichtigingen.' },
       { q: 'Ik woon niet in Marokko. Kan ik toch verkopen?', a: 'Ja. Wij regelen de fotoshoot, de bezichtigingen en het contact met kopers ter plaatse. Voor de akte bij de notaris kunt u een volmacht geven, zodat u ook voor de overdracht niet hoeft te reizen.' },
@@ -247,30 +307,30 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
   // ------------------------------------------------------------------- ENGLISH
   en: {
     meta: {
-      title: 'Sell your property in Morocco: we handle everything | Maghreb Estates',
-      description: 'Sell your home in {stedenOf} through a professional company. Valuation based on market data, photos and video, all buyer contact, and buyers in Morocco and Europe.',
-      dienst: 'Property sales in Morocco',
+      title: 'Sell a property in Morocco | Maghreb Estates',
+      description: 'Sell your property in Morocco: valuation, photos, viewings, negotiation and notary in {steden}.',
+      dienst: 'Property sales support in Morocco',
       dienstBeschrijving: 'Full sales service for homes in {steden} and their immediate surroundings: valuation, photography and video, marketing, buyer contact, viewings, negotiation and transfer at the notary.',
     },
     steden: { Tanger: 'Tangier', Rabat: 'Rabat', Casablanca: 'Casablanca', Marrakech: 'Marrakech', Agadir: 'Agadir' },
     lijst: { komma: ', ', en: ' and ', of: ' or ' },
     hero: {
       eyebrow: 'Sell your property',
-      titel: 'Selling your property?<br /><em>We take care of everything</em>',
-      sub: 'In {steden}. From the valuation to the deed at the notary, with one professional company instead of a random middleman. Whether you live in Morocco or abroad.',
-      aanmelden: 'Register your property',
-      case: 'See a case',
+      titel: 'Sell your apartment, house <br /><em>or villa in Morocco</em>',
+      sub: 'Looking to sell an apartment, a house, a villa or a plot of land in Morocco? Maghreb Estates guides you from the valuation to the signing at the notary, in {steden}.',
+      estimatie: 'Get a valuation',
+      aanbieden: 'List my property',
       trust: ['Professional photos and video', 'Buyers in Morocco and Europe', 'One point of contact', 'Through to the notary'],
     },
     kruimel: 'Sell your property',
     aanmelden: {
-      eyebrow: 'Register your property',
-      titel: 'Register your property',
+      eyebrow: 'Valuation or sale',
+      titel: 'Tell us about your property',
       intro: 'Tell us briefly about the property. We will contact you within 24 hours. No obligation: you are not committed to anything until you sign a sales mandate.',
       werkgebiedTitel: 'Where we work',
       werkgebiedTekst: 'We only sell properties in these five cities and their immediate surroundings. We know these markets and can be on site quickly.',
       voordelen: [
-        'Free introduction and price indication',
+        'No-obligation introduction and price indication',
         'Fee agreed in writing upfront',
         'Whether you live in Morocco or abroad',
         'In Darija, French, Arabic, Amazigh, Dutch or English',
@@ -279,8 +339,37 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       directWa: 'WhatsApp us',
       directBel: 'or call',
       waBericht: 'Hello Maghreb Estates, I would like to sell my property in Morocco.',
+      internationaal: 'From abroad:',
     },
+    prijzen: {
+      eyebrow: 'Market figures',
+      titel: 'Selling a property in Morocco: the market figures',
+      intro: 'What are sellers asking per square metre right now? Every week we analyse the sale listings on the major Moroccan portals. These are the median asking prices in our five cities.',
+      bijgewerkt: 'Last updated', advertenties: 'Listings analysed',
+      bron: 'Source', bronTekst: 'public listings on {bronnen}',
+      letOp: 'Important', letOpTekst: 'an asking price is not a sale price',
+      kolomStad: 'City', kolomType: 'Type', kolomMediaan: 'Median asking price', kolomBereik: 'Middle half of listings', kolomN: 'Listings',
+      types: { appartement: 'Apartment', villa: 'Villa / house' },
+      eenheid: 'MAD/m²',
+      wijkenTitel: 'Apartments by neighbourhood',
+      wijkenIntro: 'Only neighbourhoods with at least {min} listings.',
+      kolomWijk: 'Neighbourhood',
+      methodeKop: 'Method',
+      methode: [
+        'These figures are asking prices from listings, not final sale prices at the notary. The price a property actually sells for is often lower.',
+        'Source: public property listings on {bronnen}, which Maghreb Estates collects and analyses every week. Included are sale listings in dirhams that were online between {van} and {datum}. Duplicate listings count once. Listings without a floor area or with an implausible price per m² (below 500 or above 150,000 MAD) are left out.',
+        'Sample: {n} listings. The median is the middle value: half of the listings ask more, half ask less. The floor area is the one stated in the listing. For a villa, this may include the plot.',
+      ],
+      knop: 'Get a valuation for your property',
+      inStad: '{prijs} in {stad}',
+      faq: {
+        q: 'What does an apartment cost per m² in Morocco?',
+        a: 'Across the {n} listings we analysed up to {datum}, the median asking price for an apartment is {prijzen}. These are asking prices, not sale prices at the notary. Values vary a lot by neighbourhood and by property, which is why a valuation compares your property with similar homes in your own neighbourhood.',
+      },
+    },
+    homeBlok: { vraag: 'Do you own a property in Morocco and want to sell it?', link: 'Discover our sales service' },
     form: {
+      doel: 'Your request', doelen: ['A valuation', 'Selling my property'],
       naam: 'Name', naamPh: 'Your full name',
       telefoon: 'Phone / WhatsApp', telefoonPh: '+212 6 … or +44 7 …',
       email: 'Email address', emailPh: 'you@email.com', optioneel: '(optional)',
@@ -299,7 +388,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       validatie: 'Please enter your name, phone number, city, property type and where you live.',
     },
     bericht: {
-      kop: 'Property registered via maghreb-estates.com', naam: 'Name', telefoon: 'Phone / WhatsApp', email: 'Email',
+      kop: 'Property registered via maghreb-estates.com', doel: 'Request', naam: 'Name', telefoon: 'Phone / WhatsApp', email: 'Email',
       woont: 'Lives', type: 'Property type', stad: 'City', wijk: 'Neighbourhood', oppervlak: 'Floor area (m²)', kamers: 'Bedrooms',
       titel: 'Title deed', prijs: 'Desired asking price', toelichting: 'Notes',
     },
@@ -393,6 +482,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
     faqTitel: 'Frequently asked questions about selling',
     faqs: [
       { q: 'Which cities do you work in?', a: 'Only in {steden}, and their immediate surroundings. We know these markets and can be on site quickly. We do not take on properties outside this area.' },
+      { q: 'How do I sell an apartment in Morocco?', a: 'In five steps: a realistic asking price based on comparable homes, the paperwork in order (title deed, floor plan, syndic documents), a strong presentation with photos and video, viewings with serious buyers, and finally the negotiation and the deed at the notary. We take these steps off your hands in {steden}.' },
       { q: 'What does it cost to sell my property through Maghreb Estates?', a: 'That depends on the property and how much you hand over to us. You receive a written proposal upfront with the fee and what it covers. We only start once you agree.' },
       { q: 'I live in Morocco. Why not just use a simsar?', a: 'A simsar can find a buyer in your own city. We do more: a well-founded asking price, professional photos and video, checked paperwork and buyers in Europe that a local middleman can’t reach. You have one point of contact and written agreements, and we handle the viewings.' },
       { q: 'I don’t live in Morocco. Can I still sell?', a: 'Yes. We arrange the photo shoot, the viewings and all contact with buyers on site. For the deed at the notary you can give a power of attorney, so you don’t need to travel for the transfer either.' },
@@ -411,25 +501,25 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
   // -------------------------------------------------------------------- FRANÇAIS
   fr: {
     meta: {
-      title: 'Vendre votre bien au Maroc : nous nous occupons de tout | Maghreb Estates',
-      description: 'Vendez votre bien à {stedenOf} avec une société professionnelle. Estimation fondée sur les données du marché, photos et vidéo, gestion des contacts et acheteurs au Maroc et en Europe.',
-      dienst: 'Vente immobilière au Maroc',
+      title: 'Vendre un bien immobilier au Maroc | Maghreb Estates',
+      description: 'Vendez votre bien au Maroc : estimation, photos, visites, négociation et notaire à {steden}.',
+      dienst: 'Accompagnement à la vente immobilière au Maroc',
       dienstBeschrijving: 'Accompagnement complet à la vente de biens à {steden} et dans leurs environs immédiats : estimation, photos et vidéo, mise en valeur, contacts acheteurs, visites, négociation et signature chez le notaire.',
     },
     steden: { Tanger: 'Tanger', Rabat: 'Rabat', Casablanca: 'Casablanca', Marrakech: 'Marrakech', Agadir: 'Agadir' },
     lijst: { komma: ', ', en: ' et ', of: ' ou ' },
     hero: {
       eyebrow: 'Vendre votre bien',
-      titel: 'Vous vendez votre bien ?<br /><em>Nous nous occupons de tout</em>',
-      sub: 'À {steden}. De l’estimation à l’acte chez le notaire, avec une seule société professionnelle au lieu d’un intermédiaire quelconque. Que vous viviez au Maroc ou à l’étranger.',
-      aanmelden: 'Proposer votre bien',
-      case: 'Voir un exemple',
+      titel: 'Vendre votre appartement, <br /><em>maison ou villa au Maroc</em>',
+      sub: 'Vous souhaitez vendre un appartement, une maison, une villa ou un terrain au Maroc ? Maghreb Estates vous accompagne de l’estimation jusqu’à la signature chez le notaire, à {steden}.',
+      estimatie: 'Obtenir une estimation',
+      aanbieden: 'Proposer mon bien',
       trust: ['Photos et vidéo professionnelles', 'Acheteurs au Maroc et en Europe', 'Un interlocuteur unique', 'Jusqu’au notaire'],
     },
     kruimel: 'Vendre votre bien',
     aanmelden: {
-      eyebrow: 'Proposer votre bien',
-      titel: 'Proposez votre bien',
+      eyebrow: 'Estimation ou mise en vente',
+      titel: 'Parlez-nous de votre bien',
       intro: 'Présentez-nous brièvement le bien. Nous vous contactons sous 24 heures. Sans engagement : vous n’êtes lié à rien tant que vous n’avez pas signé de mandat de vente.',
       werkgebiedTitel: 'Notre zone d’intervention',
       werkgebiedTekst: 'Nous vendons uniquement des biens dans ces cinq villes et leurs environs immédiats. Nous connaissons ces marchés et pouvons être sur place rapidement.',
@@ -443,8 +533,37 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       directWa: 'Écrivez-nous sur WhatsApp',
       directBel: 'ou appelez le',
       waBericht: 'Bonjour Maghreb Estates, je souhaite vendre mon bien au Maroc.',
+      internationaal: 'Depuis l’étranger :',
     },
+    prijzen: {
+      eyebrow: 'Prix immobiliers au Maroc',
+      titel: 'Vendre un bien immobilier au Maroc : chiffres du marché',
+      intro: 'Combien demandent les vendeurs au mètre carré aujourd’hui ? Chaque semaine, nous analysons les annonces de vente des grands portails marocains. Voici les prix médians demandés dans nos cinq villes.',
+      bijgewerkt: 'Dernière mise à jour', advertenties: 'Annonces analysées',
+      bron: 'Source', bronTekst: 'annonces publiques sur {bronnen}',
+      letOp: 'Important', letOpTekst: 'prix demandés ≠ prix de transaction',
+      kolomStad: 'Ville', kolomType: 'Type', kolomMediaan: 'Prix médian demandé', kolomBereik: 'La moitié des annonces entre', kolomN: 'Annonces',
+      types: { appartement: 'Appartement', villa: 'Villa / maison' },
+      eenheid: 'MAD/m²',
+      wijkenTitel: 'Appartements par quartier',
+      wijkenIntro: 'Uniquement les quartiers comptant au moins {min} annonces.',
+      kolomWijk: 'Quartier',
+      methodeKop: 'Méthodologie',
+      methode: [
+        'Ces chiffres sont des prix demandés dans les annonces, et non les prix de vente définitifs chez le notaire. Le prix auquel un bien se vend réellement est souvent plus bas.',
+        'Source : annonces immobilières publiques sur {bronnen}, collectées et analysées chaque semaine par Maghreb Estates. Sont prises en compte les annonces de vente en dirhams en ligne entre le {van} et le {datum}. Les doublons ne comptent qu’une fois. Les annonces sans surface ou avec un prix au m² invraisemblable (moins de 500 ou plus de 150 000 MAD) sont écartées.',
+        'Échantillon : {n} annonces. La médiane est la valeur centrale : la moitié des annonces demande plus, l’autre moitié moins. La surface est celle indiquée dans l’annonce. Pour une villa, elle peut inclure le terrain.',
+      ],
+      knop: 'Obtenir une estimation de votre bien',
+      inStad: '{prijs} à {stad}',
+      faq: {
+        q: 'Quel est le prix au m² d’un appartement au Maroc ?',
+        a: 'Sur les {n} annonces que nous avons analysées jusqu’au {datum}, le prix médian demandé pour un appartement est de {prijzen}. Ce sont des prix demandés, pas des prix de vente chez le notaire. La valeur varie fortement selon le quartier et le bien : une estimation compare donc votre bien aux biens similaires de votre quartier.',
+      },
+    },
+    homeBlok: { vraag: 'Vous êtes propriétaire et souhaitez vendre votre bien ?', link: 'Découvrir notre accompagnement à la vente' },
     form: {
+      doel: 'Votre demande', doelen: ['Obtenir une estimation', 'Mettre mon bien en vente'],
       naam: 'Nom', naamPh: 'Votre nom complet',
       telefoon: 'Téléphone / WhatsApp', telefoonPh: '+212 6 … ou +33 6 …',
       email: 'Adresse e-mail', emailPh: 'vous@email.com', optioneel: '(facultatif)',
@@ -463,7 +582,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       validatie: 'Merci d’indiquer votre nom, votre téléphone, la ville, le type de bien et votre lieu de résidence.',
     },
     bericht: {
-      kop: 'Bien proposé via maghreb-estates.com', naam: 'Nom', telefoon: 'Téléphone / WhatsApp', email: 'E-mail',
+      kop: 'Bien proposé via maghreb-estates.com', doel: 'Demande', naam: 'Nom', telefoon: 'Téléphone / WhatsApp', email: 'E-mail',
       woont: 'Réside', type: 'Type de bien', stad: 'Ville', wijk: 'Quartier', oppervlak: 'Surface (m²)', kamers: 'Chambres',
       titel: 'Titre de propriété', prijs: 'Prix souhaité', toelichting: 'Précisions',
     },
@@ -557,6 +676,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
     faqTitel: 'Questions fréquentes sur la vente',
     faqs: [
       { q: 'Dans quelles villes intervenez-vous ?', a: 'Uniquement à {steden}, et dans leurs environs immédiats. Nous connaissons ces marchés et pouvons être sur place rapidement. Nous ne prenons pas en vente les biens situés en dehors de cette zone.' },
+      { q: 'Comment vendre un appartement au Maroc ?', a: 'En cinq étapes : un prix réaliste fondé sur des biens comparables, un dossier en ordre (titre de propriété, plan, documents du syndic), une présentation soignée avec photos et vidéo, des visites avec des acheteurs sérieux, puis la négociation et l’acte chez le notaire. Nous prenons ces étapes en charge pour vous à {steden}.' },
       { q: 'Combien coûte la vente de mon bien avec Maghreb Estates ?', a: 'Cela dépend du bien et de ce que vous nous confiez. Vous recevez à l’avance une proposition écrite avec nos honoraires et ce qu’ils couvrent. Nous ne commençons qu’avec votre accord.' },
       { q: 'J’habite au Maroc. Pourquoi ne pas passer simplement par un samsar ?', a: 'Un samsar peut trouver un acheteur dans votre ville. Nous allons plus loin : un prix argumenté, des photos et une vidéo professionnelles, un dossier vérifié et des acheteurs en Europe qu’un intermédiaire local n’atteint pas. Vous avez un interlocuteur unique et des engagements écrits, et nous assurons les visites.' },
       { q: 'Je n’habite pas au Maroc. Puis-je quand même vendre ?', a: 'Oui. Nous organisons le shooting, les visites et tous les contacts avec les acheteurs sur place. Pour l’acte chez le notaire, vous pouvez donner une procuration : vous n’avez pas besoin de vous déplacer, même pour le transfert.' },
@@ -575,25 +695,25 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
   // -------------------------------------------------------------------- العربية
   ar: {
     meta: {
-      title: 'بيع عقارك في المغرب: نتكفل بكل شيء | Maghreb Estates',
-      description: 'بِع عقارك في {stedenOf} مع شركة محترفة. تقييم مبني على بيانات السوق، صور وفيديو احترافية، تواصل كامل مع المشترين، ومشترون في المغرب وأوروبا.',
-      dienst: 'بيع العقارات في المغرب',
+      title: 'بيع عقار في المغرب | Maghreb Estates',
+      description: 'بِع عقارك في المغرب: التقييم، الصور، الزيارات، التفاوض والموثق في {steden}.',
+      dienst: 'مرافقة بيع العقارات في المغرب',
       dienstBeschrijving: 'مرافقة كاملة لبيع العقارات في {steden} ونواحيها القريبة: التقييم، التصوير والفيديو، العرض، التواصل مع المشترين، الزيارات، التفاوض ونقل الملكية لدى الموثق.',
     },
     steden: { Tanger: 'طنجة', Rabat: 'الرباط', Casablanca: 'الدار البيضاء', Marrakech: 'مراكش', Agadir: 'أكادير' },
     lijst: { komma: '، ', en: ' و', of: ' أو ' },
     hero: {
       eyebrow: 'بيع عقارك',
-      titel: 'تريد بيع عقارك؟<br /><em>نتكفل بكل شيء</em>',
-      sub: 'في {steden}. من التقييم إلى توقيع العقد لدى الموثق، مع شركة محترفة واحدة بدل وسيط عشوائي. سواء كنت تقيم في المغرب أو في الخارج.',
-      aanmelden: 'اعرض عقارك',
-      case: 'شاهد مثالاً',
+      titel: 'بيع شقتك أو منزلك <br /><em>أو فيلتك في المغرب</em>',
+      sub: 'هل ترغب في بيع شقة أو منزل أو فيلا أو قطعة أرض في المغرب؟ ترافقك Maghreb Estates من التقييم حتى التوقيع لدى الموثق، في {steden}.',
+      estimatie: 'احصل على تقييم',
+      aanbieden: 'اعرض عقاري',
       trust: ['صور وفيديو احترافية', 'مشترون في المغرب وأوروبا', 'مخاطَب واحد', 'حتى التوقيع لدى الموثق'],
     },
     kruimel: 'بيع عقارك',
     aanmelden: {
-      eyebrow: 'اعرض عقارك',
-      titel: 'اعرض عقارك للبيع',
+      eyebrow: 'التقييم أو البيع',
+      titel: 'حدّثنا عن عقارك',
       intro: 'أخبرنا باختصار عن العقار، وسنتواصل معك خلال 24 ساعة. دون أي التزام: لا يلزمك شيء قبل توقيع عقد تفويض البيع.',
       werkgebiedTitel: 'منطقة عملنا',
       werkgebiedTekst: 'نبيع العقارات فقط في هذه المدن الخمس ونواحيها القريبة. نعرف هذه الأسواق جيداً ونستطيع الحضور بسرعة.',
@@ -607,8 +727,45 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       directWa: 'راسلنا على واتساب',
       directBel: 'أو اتصل على',
       waBericht: 'السلام عليكم Maghreb Estates، أرغب في بيع عقاري في المغرب.',
+      internationaal: 'من خارج المغرب:',
     },
+    prijzen: {
+      eyebrow: 'أسعار العقار في المغرب',
+      titel: 'بيع عقار في المغرب: أرقام السوق',
+      intro: 'كم يطلب البائعون اليوم للمتر المربع؟ نحلل كل أسبوع إعلانات البيع على أكبر المنصات المغربية. هذه هي الأسعار الوسيطة المطلوبة في مدننا الخمس.',
+      bijgewerkt: 'آخر تحديث', advertenties: 'الإعلانات المحللة',
+      bron: 'المصدر', bronTekst: 'إعلانات عامة على {bronnen}',
+      letOp: 'تنبيه', letOpTekst: 'السعر المطلوب ليس سعر البيع الفعلي',
+      kolomStad: 'المدينة', kolomType: 'النوع', kolomMediaan: 'السعر الوسيط المطلوب', kolomBereik: 'نصف الإعلانات بين', kolomN: 'الإعلانات',
+      types: { appartement: 'شقة', villa: 'فيلا / منزل' },
+      eenheid: 'درهم/م²',
+      wijkenTitel: 'الشقق حسب الحي',
+      wijkenIntro: 'فقط الأحياء التي تضم {min} إعلاناً على الأقل.',
+      kolomWijk: 'الحي',
+      methodeKop: 'المنهجية',
+      methode: [
+        'هذه الأرقام أسعار مطلوبة في الإعلانات، وليست أسعار البيع النهائية لدى الموثق. وغالباً ما يكون السعر الذي يُباع به العقار فعلاً أقل.',
+        'المصدر: إعلانات عقارية عامة على {bronnen}، تجمعها Maghreb Estates وتحللها كل أسبوع. تُحتسب إعلانات البيع بالدرهم التي كانت منشورة بين {van} و{datum}. تُحتسب الإعلانات المكررة مرة واحدة، وتُستبعد الإعلانات التي لا تذكر المساحة أو التي يكون فيها سعر المتر غير معقول (أقل من 500 أو أكثر من 150.000 درهم).',
+        'العينة: {n} إعلاناً. الوسيط هو القيمة الوسطى: نصف الإعلانات يطلب أكثر والنصف الآخر أقل. المساحة هي المذكورة في الإعلان، وفي حالة الفيلا قد تشمل الأرض.',
+      ],
+      knop: 'احصل على تقييم لعقارك',
+      inStad: '{prijs} في {stad}',
+      faq: {
+        q: 'كم ثمن المتر المربع للشقة في المغرب؟',
+        a: 'حسب {n} إعلاناً حللناها حتى {datum}، يبلغ السعر الوسيط المطلوب للشقة {prijzen}. هذه أسعار مطلوبة وليست أسعار بيع لدى الموثق. وتختلف القيمة كثيراً حسب الحي والعقار، لذلك يقارن التقييم عقارك بعقارات مماثلة في حيّك.',
+      },
+    },
+    wijkNamen: {
+      'Agdal': 'أكدال', 'Hay Riad': 'حي الرياض', 'Souissi': 'السويسي',
+      'Maârif': 'المعاريف', 'Gauthier': 'غوتييه', 'Racine': 'راسين', 'Aïn Diab': 'عين الذئاب',
+      'Les Hôpitaux': 'حي المستشفيات', 'Belvédère': 'بلفيدير', 'Oulfa': 'الألفة',
+      'Malabata': 'مالاباطا', 'Tanja Balia': 'طنجة البالية', 'Ibéria': 'إيبيريا', 'Castilla': 'كاستيا', 'Marjane': 'مرجان',
+      'Guéliz': 'جليز', 'Hivernage': 'الحي الشتوي', 'Camp El Ghoul': 'كامب الغول', 'Targa': 'تاركة', 'M’hamid': 'المحاميد',
+      'Hay Mohammadi': 'الحي المحمدي', 'Hay Salam': 'حي السلام', 'Hay Houda': 'حي الهدى', 'Anza': 'أنزا',
+    },
+    homeBlok: { vraag: 'هل أنت مالك وترغب في بيع عقارك؟', link: 'اكتشف خدمة مرافقة البيع' },
     form: {
+      doel: 'طلبك', doelen: ['الحصول على تقييم', 'عرض عقاري للبيع'],
       naam: 'الاسم', naamPh: 'اسمك الكامل',
       telefoon: 'الهاتف / واتساب', telefoonPh: '+212 6 …',
       email: 'البريد الإلكتروني', emailPh: 'you@email.com', optioneel: '(اختياري)',
@@ -627,7 +784,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       validatie: 'يرجى إدخال الاسم ورقم الهاتف والمدينة ونوع العقار ومكان إقامتك.',
     },
     bericht: {
-      kop: 'عقار معروض عبر maghreb-estates.com', naam: 'الاسم', telefoon: 'الهاتف / واتساب', email: 'البريد',
+      kop: 'عقار معروض عبر maghreb-estates.com', doel: 'الطلب', naam: 'الاسم', telefoon: 'الهاتف / واتساب', email: 'البريد',
       woont: 'الإقامة', type: 'نوع العقار', stad: 'المدينة', wijk: 'الحي', oppervlak: 'المساحة (م²)', kamers: 'غرف النوم',
       titel: 'سند الملكية', prijs: 'السعر المرغوب', toelichting: 'ملاحظات',
     },
@@ -721,6 +878,7 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
     faqTitel: 'أسئلة شائعة حول البيع',
     faqs: [
       { q: 'في أي مدن تعملون؟', a: 'فقط في {steden} ونواحيها القريبة. نعرف هذه الأسواق جيداً ونستطيع الحضور بسرعة. لا نقبل بيع عقارات خارج هذه المنطقة.' },
+      { q: 'كيف أبيع شقة في المغرب؟', a: 'في خمس مراحل: سعر واقعي مبني على عقارات مماثلة، وملف منظم (سند الملكية، التصميم، وثائق السانديك)، وعرض جيد بالصور والفيديو، وزيارات مع مشترين جادين، ثم التفاوض والعقد لدى الموثق. نتكفل نحن بهذه المراحل نيابة عنك في {steden}.' },
       { q: 'كم تكلف عملية بيع عقاري مع Maghreb Estates؟', a: 'يتوقف ذلك على العقار وعلى ما تفوّضه لنا. تتلقى مسبقاً عرضاً مكتوباً بالأتعاب وما تشمله، ولا نبدأ إلا بعد موافقتك.' },
       { q: 'أقيم في المغرب. لماذا لا ألجأ ببساطة إلى سمسار؟', a: 'يستطيع السمسار أن يجد مشترياً في مدينتك. نحن نقدم أكثر: سعراً مُبرَّراً، وصوراً وفيديو احترافية، وملفاً مُراجعاً، ومشترين في أوروبا لا يصل إليهم الوسيط المحلي. ولديك مخاطَب واحد واتفاق مكتوب، ونتولى نحن الزيارات.' },
       { q: 'لا أقيم في المغرب. هل يمكنني البيع رغم ذلك؟', a: 'نعم. ننظم التصوير والزيارات وكل التواصل مع المشترين في عين المكان. ولتوقيع العقد لدى الموثق يمكنك منح وكالة، فلا تحتاج إلى السفر حتى لنقل الملكية.' },

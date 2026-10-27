@@ -129,7 +129,12 @@ const t = teksten[taal];
 
     var keuze = leesKeuze();
     if (keuze === 'granted') { laadAnalytics(); laadClarity(); }
-    else if (keuze === null) bar.hidden = false;
+    // Pas tonen als de webfonts binnen zijn. De melding staat onderaan vast: wisselt
+    // het lettertype terwijl hij al zichtbaar is, dan verandert zijn hoogte en
+    // verspringt hij (layout shift, CLS).
+    else if (keuze === null) {
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { bar.hidden = false; });
+    }
 
     document.addEventListener('click', function (e) {
       var knop = e.target.closest('[data-cookie]');

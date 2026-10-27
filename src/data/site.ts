@@ -5,11 +5,20 @@ export const site = {
   tagline: 'International real estate advisory in Morocco — buying, investment, management and sales.',
   telefoon: '+31 6 83 49 87 15',
   telefoonHref: '+31683498715',
+  // Marokkaans nummer, zodra het er is. Dan wordt het het hoofdnummer op de Franse
+  // en Arabische verkooppagina en blijft +31 daar het internationale nummer. Zet
+  // het daarna ook in het Organization-schema, het Google-bedrijfsprofiel en de
+  // bedrijvengidsen, overal in exact dezelfde schrijfwijze.
+  telefoonMA: '',     // bv. '+212 6 12 34 56 78'
+  telefoonMAHref: '', // bv. '+212612345678'
+  whatsappMA: '',     // bv. '212612345678'
   email: 'a.douider@maghreb-estates.com',
   whatsapp: '31683498715',
   land: 'NL',
   // Transparant logo: groen voor lichte achtergronden, crème voor donkere (footer).
   logo: '/images/logo.png',
+  // Zelfde logo als webp op 360px breed (12 KB i.p.v. 61 KB) voor de navigatie.
+  logoNav: '/images/logo.webp',
   logoLicht: '/images/logo-licht.png',
   ogImage: '/images/villa5.jpg',
   // Entity SEO: vul social-/profiel-URL's aan zodra beschikbaar (Instagram, LinkedIn,

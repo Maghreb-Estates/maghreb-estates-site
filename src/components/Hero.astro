@@ -18,12 +18,19 @@
 // daglicht, rustige compositie met ruimte links voor de tekst. villa5.jpg
 // draagt nu 28 pagina's, waaronder alle 18 stadspagina's — daar is spreiding
 // het hardst nodig.
+//
+// De foto is een echte <img> en geen CSS-achtergrond: zo ziet de browser hem
+// direct in de HTML en laadt hij eerder (LCP). Een geïmporteerde afbeelding uit
+// src/assets krijgt bovendien een srcset, zodat een telefoon een kleiner
+// bestand laadt. Een pad uit public/ werkt ook, zonder srcset.
+import { getImage } from 'astro:assets';
+
 interface Cta { label: string; href: string; primary?: boolean; }
 interface Props {
   eyebrow?: string;
   title: string;
   sub?: string;
-  image?: string;
+  image?: string | ImageMetadata;
   compact?: boolean;
   ctas?: Cta[];
   trust?: string[];
@@ -32,8 +39,14 @@ const {
   eyebrow, title, sub, image = '/images/villa5.jpg',
   compact = false, ctas = [], trust = [],
 } = Astro.props;
+
+const foto = typeof image === 'string'
+  ? { src: image, srcset: undefined, sizes: undefined }
+  : await getImage({ src: image, widths: [640, 960, image.width].filter((w) => w <= image.width), format: 'webp' })
+      .then((r) => ({ src: r.src, srcset: r.srcSet.attribute, sizes: '100vw' }));
 ---
-<section class={`hero ${compact ? 'hero--compact' : ''}`} style={`background-image: url('${image}')`}>
+<section class={`hero ${compact ? 'hero--compact' : ''}`}>
+  <img class="hero__bg" src={foto.src} srcset={foto.srcset} sizes={foto.sizes} alt="" fetchpriority="high" />
   <div class="hero__overlay"></div>
   <div class="container">
     <div class="hero__inner">

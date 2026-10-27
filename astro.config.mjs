@@ -1,5 +1,20 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+
+// De verkooppagina's krijgen in de sitemap een lastmod die alleen verschuift bij
+// een echte inhoudelijke wijziging: de laatste prijsupdate (src/data/marktprijzen.json)
+// of de laatste tekstwijziging hieronder. Pas die datum aan als de tekst van de
+// verkooppagina inhoudelijk verandert.
+const verkoopTekstGewijzigd = '2026-10-27';
+const prijzenBijgewerkt = JSON.parse(
+  readFileSync(new URL('./src/data/marktprijzen.json', import.meta.url), 'utf8'),
+).bijgewerkt;
+const verkoopLastmod = [verkoopTekstGewijzigd, prijzenBijgewerkt].sort().at(-1);
+const verkoopPaginas = new Set(
+  ['/huis-verkopen-marokko/', '/en/sell-your-property/', '/fr/vendre-votre-bien/', '/ar/sell-your-property/']
+    .map((p) => new URL(p, 'https://maghreb-estates.com').href),
+);
 
 // Live domein — bepaalt absolute URL's in sitemap, canonicals en structured data.
 
@@ -51,6 +66,8 @@ export default defineConfig({
       priority: 0.7,
       lastmod: new Date(),
       filter: (page) => !sitemapUitsluiten.has(page),
+      serialize: (item) =>
+        verkoopPaginas.has(item.url) ? { ...item, lastmod: new Date(verkoopLastmod).toISOString() } : item,
     }),
   ],
 });

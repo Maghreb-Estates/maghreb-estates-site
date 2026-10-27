@@ -8,6 +8,7 @@ import Icon from '../../components/Icon.astro';
 import ContentBlok from '../../components/ContentBlok.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import CardSlider from '../../components/CardSlider.astro';
+import VerkoopHint from '../../components/VerkoopHint.astro';
 import { team, teamNetwerk } from '../../data/site';
 import { uitgelichteProjecten } from '../../data/projecten';
 import { paginas, vertaalTalen, type Taal } from '../../i18n/config';
@@ -179,6 +180,8 @@ const diensten = [
       </div>
     </div>
   </section>
+
+  <VerkoopHint taal={taal} />
 
   {/* Korte afsluitende CTA */}
   <section class="ctaband">
