@@ -5,13 +5,12 @@ export const site = {
   tagline: 'International real estate advisory in Morocco — buying, investment, management and sales.',
   telefoon: '+31 6 83 49 87 15',
   telefoonHref: '+31683498715',
-  // Marokkaans nummer, zodra het er is. Dan wordt het het hoofdnummer op de Franse
-  // en Arabische verkooppagina en blijft +31 daar het internationale nummer. Zet
-  // het daarna ook in het Organization-schema, het Google-bedrijfsprofiel en de
-  // bedrijvengidsen, overal in exact dezelfde schrijfwijze.
-  telefoonMA: '',     // bv. '+212 6 12 34 56 78'
-  telefoonMAHref: '', // bv. '+212612345678'
-  whatsappMA: '',     // bv. '212612345678'
+  // Marokkaans nummer, alleen om te bellen: WhatsApp loopt altijd via het NL-nummer
+  // (whatsapp hieronder). Op de Franse en Arabische verkooppagina is dit het
+  // belnummer en blijft +31 daar het internationale nummer. Gebruik overal (Google-
+  // bedrijfsprofiel, bedrijvengidsen) exact dezelfde schrijfwijze.
+  telefoonMA: '+212 6 69 72 53 95',
+  telefoonMAHref: '+212669725395',
   email: 'a.douider@maghreb-estates.com',
   whatsapp: '31683498715',
   land: 'NL',

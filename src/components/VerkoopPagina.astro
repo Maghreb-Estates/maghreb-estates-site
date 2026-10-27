@@ -36,13 +36,13 @@ const steden = opsomming(stadNamen, t.lijst.en);
 const stedenOf = opsomming(stadNamen, t.lijst.of);
 const vul = (s: string) => s.replaceAll('{steden}', steden).replaceAll('{stedenOf}', stedenOf);
 
-// Zodra er een +212-nummer is (site.ts), is dat op de Franse en Arabische pagina
-// het hoofdnummer: daar zitten de verkopers in Marokko zelf.
+// Op de Franse en Arabische pagina is het +212-nummer (site.ts) het belnummer:
+// daar zitten de verkopers in Marokko zelf. WhatsApp blijft het NL-nummer.
 const lokaal = (taal === 'fr' || taal === 'ar') && site.telefoonMA !== '';
 const tel = lokaal
-  ? { nummer: site.telefoonMA, href: site.telefoonMAHref, whatsapp: site.whatsappMA }
-  : { nummer: site.telefoon, href: site.telefoonHref, whatsapp: site.whatsapp };
-const waBericht = waLink(t.aanmelden.waBericht, tel.whatsapp);
+  ? { nummer: site.telefoonMA, href: site.telefoonMAHref }
+  : { nummer: site.telefoon, href: site.telefoonHref };
+const waBericht = waLink(t.aanmelden.waBericht);
 
 // Vraagprijzen per m² (scripts/marktprijzen.py → src/data/marktprijzen.json).
 const locale = { nl: 'nl-NL', en: 'en-GB', fr: 'fr-FR', ar: 'ar-MA' }[taal];
@@ -469,7 +469,7 @@ const caseFotos: ProjectFoto[] = Object.keys(fotoModules)
     </div>
   </section>
 
-  <script is:inline define:vars={{ whatsapp: tel.whatsapp, email: site.email, validatie: t.form.validatie, b: t.bericht }}>
+  <script is:inline define:vars={{ whatsapp: site.whatsapp, email: site.email, validatie: t.form.validatie, b: t.bericht }}>
     (function () {
       function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
