@@ -9,12 +9,15 @@
 // formuliercomponent. Dat moet ook: Astro staat maar één dynamische route per
 // mapniveau toe, en de adviesgesprek-slug verschilt per taal
 // (consultation / rendez-vous-conseil), dus een vast bestand volstaat niet.
+// Om dezelfde reden loopt de verkooppagina hier doorheen, met een eigen
+// opmaak en tekst (VerkoopPagina.astro + src/i18n/verkopen.ts).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ContentBlok from '../../components/ContentBlok.astro';
 import ContactFormulier from '../../components/ContactFormulier.astro';
 import BookingFormulier from '../../components/BookingFormulier.astro';
+import VerkoopPagina from '../../components/VerkoopPagina.astro';
 import Faq from '../../components/Faq.astro';
 import { paginas, vertaalTalen, type Taal } from '../../i18n/config';
 import { ui } from '../../i18n/ui';
@@ -26,7 +29,7 @@ export function getStaticPaths() {
   // Alle vertaalde pagina's behalve de homepage, die een eigen bestand heeft.
   const sleutels = [
     'aankoopbegeleiding', 'investeren', 'nieuwbouw', 'kopen', 'kosten', 'overOns',
-    'contact', 'adviesgesprek',
+    'contact', 'adviesgesprek', 'verkopen',
   ] as const;
 
   return vertaalTalen.flatMap((taal) =>
@@ -35,7 +38,7 @@ export function getStaticPaths() {
       const slug = pad.split('/').filter(Boolean)[1];  // -> purchase-costs
       return {
         params: { lang: taal, slug },
-        props: { taal, sleutel, pagina: content[taal][sleutel] },
+        props: { taal, sleutel, pagina: sleutel === 'verkopen' ? null : content[taal][sleutel] },
       };
     }),
   );
@@ -51,12 +54,13 @@ const isBooking = sleutel === 'adviesgesprek';
 const isFormulier = isContact || isBooking;
 const inhoud = pagina as Pagina;
 
-const heroCtas = (inhoud.heroCtas ?? ['advies']).map((soort, i) => ({
+const heroCtas = (inhoud?.heroCtas ?? ['advies']).map((soort, i) => ({
   label: soort === 'advies' ? t.cta.advies : t.cta.objectanalyse,
   href: soort === 'advies' ? paginas.adviesgesprek[taal] : `${paginas.contact[taal]}?doel=objectanalyse`,
   primary: i === 0,
 }));
 ---
+{sleutel === 'verkopen' ? <VerkoopPagina taal={taal} /> : (
 <BaseLayout
   title={pagina.title}
   description={pagina.description}
@@ -109,3 +113,4 @@ const heroCtas = (inhoud.heroCtas ?? ['advies']).map((soort, i) => ({
     </>
   )}
 </BaseLayout>
+)}

@@ -113,6 +113,12 @@ export const paginas = {
     fr: '/fr/rendez-vous-conseil/',
     ar: '/ar/consultation/',
   },
+  verkopen: {
+    nl: '/huis-verkopen-marokko/',
+    en: '/en/sell-your-property/',
+    fr: '/fr/vendre-votre-bien/',
+    ar: '/ar/sell-your-property/',
+  },
 } as const;
 
 export type PaginaSleutel = keyof typeof paginas;

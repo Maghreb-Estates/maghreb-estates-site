@@ -857,6 +857,40 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
 
 .veld-rij { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
 
+/* Aanmeldblok: op desktop intro + werkgebied links en het formulier rechts; op
+   mobiel staat het formulier direct onder de intro (sneller ter zake). */
+.aanmeld { display: grid; grid-template-columns: 1.2fr 1fr; grid-template-rows: auto 1fr; grid-template-areas: "kop form" "info form"; gap: 0 60px; align-items: start; }
+.aanmeld > * { min-width: 0; }
+.aanmeld__kop { grid-area: kop; margin-bottom: 28px; }
+.aanmeld__info { grid-area: info; }
+.aanmeld__form { grid-area: form; }
+@media (max-width: 940px) {
+  .aanmeld { grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "kop" "form" "info"; }
+  .aanmeld__kop { margin-bottom: 24px; }
+  .aanmeld__form { margin-bottom: 36px; }
+}
+
+/* Werkgebied naast het aanmeldformulier: vijf steden + directe omgeving. */
+.werkgebied { background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--green-mid); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 26px; }
+.werkgebied h3 { font-size: 21px; margin-bottom: 6px; }
+.werkgebied > p { font-size: 15px; color: var(--text-muted); margin-bottom: 14px; }
+.werkgebied__lijst { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.werkgebied__lijst li { display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px 6px 11px; border: 1px solid var(--border); border-radius: 999px; background: var(--cream); }
+.werkgebied__lijst svg { color: var(--green-mid); flex-shrink: 0; }
+.werkgebied__lijst span { font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--green); line-height: 1.2; }
+.werkgebied__direct { font-size: 15px; color: var(--text-muted); }
+.werkgebied__direct a { color: var(--green-mid); border-bottom: 1px solid rgba(52,82,46,0.3); }
+.werkgebied__direct a:hover { color: var(--green); border-bottom-color: var(--green); }
+
+/* Arabisch (RTL): accentranden en lijstinspringing naar rechts, en geen
+   letterspatiëring (die breekt de verbonden Arabische letters). */
+.rtl .werkgebied { border-left: 1px solid var(--border); border-right: 3px solid var(--green-mid); }
+.rtl .werkgebied__lijst li { padding: 6px 11px 6px 14px; }
+.rtl .case__aanpak { margin: 0 20px 0 0; }
+.rtl .case__aanpak li { padding-left: 0; padding-right: 4px; }
+.rtl .case__label, .rtl .foto-leeg span { letter-spacing: 0; }
+.rtl .werkgebied__lijst span { font-family: 'Amiri', var(--font-serif); }
+
 @media (max-width: 1100px) { .stappen--5 { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 940px) { .stappen--5 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 760px) {

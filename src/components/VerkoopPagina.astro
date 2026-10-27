@@ -1,0 +1,408 @@
+---
+// Verkooppagina in alle vier de talen: eigenaren melden hier hun woning aan en
+// wij nemen de verkoop volledig uit handen. Doelgroep: eigenaren in Marokko
+// zelf én Marokkanen in het buitenland. Het formulier staat bewust direct
+// onder de hero.
+//
+// Tekst per taal: src/i18n/verkopen.ts. Gebruikt door
+// src/pages/huis-verkopen-marokko.astro (NL) en src/pages/[lang]/[slug].astro.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from './Hero.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import Faq from './Faq.astro';
+import ProjectGallery from './ProjectGallery.astro';
+import VerderLezen from './VerderLezen.astro';
+import { site, waLink } from '../data/site';
+import type { ProjectFoto } from '../data/projecten';
+import { faqSchema, serviceSchema } from '../data/schema';
+import { paginas, standaardTaal, type Taal } from '../i18n/config';
+import { ui } from '../i18n/ui';
+import { verkoopTekst, verkoopcase, werkgebied } from '../i18n/verkopen';
+
+interface Props { taal?: Taal }
+const { taal = standaardTaal } = Astro.props;
+const t = verkoopTekst[taal];
+const pad = paginas.verkopen[taal];
+const isNl = taal === standaardTaal;
+
+const stadNamen = werkgebied.map((s) => t.steden[s]);
+const opsomming = (voegwoord: string) =>
+  `${stadNamen.slice(0, -1).join(t.lijst.komma)}${voegwoord}${stadNamen[stadNamen.length - 1]}`;
+const steden = opsomming(t.lijst.en);
+const stedenOf = opsomming(t.lijst.of);
+const vul = (s: string) => s.replaceAll('{steden}', steden).replaceAll('{stedenOf}', stedenOf);
+const faqs = t.faqs.map((f) => ({ q: f.q, a: vul(f.a) }));
+const waBericht = waLink(t.aanmelden.waBericht);
+
+// Case-foto's verschijnen vanzelf: zie src/assets/verkopen/case/LEESMIJ.md.
+// De bestandsnaam bepaalt de volgorde en de alt-tekst.
+const fotoModules = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/verkopen/case/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
+  { eager: true },
+);
+const altUitBestand = (bestand: string, i: number) => {
+  const naam = bestand.split('/').pop()!.replace(/\.[^.]+$/, '').replace(/^[\d\s._-]+/, '').replace(/[-_]+/g, ' ').trim();
+  return naam ? naam.charAt(0).toUpperCase() + naam.slice(1) : `${t.case.titel}, ${i + 1}`;
+};
+const caseFotos: ProjectFoto[] = Object.keys(fotoModules)
+  .sort()
+  .map((bestand, i) => ({ src: fotoModules[bestand].default, alt: altUitBestand(bestand, i) }));
+---
+<BaseLayout
+  title={t.meta.title}
+  description={vul(t.meta.description)}
+  path={pad}
+  taal={taal}
+  schema={[faqSchema(faqs), serviceSchema({ naam: t.meta.dienst, beschrijving: vul(t.meta.dienstBeschrijving), path: pad })]}
+>
+  <Hero
+    compact
+    eyebrow={t.hero.eyebrow}
+    title={t.hero.titel}
+    sub={vul(t.hero.sub)}
+    image="/images/residentie-appartementen.webp"
+    ctas={[
+      { label: t.hero.aanmelden, href: '#aanmelden', primary: true },
+      { label: t.hero.case, href: '#case' },
+    ]}
+    trust={t.hero.trust}
+  />
+  <Breadcrumbs
+    items={[{ label: t.kruimel, href: pad }]}
+    home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
+  />
+
+  <!-- AANMELDEN: direct na de hero, met het werkgebied ernaast -->
+  <section class="section" id="aanmelden" style="padding-top:40px">
+    <div class="container">
+      <!-- Op mobiel: intro, dan meteen het formulier, daarna werkgebied en voordelen. -->
+      <div class="aanmeld">
+        <div class="aanmeld__kop">
+          <p class="eyebrow">{t.aanmelden.eyebrow}</p>
+          <h2>{t.aanmelden.titel}</h2>
+          <p class="section__desc">{t.aanmelden.intro}</p>
+        </div>
+
+        <div class="aanmeld__info">
+          <div class="werkgebied">
+            <h3>{t.aanmelden.werkgebiedTitel}</h3>
+            <p>{t.aanmelden.werkgebiedTekst}</p>
+            <ul class="werkgebied__lijst">
+              {werkgebied.map((s) => (
+                <li><Icon name="afstand" size={17} /><span>{t.steden[s]}</span></li>
+              ))}
+            </ul>
+          </div>
+
+          <ul class="checks" style="margin-bottom:22px">
+            {t.aanmelden.voordelen.map((v) => <li>{v}</li>)}
+          </ul>
+
+          <p class="werkgebied__direct">{t.aanmelden.direct} <a href={waBericht}>{t.aanmelden.directWa}</a> {t.aanmelden.directBel} <a href={`tel:${site.telefoonHref}`} dir="ltr">{site.telefoon}</a>.</p>
+        </div>
+
+        <form class="card aanmeld__form" id="verkoopForm" novalidate>
+          <div class="veld">
+            <label for="naam">{t.form.naam} <span aria-hidden="true">*</span></label>
+            <input type="text" id="naam" name="naam" placeholder={t.form.naamPh} required />
+          </div>
+          <div class="veld">
+            <label for="telefoon">{t.form.telefoon} <span aria-hidden="true">*</span></label>
+            <input type="tel" id="telefoon" name="telefoon" placeholder={t.form.telefoonPh} dir="ltr" required />
+          </div>
+          <div class="veld">
+            <label for="email">{t.form.email} <span class="veld__hint">{t.form.optioneel}</span></label>
+            <input type="email" id="email" name="email" placeholder={t.form.emailPh} dir="ltr" />
+          </div>
+          <div class="veld">
+            <label for="stad">{t.form.stad} <span aria-hidden="true">*</span></label>
+            <select id="stad" name="stad" required>
+              <option value="">{t.form.stadKies}</option>
+              {werkgebied.map((s) => <option value={s}>{t.form.stadOptie.replace('{stad}', t.steden[s])}</option>)}
+            </select>
+          </div>
+          <div class="veld">
+            <label for="wijk">{t.form.wijk} <span class="veld__hint">{t.form.optioneel}</span></label>
+            <input type="text" id="wijk" name="wijk" placeholder={t.form.wijkPh} />
+          </div>
+          <div class="veld-rij">
+            <div class="veld">
+              <label for="type">{t.form.type} <span aria-hidden="true">*</span></label>
+              <select id="type" name="type" required>
+                <option value="">{t.form.kies}</option>
+                {t.form.types.map((o) => <option>{o}</option>)}
+              </select>
+            </div>
+            <div class="veld">
+              <label for="woonplaats">{t.form.woont} <span aria-hidden="true">*</span></label>
+              <select id="woonplaats" name="woonplaats" required>
+                <option value="">{t.form.kies}</option>
+                {t.form.woonOpties.map((o) => <option>{o}</option>)}
+              </select>
+            </div>
+          </div>
+          <div class="veld-rij">
+            <div class="veld">
+              <label for="oppervlak">{t.form.oppervlak} <span class="veld__hint">{t.form.oppervlakHint}</span></label>
+              <input type="text" id="oppervlak" name="oppervlak" inputmode="numeric" placeholder={t.form.oppervlakPh} />
+            </div>
+            <div class="veld">
+              <label for="kamers">{t.form.kamers}</label>
+              <input type="text" id="kamers" name="kamers" inputmode="numeric" placeholder={t.form.kamersPh} />
+            </div>
+          </div>
+          <div class="veld">
+            <label for="titel">{t.form.titel} <span class="veld__hint">{t.form.optioneel}</span></label>
+            <select id="titel" name="titel">
+              <option value="">{t.form.titelOnbekend}</option>
+              {t.form.titels.map((o) => <option>{o}</option>)}
+            </select>
+          </div>
+          <div class="veld">
+            <label for="prijs">{t.form.prijs} <span class="veld__hint">{t.form.optioneel}</span></label>
+            <input type="text" id="prijs" name="prijs" placeholder={t.form.prijsPh} />
+          </div>
+          <div class="veld">
+            <label for="bericht">{t.form.bericht} <span class="veld__hint">{t.form.optioneel}</span></label>
+            <textarea id="bericht" name="bericht" rows="3" placeholder={t.form.berichtPh}></textarea>
+          </div>
+
+          <div class="form__acties">
+            <button type="button" id="sendWhatsapp" class="btn btn--primary">{t.form.viaWhatsapp}</button>
+            <button type="button" id="sendMail" class="btn btn--outline">{t.form.viaEmail}</button>
+          </div>
+
+          <p class="form__melding" id="bevestiging" hidden>{t.form.bevestiging}</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAAROM: professioneel bedrijf vs. losse tussenpersoon -->
+  <section class="section section--tinted">
+    <div class="container">
+      <div class="section__header" style="max-width:820px">
+        <p class="eyebrow">{t.waarom.eyebrow}</p>
+        <h2 set:html={t.waarom.titel} />
+        <p class="section__desc">{t.waarom.desc}</p>
+      </div>
+      <div class="compare-wrap">
+        <table class="compare verkoop-compare">
+          <thead>
+            <tr><th scope="col"></th><th scope="col">{t.waarom.kolomAnders}</th><th scope="col">{t.waarom.kolomWij}</th></tr>
+          </thead>
+          <tbody>
+            {t.waarom.rijen.map((r) => (
+              <tr><th scope="row">{r.onderwerp}</th><td data-label={t.waarom.kolomAnders}>{r.anders}</td><td data-label={t.waarom.kolomWij}>{r.wij}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAT WIJ DOEN -->
+  <section class="section">
+    <div class="container">
+      <div class="section__header" style="max-width:820px">
+        <p class="eyebrow">{t.diensten.eyebrow}</p>
+        <h2 set:html={t.diensten.titel} />
+        <p class="section__desc">{t.diensten.desc}</p>
+      </div>
+      <div class="datacards verkoop-diensten">
+        {t.diensten.items.map((d) => (
+          <div class="datacard">
+            <span class="datacard__ic"><Icon name={d.icon} size={24} /></span>
+            <h3>{d.titel}</h3>
+            <p>{d.tekst}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- NETWERK: kopers in Marokko én daarbuiten -->
+  <section class="section section--dark">
+    <div class="container">
+      <div class="split">
+        <div class="split__text">
+          <p class="eyebrow eyebrow--light">{t.netwerk.eyebrow}</p>
+          <h2 set:html={t.netwerk.titel} />
+          <p class="netwerk__tekst">{t.netwerk.p1}</p>
+          <p class="netwerk__tekst">{t.netwerk.p2}</p>
+        </div>
+        <div>
+          <ul class="checks netwerk__lijst">
+            {t.netwerk.punten.map((p) => <li><strong>{p.kop}</strong> {p.tekst}</li>)}
+          </ul>
+          <div class="quote-block netwerk__transparant">
+            <p><strong>{t.netwerk.transparant.kop}</strong> {t.netwerk.transparant.tekst}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WERKWIJZE -->
+  <section class="section">
+    <div class="container">
+      <div class="section__header" style="max-width:820px">
+        <p class="eyebrow">{t.werkwijze.eyebrow}</p>
+        <h2>{t.werkwijze.titel}</h2>
+        <p class="section__desc">{t.werkwijze.desc}</p>
+      </div>
+      <ol class="stappen stappen--5">
+        {t.werkwijze.stappen.map((s, i) => (
+          <li class="stap">
+            <span class="stap__num">{t.werkwijze.stap} {i + 1}</span>
+            <h3>{s.titel}</h3>
+            <p>{s.tekst}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- CASE -->
+  <section class="section section--tinted" id="case">
+    <div class="container">
+      <div class="section__header" style="max-width:820px">
+        <p class="eyebrow">{t.case.eyebrow}</p>
+        <h2>{t.case.titel}<br /><em>{t.case.em}</em></h2>
+        {verkoopcase.voorbeeld && <p class="case__label">{t.case.label}</p>}
+      </div>
+
+      {caseFotos.length > 0 ? (
+        <ProjectGallery fotos={caseFotos} projectNaam={t.case.titel} taal={taal} lazy />
+      ) : (
+        <div class="pgallery" aria-label={t.case.galerij}>
+          <div class="pgallery__main foto-leeg"><span>{t.case.fotoVolgt} · {t.case.legeVakken[0]}</span></div>
+          <div class="pgallery__thumbs">
+            {t.case.legeVakken.slice(1).map((v) => <div class="pgallery__thumb foto-leeg"><span>{v}</span></div>)}
+          </div>
+        </div>
+      )}
+
+      <div class="project__lead case__lead">
+        <div>
+          <h3 class="case__kop">{t.case.situatieKop}</h3>
+          <p class="case__tekst">{t.case.situatie}</p>
+
+          <h3 class="case__kop">{t.case.aanpakKop}</h3>
+          <ol class="case__aanpak">
+            {t.case.aanpak.map((a) => (
+              <li><strong>{a.titel}.</strong> {a.tekst}</li>
+            ))}
+          </ol>
+
+          <h3 class="case__kop">{t.case.eigenaarKop}</h3>
+          <p class="case__tekst">{t.case.eigenaar}</p>
+        </div>
+
+        <aside>
+          <dl class="project__specs">
+            <div class="project__spec"><dt>{t.case.locatie}</dt><dd>{t.case.locatieWaarde}</dd></div>
+            {t.case.specs.map((s) => (
+              <div class="project__spec"><dt>{s.label}</dt><dd>{s.waarde}</dd></div>
+            ))}
+          </dl>
+          {verkoopcase.video ? (
+            <video class="case__video" src={verkoopcase.video} controls preload="none" playsinline></video>
+          ) : (
+            <div class="case__video foto-leeg"><span>{t.case.videoVolgt}</span></div>
+          )}
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <Faq items={faqs} title={t.faqTitel} />
+
+  {/* De gidsen hieronder bestaan alleen in het Nederlands. */}
+  {isNl && (
+    <VerderLezen items={[
+      { label: 'Verkopen vanuit het buitenland', href: '/huis-verkopen-marokko-vanuit-nederland/', tekst: 'Wat er komt kijken als u buiten Marokko woont.' },
+      { label: 'Waarde van uw woning bepalen', href: '/waarde-woning-marokko-bepalen/', tekst: 'Hoe een realistische vraagprijs tot stand komt.' },
+      { label: 'Juridische documenten', href: '/juridische-documenten-vastgoed-marokko/', tekst: 'Welke stukken bij een overdracht horen.' },
+      { label: 'Titre foncier', href: '/titre-foncier-marokko/', tekst: 'Wat de eigendomstitel betekent voor een koper.' },
+    ]} />
+  )}
+
+  <section class="ctaband">
+    <div class="container">
+      <h2>{t.slot.titel}</h2>
+      <p>{vul(t.slot.tekst)}</p>
+      <div class="ctaband__actions">
+        <a href="#aanmelden" class="btn btn--light">{t.slot.knop}</a>
+        <a href={waBericht} class="btn btn--outline" style="color:var(--cream);border-color:var(--cream)">{t.slot.wa}</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ whatsapp: site.whatsapp, email: site.email, validatie: t.form.validatie, b: t.bericht }}>
+    (function () {
+      function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+      function build() {
+        // Telefoon verplicht, e-mail bewust niet: de meeste verkopers reageren
+        // het liefst via WhatsApp.
+        if (!val('naam') || !val('telefoon') || !val('stad') || !val('type') || !val('woonplaats')) {
+          alert(validatie);
+          return null;
+        }
+        var regels = [b.kop, ''];
+        function voegToe(label, waarde) { if (waarde) regels.push(label + ': ' + waarde); }
+        voegToe(b.naam, val('naam'));
+        voegToe(b.telefoon, val('telefoon'));
+        voegToe(b.email, val('email'));
+        voegToe(b.woont, val('woonplaats'));
+        regels.push('');
+        voegToe(b.type, val('type'));
+        voegToe(b.stad, val('stad'));
+        voegToe(b.wijk, val('wijk'));
+        voegToe(b.oppervlak, val('oppervlak'));
+        voegToe(b.kamers, val('kamers'));
+        voegToe(b.titel, val('titel'));
+        voegToe(b.prijs, val('prijs'));
+        if (val('bericht')) regels.push('', b.toelichting + ':', val('bericht'));
+        return regels.join('\n');
+      }
+
+      // Elke aanmelding ook opslaan als lead in de CRM (zie LeadOpslag.astro). Blokkeert
+      // nooit: de belofte is na hooguit 1 seconde klaar, ook als Supabase niet reageert.
+      function bewaar(kanaal) {
+        return window.meLead
+          ? window.meLead('verkoop', document.getElementById('verkoopForm'), { kanaal: kanaal }, 1000)
+          : Promise.resolve(false);
+      }
+
+      function toonBevestiging() {
+        var el = document.getElementById('bevestiging');
+        el.hidden = false;
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      document.getElementById('sendWhatsapp').addEventListener('click', function () {
+        var msg = build(); if (!msg) return;
+        window.meTrack && window.meTrack('generate_lead', { form: 'verkoop', method: 'whatsapp' });
+        bewaar('whatsapp');
+        window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
+        toonBevestiging();
+      });
+
+      document.getElementById('sendMail').addEventListener('click', function () {
+        var msg = build(); if (!msg) return;
+        window.meTrack && window.meTrack('generate_lead', { form: 'verkoop', method: 'email' });
+        var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
+        var mailto = 'mailto:' + email
+          + '?subject=' + encodeURIComponent(b.kop)
+          + cc + '&body=' + encodeURIComponent(msg);
+        // Eerst (kort) opslaan: sommige browsers breken een lopend verzoek af zodra
+        // de mailapp opent.
+        bewaar('email').then(function () { window.location.href = mailto; });
+        toonBevestiging();
+      });
+    })();
+  </script>
+</BaseLayout>
