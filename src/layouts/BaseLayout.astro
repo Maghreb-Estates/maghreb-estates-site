@@ -4,6 +4,7 @@ import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import StickyWhatsapp from '../components/StickyWhatsapp.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import LeadOpslag from '../components/LeadOpslag.astro';
 import { site } from '../data/site';
 import { htmlLang, isRtl, paginas, sleutelVoorPad, standaardTaal, talen, type Taal } from '../i18n/config';
 
@@ -157,5 +158,6 @@ const allSchema = [orgSchema, ...schema];
     <Footer taal={taal} />
     {toonSticky && <StickyWhatsapp taal={taal} />}
     <CookieConsent taal={taal} />
+    <LeadOpslag />
   </body>
 </html>

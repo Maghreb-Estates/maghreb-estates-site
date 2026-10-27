@@ -167,6 +167,14 @@ const path = '/contact/';
         return regels.join('\n');
       }
 
+      // Elke inzending ook opslaan als lead in de CRM (zie LeadOpslag.astro). Blokkeert
+      // nooit: de belofte is na hooguit 1 seconde klaar, ook als Supabase niet reageert.
+      function bewaar(kanaal) {
+        return window.meLead
+          ? window.meLead('contact', document.getElementById('contactForm'), { kanaal: kanaal }, 1000)
+          : Promise.resolve(false);
+      }
+
       function toonBevestiging() {
         var b = document.getElementById('bevestiging');
         b.hidden = false;
@@ -176,6 +184,7 @@ const path = '/contact/';
       document.getElementById('sendWhatsapp').addEventListener('click', function () {
         var msg = build(); if (!msg) return;
         window.meTrack && window.meTrack('generate_lead', { form: 'contact', method: 'whatsapp' });
+        bewaar('whatsapp');
         // De klant ziet de volledige inhoud zelf terug in zijn WhatsApp-gesprek.
         window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
         toonBevestiging();
@@ -189,9 +198,12 @@ const path = '/contact/';
         var kopie = val('email')
           ? '\n\n---\nBedankt voor uw bericht aan Maghreb Estates. Wij hebben uw aanvraag ontvangen en nemen zo snel mogelijk contact met u op. Heeft u een woninglink of documenten gedeeld, dan bekijken wij eerst de informatie en komen wij terug met een duidelijke vervolgstap.'
           : '';
-        window.location.href = 'mailto:' + email
+        var mailto = 'mailto:' + email
           + '?subject=' + encodeURIComponent('Aanvraag via maghreb-estates.com')
           + cc + '&body=' + encodeURIComponent(msg + kopie);
+        // Eerst (kort) opslaan: sommige browsers breken een lopend verzoek af zodra
+        // de mailapp opent.
+        bewaar('email').then(function () { window.location.href = mailto; });
         toonBevestiging();
       });
     })();

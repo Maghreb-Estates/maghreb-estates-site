@@ -127,7 +127,13 @@ const waAdvies = waLink('Hallo Maghreb Estates, ik heb een woning of project op 
         const wa = 'https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg);
         document.getElementById('checklistWa').setAttribute('href', wa);
         document.getElementById('checklistDone').style.display = 'block';
-        window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent('Checklist-aanvraag') + '&body=' + encodeURIComponent(msg);
+        const mailto = 'mailto:' + email + '?subject=' + encodeURIComponent('Checklist-aanvraag') + '&body=' + encodeURIComponent(msg);
+        // Ook opslaan als lead in de CRM (zie LeadOpslag.astro), hooguit 1 seconde
+        // wachten: sommige browsers breken een lopend verzoek af zodra de mailapp opent.
+        const opgeslagen = window.meLead
+          ? window.meLead('checklist', document.getElementById('checklistForm'), { kanaal: 'email' }, 1000)
+          : Promise.resolve(false);
+        opgeslagen.then(function () { window.location.href = mailto; });
       });
     })();
   </script>

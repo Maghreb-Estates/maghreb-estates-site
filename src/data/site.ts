@@ -29,6 +29,13 @@ export const site = {
   gaId: 'G-4DY7YZK059',
   // Microsoft Clarity (heatmaps + opnames) — idem, pas na toestemming.
   clarityId: 'z07kb3h2jq',
+  // Supabase (live project): formulieren bewaren hier elke lead in crm_leads. De
+  // publishable key is bedoeld om publiek te staan; RLS laat er alleen invoegen mee
+  // toe (zie crm/supabase/site_formulieren.sql). Nooit de service key hier zetten.
+  supabase: {
+    url: 'https://pkkdjnxiperugvothjtn.supabase.co',
+    publishableKey: 'sb_publishable_JJTYSoXQjhK2gECPczzwgQ_HyzxjnDB',
+  },
 };
 
 // WhatsApp-linkhelper (optioneel voorgevuld bericht).

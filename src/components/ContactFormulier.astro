@@ -168,6 +168,14 @@ const interesse = interesseTpl[taal];
       return regels.join('\n');
     }
 
+    // Elke inzending ook opslaan als lead in de CRM (zie LeadOpslag.astro). Blokkeert
+    // nooit: de belofte is na hooguit 1 seconde klaar, ook als Supabase niet reageert.
+    function bewaar(kanaal) {
+      return window.meLead
+        ? window.meLead('contact', document.getElementById('contactForm'), { kanaal: kanaal }, 1000)
+        : Promise.resolve(false);
+    }
+
     function toonBevestiging() {
       var b = document.getElementById('bevestiging');
       b.hidden = false;
@@ -177,6 +185,7 @@ const interesse = interesseTpl[taal];
     document.getElementById('sendWhatsapp').addEventListener('click', function () {
       var msg = build(); if (!msg) return;
       window.meTrack && window.meTrack('generate_lead', { form: 'contact', method: 'whatsapp' });
+      bewaar('whatsapp');
       window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
       toonBevestiging();
     });
@@ -186,9 +195,12 @@ const interesse = interesseTpl[taal];
       window.meTrack && window.meTrack('generate_lead', { form: 'contact', method: 'email' });
       var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
       var kopie = val('email') ? '\n\n---\n' + kopieTekst : '';
-      window.location.href = 'mailto:' + email
+      var mailto = 'mailto:' + email
         + '?subject=' + encodeURIComponent('Maghreb Estates — maghreb-estates.com')
         + cc + '&body=' + encodeURIComponent(msg + kopie);
+      // Eerst (kort) opslaan: sommige browsers breken een lopend verzoek af zodra
+      // de mailapp opent.
+      bewaar('email').then(function () { window.location.href = mailto; });
       toonBevestiging();
     });
   })();
