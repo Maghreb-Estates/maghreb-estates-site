@@ -5,8 +5,8 @@
 // Er is nog geen echte agenda. Elk slot krijgt een vaste bezet/vrij-status uit een
 // hash van datum + tijd, dus een "tabel" voor vijf jaar vooruit zonder dat er data
 // wordt meegestuurd: elke bezoeker ziet op dezelfde dag dezelfde bezetting, ook na
-// herladen, en er wordt alleen gerekend voor de gekozen dag. Per dag zijn 8 tot 11
-// van de 15 slots bezet (gemiddeld ~63%); welke dat zijn, bepaalt de hash.
+// herladen, en er wordt alleen gerekend voor de gekozen dag. Per dag zijn 5 tot 7
+// van de 15 slots bezet (gemiddeld ~40%); welke dat zijn, bepaalt de hash.
 // Een gekozen slot is een voorkeur: we bevestigen altijd persoonlijk.
 // TODO: koppel aan een externe agenda (Cal.com / Google Calendar) zodra beschikbaar;
 // vervang dan dit component en laat de rest van het formulier staan.
@@ -79,7 +79,7 @@ const tijdsloten = Array.from({ length: 15 }, (_, i) => `${String(8 + i).padStar
 
       // Drukte van de dag bepaalt hoeveel slots bezet zijn; de slots met de laagste
       // score zijn het.
-      var aantal = Math.round(knoppen.length * (0.52 + 0.22 * kans(d)));
+      var aantal = Math.round(knoppen.length * (0.3 + 0.2 * kans(d)));
       var scores = knoppen.map(function (k) { return kans(d + ' ' + k.dataset.slot); });
       var grens = scores.slice().sort(function (a, z) { return a - z; })[aantal - 1];
       knoppen.forEach(function (k, i) {
