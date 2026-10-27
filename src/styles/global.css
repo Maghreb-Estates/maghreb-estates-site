@@ -508,6 +508,12 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
 .slot:hover { border-color: var(--green-mid); }
 .slot[aria-pressed='true'] { background: var(--green); border-color: var(--green); color: var(--cream); }
 .slot:disabled { opacity: 0.4; cursor: not-allowed; }
+.slot--bezet, .slot--bezet:hover { background: var(--cream-dark); border-color: var(--border); color: var(--text-muted); text-decoration: line-through; opacity: 0.7; }
+.slots[hidden], .slots__hint[hidden], .slots__legenda[hidden] { display: none; }
+.slots__hint { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+.slots__legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin: -8px 0 22px; }
+.slots__stip { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--border); background: var(--white); }
+.slots__stip--bezet { background: var(--cream-dark); opacity: 0.7; margin-inline-start: 10px; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 940px) {

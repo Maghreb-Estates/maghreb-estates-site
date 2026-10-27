@@ -428,7 +428,7 @@ export const en: TaalContent = {
       'Which next step makes sense.',
     ],
     punten: [],
-    bevestiging: 'Thank you. Your consultation request has been received. We will confirm the time slot as soon as possible via WhatsApp or phone.',
-    kopie: 'Thank you for your request to Maghreb Estates. We have received your consultation request and will confirm the time slot as soon as possible via WhatsApp or phone.',
+    bevestiging: 'Thank you. Your consultation request has been received. We will contact you as soon as possible via WhatsApp or phone to confirm your preferred time slot. If it does not work, we will agree on another time together.',
+    kopie: 'Thank you for your request to Maghreb Estates. We have received your consultation request. Your chosen time slot is a preference: we will confirm as soon as possible via WhatsApp or phone whether it works, or agree on another time with you.',
   },
 };

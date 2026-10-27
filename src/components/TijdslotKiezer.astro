@@ -1,0 +1,102 @@
+---
+// Datumkiezer + tijdsloten voor het adviesgesprek (NL en vertaalde pagina's). Het
+// gekozen slot staat in het verborgen veld #tijdslot, dat de formulierscripts uitlezen.
+//
+// Er is nog geen echte agenda. Elk slot krijgt een vaste bezet/vrij-status uit een
+// hash van datum + tijd, dus een "tabel" voor vijf jaar vooruit zonder dat er data
+// wordt meegestuurd: elke bezoeker ziet op dezelfde dag dezelfde bezetting, ook na
+// herladen, en er wordt alleen gerekend voor de gekozen dag. Per dag zijn 8 tot 11
+// van de 15 slots bezet (gemiddeld ~63%); welke dat zijn, bepaalt de hash.
+// Een gekozen slot is een voorkeur: we bevestigen altijd persoonlijk.
+// TODO: koppel aan een externe agenda (Cal.com / Google Calendar) zodra beschikbaar;
+// vervang dan dit component en laat de rest van het formulier staan.
+import type { UiStrings } from '../i18n/ui';
+
+interface Props {
+  b: UiStrings['booking'];
+}
+const { b } = Astro.props;
+
+// Elk heel uur van 08:00 tot en met 22:00 (gesprek max. 60 minuten).
+const tijdsloten = Array.from({ length: 15 }, (_, i) => `${String(8 + i).padStart(2, '0')}:00`);
+---
+<div class="veld">
+  <label for="datum">{b.datum} <span aria-hidden="true">*</span></label>
+  <input type="date" id="datum" name="datum" dir="ltr" required />
+</div>
+
+<p class="booking__label" id="slotLabel">{b.tijdslot} <span aria-hidden="true">*</span></p>
+<p class="slots__hint" id="slotHint">{b.kiesEerstDatum}</p>
+<div class="slots" id="slots" role="group" aria-labelledby="slotLabel" dir="ltr" hidden>
+  {tijdsloten.map((x) => (
+    <button type="button" class="slot" data-slot={x} aria-pressed="false">{x}</button>
+  ))}
+</div>
+<p class="slots__legenda" id="slotLegenda" hidden>
+  <span class="slots__stip"></span>{b.vrij}
+  <span class="slots__stip slots__stip--bezet"></span>{b.bezet}
+</p>
+<input type="hidden" id="tijdslot" name="tijdslot" />
+
+<script is:inline define:vars={{ bezetTekst: b.bezet }}>
+  (function () {
+    var datum = document.getElementById('datum');
+    var slots = document.getElementById('slots');
+    var hint = document.getElementById('slotHint');
+    var legenda = document.getElementById('slotLegenda');
+    var gekozen = document.getElementById('tijdslot');
+    var knoppen = Array.prototype.slice.call(slots.querySelectorAll('.slot'));
+
+    // Lokale datum als JJJJ-MM-DD (toISOString zou rond middernacht een dag verschuiven).
+    function iso(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    var nu = new Date();
+    datum.min = iso(new Date(nu.getFullYear(), nu.getMonth(), nu.getDate() + 1));
+    datum.max = iso(new Date(nu.getFullYear() + 5, nu.getMonth(), nu.getDate()));
+
+    // FNV-1a + murmur3-finalizer: vast getal tussen 0 en 1 per tekst.
+    function kans(s) {
+      var h = 2166136261;
+      for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+      h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b);
+      h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35);
+      h ^= h >>> 16;
+      return (h >>> 0) / 4294967296;
+    }
+
+    function kies(knop) {
+      knoppen.forEach(function (x) { x.setAttribute('aria-pressed', String(x === knop)); });
+      gekozen.value = knop ? knop.dataset.slot : '';
+    }
+
+    function toon() {
+      var d = datum.value;
+      var geldig = !!d && d >= datum.min && d <= datum.max;
+      slots.hidden = legenda.hidden = !geldig;
+      hint.hidden = geldig;
+      if (!geldig) { kies(null); return; }
+
+      // Drukte van de dag bepaalt hoeveel slots bezet zijn; de slots met de laagste
+      // score zijn het.
+      var aantal = Math.round(knoppen.length * (0.52 + 0.22 * kans(d)));
+      var scores = knoppen.map(function (k) { return kans(d + ' ' + k.dataset.slot); });
+      var grens = scores.slice().sort(function (a, z) { return a - z; })[aantal - 1];
+      knoppen.forEach(function (k, i) {
+        var bezet = scores[i] <= grens;
+        k.disabled = bezet;
+        k.classList.toggle('slot--bezet', bezet);
+        if (bezet) k.setAttribute('aria-label', k.dataset.slot + ', ' + bezetTekst);
+        else k.removeAttribute('aria-label');
+        if (bezet && gekozen.value === k.dataset.slot) kies(null);
+      });
+    }
+
+    knoppen.forEach(function (k) { k.addEventListener('click', function () { kies(k); }); });
+    datum.addEventListener('change', toon);
+    datum.addEventListener('input', toon);
+    // Bij terugnavigatie kan de browser de datum al hebben teruggezet.
+    gekozen.value = '';
+    toon();
+  })();
+</script>
