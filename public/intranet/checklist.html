@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Due Diligence Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; padding: 28px 0 64px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .side { position: sticky; top: 20px; }
+  @media (max-width: 900px) { .side { position: static; } }
+  .prog { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; margin: 8px 0 4px; }
+  .prog i { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+  .big { font-family: var(--serif); font-size: 40px; color: var(--green); line-height: 1; }
+  .grp { margin-bottom: 16px; }
+  .grp-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+  .grp-h span { font-size: 12px; color: var(--muted); }
+  .item { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 12px 0; border-top: 1px solid var(--cream-dark); }
+  .item input[type=checkbox] { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--green); }
+  .item b { font-weight: 500; font-size: 14.5px; }
+  .item .why { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .item.done b { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--accent); }
+  .item textarea { margin-top: 8px; min-height: 36px; font-size: 13px; padding: 6px 10px; display: none; }
+  .item.open textarea, .item textarea.has { display: block; }
+  .item .nb { font-size: 12px; color: var(--green-mid); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; margin-top: 4px; }
+  .tag { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-left: 6px; }
+  .dossiers { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .dossiers button { text-align: left; font: inherit; font-size: 13px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; cursor: pointer; display: flex; justify-content: space-between; }
+  .dossiers button.on { border-color: var(--green); background: var(--green-light); }
+  @media print { .side { display: none; } .layout { display: block; } .item textarea { display: block; border: 0; padding: 0; } .nb { display: none; } }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Due diligence checklist</h1><p>Per dossier afvinken wat gecontroleerd is, van eigendomstitel tot overdracht bij de notaris</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+<main class="wrap layout">
+  <aside class="side">
+    <div class="card">
+      <h3>Dossier</h3>
+      <div class="field" style="margin-top:10px"><label>Klant en object</label><input type="text" id="naam" placeholder="Bijv. Morad, villa Malabata"></div>
+      <div class="field"><label>Soort object</label><div class="seg" id="soort"><button data-v="bestaand" class="on">Bestaand</button><button data-v="nieuw">Nieuwbouw</button><button data-v="grond">Grond</button></div></div>
+      <div class="big" id="pct">0%</div><div class="prog"><i id="bar" style="width:0"></i></div><div class="small muted" id="cnt"></div>
+      <div class="btns"><button class="btn" id="print">Print / PDF</button><button class="btn outline" id="nieuw">Nieuw dossier</button></div>
+      <div class="dossiers" id="list"></div>
+      <p class="note">Wordt op dit apparaat bewaard. Zet geen paspoortnummers of andere persoonsgegevens in de notities.</p>
+    </div>
+  </aside>
+  <div id="groups"></div>
+</main>
+<script>
+const { esc } = ME;
+const $ = id => document.getElementById(id);
+const G = [
+  { t: 'Eigendom', items: [
+    ['cert', 'Certificat de propriété opgevraagd, niet ouder dan een maand', 'Bij de ANCFCC. Toont eigenaar, oppervlakte en lasten op het titre foncier.'],
+    ['eig', 'Verkoper staat als eigenaar op het certificaat', 'Naam, aandelen en eventuele mede-eigenaren kloppen met de verkopers aan tafel.'],
+    ['last', 'Geen hypotheek, beslag of voorinschrijving', 'Rubriek “charges et droits réels”. Bestaande hypotheek wordt bij de notaris afgelost.'],
+    ['erf', 'Bij erfenis: acte d’hérédité en akkoord van alle erfgenamen', 'Alle erfgenamen tekenen, of via een gelegaliseerde volmacht.'],
+    ['volm', 'Volmachten gelegaliseerd en recent', 'Volmacht uit Nederland of België via consulaat of apostille.'],
+    ['melk', 'Melkia of réquisition: status en opposities gecontroleerd', 'Melkia: adoul-akte en getuigen. Réquisition: oppositietermijn verlopen? Liefst eerst titreren.', 'grond'],
+  ]},
+  { t: 'Stedenbouw', items: [
+    ['nru', 'Note de renseignement urbanistique', 'Van de Agence Urbaine. Bestemming, bouwhoogte, COS en CUS, toekomstige wegen.'],
+    ['verg', 'Bouwvergunning (autorisation de construire)', 'Klopt met wat er feitelijk staat?'],
+    ['ph', 'Permis d’habiter of certificat de conformité', 'Zonder deze stukken geen aansluiting en lastig bij doorverkoop.', 'bestaand'],
+    ['plan', 'Kadastrale plan en oppervlakte kloppen met de werkelijkheid', 'Bij twijfel een géomètre-topographe laten meten.'],
+  ]},
+  { t: 'Lasten en belastingen', items: [
+    ['tsc', 'Taxe de services communaux en taxe d’habitation betaald', 'Laatste aanslagen en betaalbewijzen van de verkoper.', 'bestaand'],
+    ['quit', 'Quitus fiscal of attestation de non-imposition', 'Nodig voor de overdracht. Verkoper vraagt aan bij de DGI.', 'bestaand'],
+    ['syn', 'Attestation du syndic: geen achterstand', 'Voor appartementen. Vraag ook naar geplande grote uitgaven.', 'bestaand'],
+    ['nuts', 'Water en stroom: laatste facturen zonder achterstand', 'Amendis (Tanger), Lydec (Casablanca), Redal (Rabat), RADEEMA (Marrakech) of ONEE.', 'bestaand'],
+  ]},
+  { t: 'Nieuwbouw en ontwikkelaar', items: [
+    ['rc', 'Ontwikkelaar gecontroleerd', 'Registre de commerce, eerdere projecten opgeleverd, reviews en bezoek aan een opgeleverd project.', 'nieuw'],
+    ['gar', 'Garantie d’achèvement of de remboursement van een bank', 'Wet 44-00 / 107-12 over VEFA. Vraag de naam van de bank en het document.', 'nieuw'],
+    ['tm', 'Titre-mère van het project en vergunning ingezien', 'Het project moet op een titre foncier staan. Later volgt het splitsen per unit.', 'nieuw'],
+    ['cr', 'Contrat de réservation en contrat préliminaire gelezen', 'Betalingen gekoppeld aan bouwfasen, opleverdatum, boeteclausule bij vertraging.', 'nieuw'],
+    ['spec', 'Technische omschrijving en plattegrond als bijlage', 'Afwerking, oppervlakte (privatif vs. totaal), parking en berging.', 'nieuw'],
+  ]},
+  { t: 'Prijs en staat', items: [
+    ['ref', 'Minimaal drie referentieobjecten in dezelfde wijk', 'Uit het marktdashboard en de portals. Vraagprijs is geen marktprijs.'],
+    ['m2', 'Prijs per m² getoetst aan de mediaan van de wijk', 'Gebruik de vergelijker. Meer dan 15% boven de mediaan: onderbouwing vragen.'],
+    ['insp', 'Bezichtiging of bouwkundige inspectie gedaan', 'Vocht, scheuren, dak, elektra en sanitair. Foto’s en video voor de klant.', 'bestaand'],
+    ['rol', 'Onze rol en vergoeding aan de klant gemeld', 'Als een ontwikkelaar ons betaalt, zeggen we dat. Schriftelijk.'],
+  ]},
+  { t: 'Overdracht', items: [
+    ['not', 'Notaris gekozen, bij voorkeur een eigen notaris van de koper', 'Notaris of adoul? Bij titre foncier altijd een notaris.'],
+    ['comp', 'Compromis de vente gelezen vóór ondertekening', 'Bindend. Ontbindende voorwaarden (financiering, stukken) opgenomen.'],
+    ['cdc', 'Betaling via een rekening in convertibele dirhams', 'Met bewijs van overboeking uit het buitenland. Nodig om later terug te kunnen halen.'],
+    ['reg', 'Registratie en conservation foncière binnen de termijn', 'De notaris regelt het. Vraag het betaalbewijs.'],
+    ['nieuwcert', 'Nieuw certificat de propriété op naam van de koper', 'Pas dan is de koper eigenaar. Kopie in het klantdossier.'],
+  ]},
+];
+let state = ME.keep.get('dd', { cur: 'Nieuw dossier', d: { 'Nieuw dossier': { soort: 'bestaand', c: {}, n: {} } } });
+const cur = () => state.d[state.cur];
+const save = () => ME.keep.set('dd', state);
+const visible = it => !it[3] || it[3] === cur().soort || (it[3] === 'grond' && cur().soort !== 'nieuw');
+function draw() {
+  const d = cur();
+  $('naam').value = state.cur === 'Nieuw dossier' ? '' : state.cur;
+  document.querySelectorAll('#soort button').forEach(b => b.classList.toggle('on', b.dataset.v === d.soort));
+  $('groups').innerHTML = G.map(g => {
+    const its = g.items.filter(visible); if (!its.length) return '';
+    const done = its.filter(i => d.c[i[0]]).length;
+    return `<div class="card grp"><div class="grp-h"><h3>${g.t}</h3><span>${done} van ${its.length}</span></div>` + its.map(i => `
+      <div class="item ${d.c[i[0]] ? 'done' : ''}" data-id="${i[0]}">
+        <input type="checkbox" ${d.c[i[0]] ? 'checked' : ''} aria-label="${esc(i[1])}">
+        <div><b>${esc(i[1])}</b>${i[3] === 'nieuw' ? '<span class="tag">nieuwbouw</span>' : ''}<div class="why">${esc(i[2])}</div>
+        <button class="nb noprint" type="button">${d.n[i[0]] ? 'Notitie' : '+ Notitie'}</button>
+        <textarea class="${d.n[i[0]] ? 'has' : ''}" placeholder="Notitie">${esc(d.n[i[0]] || '')}</textarea></div>
+      </div>`).join('') + '</div>';
+  }).join('');
+  document.querySelectorAll('.item').forEach(el => {
+    const id = el.dataset.id;
+    el.querySelector('input').onchange = e => { d.c[id] = e.target.checked; save(); draw(); };
+    el.querySelector('.nb').onclick = () => el.classList.toggle('open');
+    el.querySelector('textarea').oninput = e => { d.n[id] = e.target.value; save(); };
+  });
+  const all = G.flatMap(g => g.items).filter(visible), n = all.filter(i => d.c[i[0]]).length;
+  const p = all.length ? Math.round(n / all.length * 100) : 0;
+  $('pct').textContent = p + '%'; $('bar').style.width = p + '%'; $('cnt').textContent = `${n} van ${all.length} punten gecontroleerd`;
+  $('list').innerHTML = Object.keys(state.d).filter(k => k !== 'Nieuw dossier' || Object.keys(state.d).length === 1).map(k => `<button class="${k === state.cur ? 'on' : ''}" data-k="${esc(k)}"><span>${esc(k)}</span></button>`).join('');
+  $('list').querySelectorAll('button').forEach(b => b.onclick = () => { state.cur = b.dataset.k; save(); draw(); });
+}
+$('naam').onchange = () => {
+  const v = $('naam').value.trim(); if (!v || v === state.cur) return;
+  state.d[v] = state.d[v] || cur();
+  if (state.cur !== v) delete state.d[state.cur];
+  state.cur = v; save(); draw();
+};
+document.querySelectorAll('#soort button').forEach(b => b.onclick = () => { cur().soort = b.dataset.v; save(); draw(); });
+$('nieuw').onclick = () => { state.d['Nieuw dossier'] = { soort: 'bestaand', c: {}, n: {} }; state.cur = 'Nieuw dossier'; save(); draw(); $('naam').focus(); };
+$('print').onclick = () => window.print();
+draw();
+</script>
+</body>
+</html>

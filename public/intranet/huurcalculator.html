@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Huurcalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Huurcalculator</h1><p>Bruto en netto rendement voor lange verhuur of vakantieverhuur</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+
+<main class="wrap tool">
+  <div>
+    <div class="card">
+      <h3>Woning en investeerder</h3>
+      <div class="grid2">
+        <div class="field"><label>Project of woning</label><input type="text" id="project" placeholder="Bijv. Projet Or, 2 slaapkamers, Agdal"></div>
+        <div class="field"><label>Naam investeerder</label><input type="text" id="inv" placeholder="Naam"></div>
+        <div class="field"><label>Stad</label><select id="stad"><option>Tanger</option><option>Casablanca</option><option>Rabat</option><option selected>Marrakech</option><option>Agadir</option><option>Nador</option><option>Al Hoceima</option></select></div>
+        <div class="field"><label>Oppervlakte</label><div class="affix"><input type="text" id="m2" value="85"><span>m²</span></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Aankoop</h3>
+      <div class="field"><label>Koopsom</label><div class="affix"><span>MAD</span><input type="text" id="prijs" value="1.400.000"></div></div>
+      <div class="grid2">
+        <div class="field"><label>Kosten koper</label><div class="affix"><input type="text" id="kk" value="6,5"><span>%</span></div><div class="hint">Registratie 4%, conservation 1,5%, notaris. Zie de kosten-kopercalculator.</div></div>
+        <div class="field"><label>Inrichting en meubels</label><div class="affix"><span>MAD</span><input type="text" id="inr" value="80.000"></div></div>
+      </div>
+      <div class="kpis"><div class="kpi dark"><div class="k">Totale investering</div><div class="v" id="oInv">–</div></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Verhuur</h3>
+      <div class="field"><div class="seg" id="mode"><button data-v="lang" class="on">Lange verhuur</button><button data-v="kort">Vakantieverhuur (Airbnb)</button></div></div>
+      <div id="lang">
+        <div class="grid2">
+          <div class="field"><label>Huur per maand</label><div class="affix"><span>MAD</span><input type="text" id="huur" value="8.000"></div><div class="hint" id="huurHint"></div></div>
+          <div class="field"><label>Leegstand per jaar</label><div class="affix"><input type="text" id="leeg" value="1"><span>mnd</span></div></div>
+        </div>
+      </div>
+      <div id="kort" style="display:none">
+        <div class="grid2">
+          <div class="field"><label>Gemiddelde nachtprijs <em>ADR</em></label><div class="affix"><span>MAD</span><input type="text" id="adr" value="750"></div></div>
+          <div class="field"><label>Bezetting</label><div class="affix"><input type="text" id="bez" value="55"><span>%</span></div><div class="hint">Check AirROI in het marktdashboard. Juli en augustus liggen veel hoger.</div></div>
+          <div class="field"><label>Platformkosten</label><div class="affix"><input type="text" id="plat" value="3"><span>%</span></div><div class="hint">Airbnb hostfee, bij split fee circa 3%.</div></div>
+          <div class="field"><label>Schoonmaak en linnen per jaar</label><div class="affix"><span>MAD</span><input type="text" id="schoon" value="18.000"></div></div>
+          <div class="field"><label>Water, stroom, internet per maand</label><div class="affix"><span>MAD</span><input type="text" id="nuts" value="900"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Jaarlijkse kosten</h3>
+      <div class="grid2">
+        <div class="field"><label>Syndic per maand <em>VvE</em></label><div class="affix"><span>MAD</span><input type="text" id="syndic" value="500"></div></div>
+        <div class="field"><label>Beheer</label><div class="affix"><input type="text" id="beheer" value="10"><span>%</span></div><div class="hint">Van de huurinkomsten. Airbnb-beheer is meestal 20 tot 25%.</div></div>
+        <div class="field"><label>Onderhoud</label><div class="affix"><input type="text" id="ond" value="5"><span>%</span></div><div class="hint">Reservering, als % van de huurinkomsten.</div></div>
+        <div class="field"><label>Taxe de services communaux</label><div class="affix"><input type="text" id="tsc" value="10,5"><span>%</span></div><div class="hint">Van de huurwaarde, stedelijk gebied. Buiten de stad 6,5%.</div></div>
+      </div>
+      <label class="check"><input type="checkbox" id="ib" checked><div><b>Marokkaanse huurbelasting meenemen</b><span>Bevrijdende heffing op bruto huur: 10% tot 120.000 MAD per jaar, 15% daarboven. Nederlandse box 3 komt hier nog bij.</span></div></label>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="sheet" id="sheet">
+      <div class="sheet-head"><div><h3>Rendementsindicatie</h3><p id="sMode">Lange verhuur</p></div><img src="assets/logo-licht.png" alt=""></div>
+      <div class="sheet-body">
+        <div class="small muted" id="meta" style="margin-bottom:10px"></div>
+        <div class="kpis" style="margin-top:0">
+          <div class="kpi"><div class="k">Bruto rendement</div><div class="v" id="oBr">–</div></div>
+          <div class="kpi dark"><div class="k">Netto rendement</div><div class="v" id="oNe">–</div></div>
+        </div>
+        <table class="rows"><thead><tr><th>Per jaar</th><th class="r">MAD</th><th class="r">EUR</th></tr></thead><tbody id="rows"></tbody></table>
+        <p class="note">Netto rendement = netto huur na kosten en Marokkaanse belasting, gedeeld door de totale investering. Indicatief, zonder waardestijging en zonder financiering.</p>
+      </div>
+      <div class="sheet-foot"><span>Maghreb Estates</span><span>a.douider@maghreb-estates.com · maghreb-estates.com</span></div>
+    </div>
+    <div class="btns noprint">
+      <button class="btn" id="pdf">Download PDF</button>
+      <button class="btn outline" id="png">Download afbeelding</button>
+      <button class="btn accent" id="wa">Deel via WhatsApp</button>
+      <button class="btn outline" id="cp">Kopieer tekst</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const { fmt, num, money, mad, eur, pct, fxReady, esc, today } = ME;
+const $ = id => document.getElementById(id);
+['prijs', 'inr', 'huur', 'adr', 'schoon', 'nuts', 'syndic'].forEach(id => money($(id)));
+let mode = 'lang', R = {};
+document.querySelectorAll('#mode button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#mode button').forEach(x => x.classList.toggle('on', x === b));
+  mode = b.dataset.v;
+  $('lang').style.display = mode === 'lang' ? '' : 'none';
+  $('kort').style.display = mode === 'kort' ? '' : 'none';
+  $('beheer').value = mode === 'kort' ? '20' : '10';
+  calc();
+});
+function calc() {
+  const fx = ME.fx, P = num($('prijs').value);
+  const inv = P * (1 + num($('kk').value) / 100) + num($('inr').value);
+  let bruto, extra = [];
+  if (mode === 'lang') {
+    bruto = num($('huur').value) * (12 - num($('leeg').value));
+  } else {
+    bruto = num($('adr').value) * 365 * num($('bez').value) / 100;
+    extra.push(['Platformkosten', bruto * num($('plat').value) / 100]);
+    extra.push(['Schoonmaak en linnen', num($('schoon').value)]);
+    extra.push(['Water, stroom, internet', num($('nuts').value) * 12]);
+  }
+  const kosten = [
+    ...extra,
+    ['Syndic', num($('syndic').value) * 12],
+    ['Beheer (' + pct(num($('beheer').value)) + ')', bruto * num($('beheer').value) / 100],
+    ['Onderhoud (' + pct(num($('ond').value)) + ')', bruto * num($('ond').value) / 100],
+    ['Taxe de services communaux', bruto * num($('tsc').value) / 100],
+  ];
+  if ($('ib').checked) {
+    const t = bruto < 120000 ? 0.10 : 0.15;
+    kosten.push([`Huurbelasting Marokko (${t * 100}%)`, bruto * t]);
+  }
+  const k = kosten.reduce((s, x) => s + x[1], 0), netto = bruto - k;
+  R = { P, inv, bruto, kosten, netto, br: bruto / inv * 100, ne: netto / inv * 100 };
+  $('oInv').textContent = mad(inv);
+  $('oBr').textContent = pct(R.br);
+  $('oNe').textContent = pct(R.ne);
+  $('sMode').textContent = mode === 'lang' ? 'Lange verhuur' : 'Vakantieverhuur';
+  const m2 = num($('m2').value);
+  $('huurHint').textContent = m2 ? `${fmt(num($('huur').value) / m2)} MAD per m² per maand` : '';
+  $('rows').innerHTML =
+    `<tr><td>Totale investering</td><td class="r">${fmt(inv)}</td><td class="r">${fmt(inv / fx)}</td></tr>` +
+    `<tr><td><b>Bruto huurinkomsten</b></td><td class="r"><b>${fmt(bruto)}</b></td><td class="r">${fmt(bruto / fx)}</td></tr>` +
+    kosten.map(x => `<tr><td class="muted">− ${esc(x[0])}</td><td class="r">${fmt(x[1])}</td><td class="r">${fmt(x[1] / fx)}</td></tr>`).join('') +
+    `<tr class="total"><td>Netto huur per jaar</td><td class="r">${fmt(netto)}</td><td class="r">${fmt(netto / fx)}</td></tr>` +
+    `<tr class="grand"><td>Netto per maand</td><td class="r">${fmt(netto / 12)}</td><td class="r">${fmt(netto / 12 / fx)}</td></tr>`;
+  $('meta').textContent = [today(), $('project').value, $('stad').value, $('inv').value && 'voor ' + $('inv').value].filter(Boolean).join(' · ');
+}
+function text() {
+  const fx = ME.fx;
+  return `Rendementsindicatie ${$('project').value || ''} (${$('stad').value}, ${mode === 'lang' ? 'lange verhuur' : 'vakantieverhuur'})\n` +
+    `Totale investering: ${mad(R.inv)} (${eur(R.inv / fx)})\nBruto huur per jaar: ${mad(R.bruto)}\nNetto huur per jaar: ${mad(R.netto)} (${eur(R.netto / fx)})\n` +
+    `Bruto rendement: ${pct(R.br)}\nNetto rendement: ${pct(R.ne)}\n\nIndicatief, Maghreb Estates`;
+}
+document.querySelectorAll('input, select').forEach(i => { i.addEventListener('input', calc); i.addEventListener('change', calc); });
+$('pdf').onclick = () => ME.printEl($('sheet'));
+$('png').onclick = () => ME.pngEl($('sheet'), 'rendement');
+$('wa').onclick = () => ME.wa(text());
+$('cp').onclick = () => ME.copy(text());
+calc(); fxReady.then(calc);
+</script>
+</body>
+</html>

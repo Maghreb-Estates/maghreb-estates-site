@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>WhatsApp Gesprekstraining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  body { background: #e9e6df; }
+  .layout { display: grid; grid-template-columns: 300px 400px; gap: 24px; justify-content: center; padding: 28px 0 48px; align-items: start; }
+  @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } .phone { order: -1; } }
+  .side .card { padding: 18px; }
+  .side h1 { font-size: 34px; margin: 4px 0 10px; }
+  .side ol { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
+  .kv { display: grid; grid-template-columns: 90px 1fr; gap: 4px 10px; font-size: 13px; }
+  .kv span { color: var(--muted); } .kv b { font-weight: 500; }
+  .meter { display: grid; grid-template-columns: 90px 1fr 34px; gap: 10px; align-items: center; font-size: 13px; margin: 8px 0; }
+  .meter .tr { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; }
+  .meter .tr i { display: block; height: 100%; background: var(--green-mid); transition: width .4s; }
+  .meter span:last-child { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+  .phone { background: #fff; border-radius: 22px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.14); height: min(760px, calc(100vh - 140px)); min-height: 560px; display: flex; flex-direction: column; }
+  .ph-head { background: var(--green); color: var(--cream); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .ph-head b { display: block; font-weight: 500; }
+  .ph-head small { color: rgba(245,241,232,.65); font-size: 12px; }
+  .ph-head button { background: none; border: 0; color: var(--cream); font-size: 22px; cursor: pointer; padding: 0 4px; }
+  .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 600; flex-shrink: 0; font-size: 14px; }
+  .chats { flex: 1; overflow-y: auto; }
+  .chat-row { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f0ede6; cursor: pointer; align-items: center; }
+  .chat-row:hover { background: #faf8f3; }
+  .chat-row .mid { flex: 1; min-width: 0; }
+  .chat-row b { font-weight: 500; font-size: 14.5px; }
+  .chat-row p { margin: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-row .rt { text-align: right; font-size: 11px; color: var(--muted); }
+  .badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; border-radius: 10px; background: #25d366; color: #fff; font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .badge.done { background: none; border: 1px solid var(--green-mid); color: var(--green-mid); padding: 0 6px; }
+  .info { margin: 12px 16px; background: var(--green-light); font-size: 13px; padding: 10px 12px; border-radius: 8px; }
+  .msgs { flex: 1; overflow-y: auto; padding: 14px; background: #efe9dd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 4l6 14 14 6-14 6-6 14-6-14-14-6 14-6z' fill='none' stroke='%23d9d0bf' stroke-width='1'/%3E%3C/svg%3E"); }
+  .day { text-align: center; margin: 4px 0 12px; } .day span { background: #fff; font-size: 11.5px; padding: 3px 10px; border-radius: 6px; color: var(--muted); }
+  .sys { background: #fff5cf; color: #6b5a1f; font-size: 12px; padding: 8px 10px; border-radius: 8px; margin: 0 10px 12px; text-align: center; }
+  .b { max-width: 82%; padding: 7px 10px 18px; border-radius: 8px; font-size: 14px; line-height: 1.45; margin-bottom: 6px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,.06); white-space: pre-wrap; }
+  .b small { position: absolute; right: 8px; bottom: 3px; font-size: 10.5px; color: #8b9a8e; }
+  .b.in { background: #fff; }
+  .b.out { background: #dcf3d0; margin-left: auto; }
+  .fb { font-size: 12.5px; padding: 8px 10px; border-radius: 8px; margin: 2px 0 10px auto; max-width: 82%; }
+  .fb.good { background: var(--ok-soft); color: var(--ok); } .fb.bad { background: var(--accent-soft); color: #8a3d14; } .fb.mid { background: var(--gold-soft); color: #7a5e14; }
+  .typing { background: #fff; display: inline-block; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; }
+  .typing i { display: inline-block; width: 6px; height: 6px; margin: 0 2px; background: #a9b2a6; border-radius: 50%; animation: blink 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 50% { opacity: .2; } }
+  .opts { border-top: 1px solid #ece7db; padding: 10px 12px 12px; background: #fff; max-height: 48%; overflow-y: auto; }
+  .opts .h { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .opt { display: flex; gap: 10px; width: 100%; text-align: left; font: inherit; font-size: 13.5px; line-height: 1.4; background: #f4f1ea; border: 1px solid transparent; border-radius: 8px; padding: 9px 10px; margin-bottom: 6px; cursor: pointer; }
+  .opt:hover { border-color: var(--green-mid); }
+  .opt b { width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-size: 11px; flex-shrink: 0; }
+  .start { margin: auto; background: #fff; border-radius: 12px; padding: 22px; max-width: 320px; box-shadow: var(--shadow); }
+  .start h3 { font-family: var(--sans); font-weight: 600; font-size: 22px; margin: 6px 0 8px; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>WhatsApp gesprekstraining</h1><p>Oefen gesprekken met fictieve leads. Kies per bericht het antwoord dat jij zou sturen.</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+<main class="wrap layout">
+  <aside class="side" id="side"></aside>
+  <section class="phone" id="phone"></section>
+</main>
+<script>
+const { esc } = ME;
+const $ = id => document.getElementById(id);
+const KV = { T: 'Transparantie', E: 'Expertise', V: 'Vertrouwen' };
+const L = [
+  { id: 'samira', naam: 'Samira Bouzid', kleur: '#C4622D', tijd: '11:02', titel: 'De koper met familie in Tanger',
+    info: { Leeftijd: '34', Woonplaats: 'Rotterdam', Beroep: 'Verpleegkundige', Budget: '€ 120.000', Twijfel: 'Kan mijn oom het niet regelen?' },
+    scen: 'Samira wil een appartement in Tanger voor de zomers en wil het de rest van het jaar verhuren. Haar oom woont in Tanger. Samira is fictief.',
+    open: ['Salam! Ik zag jullie op Instagram 😊', 'Mijn oom in Tanger zegt dat hij wel een appartement voor me kan regelen. Waarom zou ik jullie nodig hebben?'],
+    r: [
+      { o: [
+        ['Familie bedoelt het goed, maar ze kennen de juridische kant niet. Zonder ons loopt u echt risico.', {}, 'bad', 'Je zet de familie weg en werkt met angst. Dat kost vertrouwen, zeker bij Marokkaans-Nederlandse kopers.', 'Hmm, mijn oom weet echt wel wat hij doet hoor.'],
+        ['Wa alaykum salam Samira! Fijn dat uw oom meedenkt, dat is veel waard. Wat wij toevoegen is de controle: de eigendomstitel bij het kadaster, het contract en de prijs tegen vergelijkbare woningen. Uw oom kan gewoon meekijken. Wat zoekt u precies?', { V: 2, E: 1, T: 1 }, 'good', 'Je erkent de rol van de familie, benoemt concreet wat je toevoegt en stelt een open vraag.', 'Oh dat is fijn, dan kan hij meedoen.'],
+        ['Wij hebben de beste deals in Tanger, beter dan wat uw oom kan vinden.', {}, 'bad', 'Een belofte zonder onderbouwing. “De beste deals” zegt niets en klinkt als verkoop.', 'Dat zegt iedereen…'],
+      ]},
+      { lead: ['Budget is ongeveer 120.000 euro. In de zomer wil ik er zelf zitten en de rest van het jaar verhuren.', 'Kan dat 8% opleveren?'], o: [
+        ['Ja hoor, 8% is in Tanger heel normaal.', {}, 'bad', 'Je belooft een rendement zonder berekening. Juist juli en augustus, als zij er zelf zit, zijn de beste verhuurmaanden.', 'Top! Dan ga ik ervoor.'],
+        ['Dat hangt van veel af, lastig te zeggen.', { V: 1 }, 'mid', 'Eerlijk, maar te vaag. Ze heeft niets aan dit antwoord.', 'Oké… maar ongeveer?'],
+        ['Als u in juli en augustus zelf in het appartement zit, mist u juist de duurste verhuurmaanden. Netto ligt het dan eerder rond 3 tot 5%. Ik reken het graag voor een concrete woning uit, met syndic, beheer en de 10% huurbelasting erbij.', { E: 2, T: 2 }, 'good', 'Je bent eerlijk over de verwachting, legt uit waarom en biedt een concrete berekening aan.', 'Minder dan ik dacht, maar wel duidelijk.'],
+      ]},
+      { lead: ['Wat kost jullie hulp mij eigenlijk?'], o: [
+        ['Daar hebben we het later wel over, eerst de juiste woning vinden.', {}, 'bad', 'Ontwijken van de prijsvraag wekt wantrouwen. Transparantie over onze vergoeding is een kernwaarde.', 'Liever weet ik het nu.'],
+        ['Voor u is het gratis, de verkoper betaalt.', { V: 1 }, 'bad', 'Klopt niet altijd, en het verzwijgt dat je dan een belang hebt bij de verkoop.', 'O, oké. Waarom doen jullie dat dan?'],
+        ['Goede vraag. Voor aankoopbegeleiding spreken we vooraf een vaste vergoeding af. Bij sommige nieuwbouwprojecten betaalt de ontwikkelaar ons. Dat zeggen we er dan altijd bij, zodat u weet waar u staat.', { T: 2, V: 2 }, 'good', 'Helder en eerlijk over beide verdienmodellen.', 'Duidelijk, dat waardeer ik.'],
+      ]},
+      { lead: ['Mijn oom heeft al iets gevonden, maar het is een melkia. Is dat erg?'], o: [
+        ['Een melkia is eigenlijk hetzelfde als een titre foncier, geen probleem.', {}, 'bad', 'Inhoudelijk fout. Een melkia is niet ingeschreven bij het kadaster en heeft meer risico.', 'Mooi, dan tekenen we snel.'],
+        ['Melkia’s zijn onbetrouwbaar, daar moet u niet aan beginnen.', { E: 1 }, 'mid', 'Te absoluut. Een melkia kan, maar vraagt extra controle.', 'Oei. Maar mijn oom zegt dat het goed is…'],
+        ['Een melkia is een traditioneel eigendomsbewijs via de adoul, geen ingeschreven titel bij het kadaster. Het kan, maar het risico is groter. We controleren de akte en de getuigen en kijken of titreren mogelijk is. Zal ik de stukken bekijken?', { E: 2, V: 1 }, 'good', 'Je legt uit, nuanceert en biedt een concrete volgende stap.', 'Ja graag! Ik vraag mijn oom om de papieren te sturen.'],
+      ]},
+    ]},
+  { id: 'kevin', naam: 'Kevin de Vries', kleur: '#34522e', tijd: '09:15', titel: 'De rendementsjager',
+    info: { Leeftijd: '41', Woonplaats: 'Utrecht', Beroep: 'IT-consultant', Budget: '€ 300.000', Twijfel: 'Is 10% gegarandeerd echt?' },
+    scen: 'Kevin wil een Airbnb-investering in Marrakech. Een ontwikkelaar heeft hem 10% gegarandeerd rendement beloofd. Kevin is fictief.',
+    open: ['Hoi, ik zoek een Airbnb-investering in Marrakech.', 'Een ontwikkelaar belooft 10% gegarandeerd rendement. Wat vinden jullie daarvan?'],
+    r: [
+      { o: [
+        ['10% gegarandeerd klinkt goed, dat zou ik doen.', {}, 'bad', 'Je neemt de belofte klakkeloos over. Geen controle, geen expertise.', 'Mooi, dan teken ik.'],
+        ['Een garantie is zo sterk als degene die hem geeft. Vaak zit het rendement al verwerkt in een hogere koopprijs. Ik kijk graag mee: wie garandeert, hoe lang, en wat gebeurt er daarna? En we leggen de prijs per m² naast de markt.', { E: 2, T: 1, V: 1 }, 'good', 'Kritisch zonder negatief te zijn, met concrete controlepunten.', 'Goed punt, daar had ik niet aan gedacht.'],
+        ['Ontwikkelaars liegen altijd over rendement.', {}, 'bad', 'Te negatief en niet waar. We werken zelf met ontwikkelaars.', 'Werken jullie dan niet met ontwikkelaars?'],
+      ]},
+      { lead: ['Wat haalt een Airbnb in Marrakech dan echt?'], o: [
+        ['Zo’n 15% bruto, makkelijk.', {}, 'bad', 'Ongefundeerd en te hoog. Gebruik onze data.', 'Wauw, nog beter dan de ontwikkelaar!'],
+        ['Uit de AirROI-data zien we per wijk grote verschillen in nachtprijs en bezetting. Ik stuur u de cijfers voor Hivernage, Guéliz en Agdal, met de kosten erbij: beheer 20 tot 25%, schoonmaak, syndic en belasting. Dan ziet u het netto bedrag.', { E: 2, T: 1 }, 'good', 'Data-gedreven en eerlijk over de kosten. Dit is ons onderscheid.', 'Graag, dat is precies wat ik zoek.'],
+        ['Dat weet eigenlijk niemand precies.', {}, 'mid', 'We hebben juist data. Gebruik die.', 'Hm, dan heb ik weinig aan jullie.'],
+      ]},
+      { lead: ['Kan ik als buitenlander gewoon kopen en het geld later terughalen?'], o: [
+        ['Ja, geld kan altijd terug, geen probleem.', { V: 1 }, 'mid', 'Onvolledig. Zonder convertibele dirhams kan terughalen lastig worden.', 'Fijn.'],
+        ['Ja. Belangrijk is dat u het geld vanuit het buitenland overmaakt naar een rekening in convertibele dirhams. Met dat bewijs kunt u bij verkoop de opbrengst, inclusief winst, weer terughalen. Wij zorgen dat dit in het dossier zit.', { E: 2, V: 1 }, 'good', 'Precies het detail dat later veel geld scheelt.', 'Goed om te weten!'],
+        ['Daarvoor moet u een advocaat bellen.', {}, 'bad', 'Dit is basiskennis die je zelf moet kunnen uitleggen.', 'Oké…'],
+      ]},
+      { lead: ['Klinkt goed. Kunnen jullie het daarna ook beheren?'], o: [
+        ['Nee, dat moet u zelf regelen.', {}, 'bad', 'Klopt niet. We bieden Airbnb-beheer via lokale partners.', 'Jammer.'],
+        ['Ja, wij regelen alles, u hoeft nergens naar om te kijken.', { V: 1 }, 'mid', 'Klinkt fijn, maar beloof niet te veel. Noem hoe het werkt.', 'Echt alles?'],
+        ['Ja, met lokale partners voor check-in, schoonmaak, onderhoud en de listing. U krijgt elke maand een overzicht. Zullen we eerst een kort gesprek plannen om uw doelen scherp te krijgen?', { T: 1, E: 1, V: 2 }, 'good', 'Concreet, eerlijk over de partners en een duidelijke volgende stap.', 'Ja, donderdag kan ik.'],
+      ]},
+    ]},
+  { id: 'fatima', naam: 'Fatima El Idrissi', kleur: '#C9A84C', tijd: '07:58', titel: 'De erfenis in Nador',
+    info: { Leeftijd: '58', Woonplaats: 'Antwerpen', Beroep: 'Gepensioneerd', Budget: 'Verkoop', Twijfel: 'Wat is het huis waard?' },
+    scen: 'Fatima heeft met vier broers en zussen een huis in Nador geërfd. Haar broer wil 3 miljoen dirham vragen. Fatima is fictief.',
+    open: ['Salam, wij hebben met vijf erfgenamen een huis in Nador.', 'Mijn broer wil 3 miljoen dirham vragen. Kunnen jullie het verkopen?'],
+    r: [
+      { o: [
+        ['3 miljoen is veel te veel, dat gaat nooit lukken.', {}, 'bad', 'Je oordeelt zonder data en zonder het huis te kennen.', 'Hoe weet u dat dan?'],
+        ['Wa alaykum salam Fatima. Dat kunnen we zeker bekijken. Voor een realistische prijs vergelijk ik het huis met woningen in dezelfde wijk. Weet u de wijk, de oppervlakte en of er een titre foncier is?', { E: 1, V: 2 }, 'good', 'Respectvol, en je stuurt naar feiten in plaats van meningen.', 'Het is in Ouled Mimoun, ongeveer 180 m². Titre foncier weet ik niet.'],
+        ['Ja hoor, 3 miljoen moet lukken.', {}, 'bad', 'Een prijs beloven om de opdracht te krijgen leidt later tot teleurstelling.', 'Mooi, mijn broer zal blij zijn.'],
+      ]},
+      { lead: ['Het staat nog op naam van mijn overleden vader. Is dat een probleem?'], o: [
+        ['Nee, dat maakt niet uit.', {}, 'bad', 'Fout. Zonder acte d’hérédité kan er niet verkocht worden.', 'Gelukkig.'],
+        ['Dan moet u eerst naar de rechter.', { E: 1 }, 'mid', 'Meestal niet nodig. De adoul regelt de acte d’hérédité.', 'De rechter?! Dat klinkt ingewikkeld.'],
+        ['Dat komt heel vaak voor. Eerst is een acte d’hérédité nodig bij de adoul. Daarna verkopen alle erfgenamen samen. Wie in Europa woont, kan tekenen met een gelegaliseerde volmacht, via het consulaat.', { E: 2, V: 1 }, 'good', 'Geruststellend en precies de juiste stappen.', 'Fijn, dat scheelt reizen.'],
+      ]},
+      { lead: ['En wat houden we er netto aan over?'], o: [
+        ['Bij een erfenis betaal je geen belasting.', {}, 'bad', 'Fout. Ook bij een geërfde woning geldt TPI.', 'Super!'],
+        ['Er gaat meerwaardebelasting af: 20% van de winst, met een minimum van 3% van de verkoopprijs. Bij een erfenis telt de waarde op het moment van overlijden als aankoopwaarde. Plus de makelaar en kleine kosten. Ik maak een berekening voor u.', { E: 2, T: 2 }, 'good', 'Correct, volledig en je biedt een berekening.', 'Graag, dan kan ik het delen met de familie.'],
+        ['Dat hoort u van de notaris.', {}, 'mid', 'Je kunt dit zelf indicatief uitrekenen met de verkoopcalculator.', 'Oké, ik dacht dat u dat wist.'],
+      ]},
+      { lead: ['Mijn broer twijfelt nog. Wat nu?'], o: [
+        ['Zeg maar tegen uw broer dat hij moet stoppen met twijfelen.', {}, 'bad', 'Je kiest partij in een familiekwestie.', 'Zo ligt het niet…'],
+        ['Zal ik een korte waardebepaling met referentieobjecten maken die u met de hele familie kunt delen? Dan praat iedereen over dezelfde cijfers. Ik kan ook een videogesprek met iedereen doen, in het Nederlands, Frans of Darija.', { T: 1, E: 1, V: 2 }, 'good', 'Je brengt de familie samen rond feiten, in hun eigen taal.', 'Dat is een goed idee, ik stel het voor.'],
+        ['Dan wachten we gewoon af.', { V: 1 }, 'mid', 'Afwachten zonder voorstel. Bied een volgende stap.', 'Oké.'],
+      ]},
+    ]},
+];
+const maxOf = l => { const m = { T: 0, E: 0, V: 0 }; l.r.forEach(r => { const best = r.o.find(o => o[2] === 'good')[1]; Object.keys(m).forEach(k => m[k] += best[k] || 0); }); return m; };
+let st = ME.keep.get('training', { naam: '', p: {} });
+const save = () => ME.keep.set('training', st);
+const prog = id => st.p[id] || { step: 0, picks: [], done: false };
+const score = l => { const p = prog(l.id), s = { T: 0, E: 0, V: 0 }; p.picks.forEach((pi, i) => { const sc = l.r[i].o[pi][1]; Object.keys(s).forEach(k => s[k] += sc[k] || 0); }); return s; };
+
+function sideIntro() {
+  $('side').innerHTML = `<div class="eyebrow">Academie · gesprekstraining</div><h1>${st.naam ? 'Welkom, ' + esc(st.naam) : 'Gesprekstraining'}</h1>
+    <p class="muted small">Drie leads hebben je een WhatsApp gestuurd, elk met eigen vragen en twijfels. Open een gesprek en kies per bericht het antwoord dat jij zou sturen.</p>
+    <div class="card"><h3 style="font-size:18px;margin-bottom:8px">Zo werkt het</h3><ol><li>Open een chat in de lijst.</li><li>Kies een van de drie antwoorden.</li><li>Lees waarom het werkt, of niet.</li><li>De lead reageert op wat jij stuurde.</li></ol></div>
+    <div class="card"><h3 style="font-size:18px;margin-bottom:8px">Jouw voortgang</h3>${L.map(l => { const p = prog(l.id), pc = Math.round(p.picks.length / l.r.length * 100); return `<div class="meter"><span>${l.naam.split(' ')[0]}</span><div class="tr"><i style="width:${pc}%"></i></div><span>${p.done ? pc + '%' : p.picks.length ? pc + '%' : 'open'}</span></div>`; }).join('')}
+    ${Object.keys(st.p).length ? '<button class="btn ghost sm" id="reset">Opnieuw beginnen</button>' : ''}</div>`;
+  const r = $('reset'); if (r) r.onclick = () => { st.p = {}; save(); list(); };
+}
+function sideLead(l) {
+  const s = score(l), m = maxOf(l);
+  $('side').innerHTML = `<div class="eyebrow">Academie · gesprekstraining</div><h1>${esc(l.titel)}</h1><p class="muted small">Kies per bericht het antwoord dat jij zou sturen. Na elke keuze lees je waarom het werkt, of niet.</p>
+    <div class="card"><h3 style="font-size:18px;margin-bottom:8px">Wie is de lead</h3><div class="kv"><span>Naam</span><b>${esc(l.naam)}</b>${Object.entries(l.info).map(([k, v]) => `<span>${k}</span><b>${esc(v)}</b>`).join('')}</div></div>
+    <div class="card"><h3 style="font-size:18px;margin-bottom:8px">Jouw score op de kernwaarden</h3>${Object.keys(KV).map(k => `<div class="meter"><span>${KV[k]}</span><div class="tr"><i style="width:${m[k] ? s[k] / m[k] * 100 : 0}%"></i></div><span>${s[k]}/${m[k]}</span></div>`).join('')}</div>`;
+}
+function list() {
+  sideIntro();
+  if (!st.naam) {
+    $('phone').innerHTML = `<div class="ph-head"><div><b>Chats</b><small>Maghreb Estates</small></div></div><div class="msgs" style="display:flex"><div class="start"><div class="eyebrow">Academie · gesprekstraining</div><h3>Drie leads wachten op je antwoord</h3><p class="small muted">Samira, Kevin en Fatima hebben je een WhatsApp gestuurd. Vul je naam in, dan weten ze met wie ze praten.</p><div class="field"><label>Jouw naam</label><input type="text" id="nm" placeholder="Voornaam"></div><button class="btn block" id="go">Naar mijn chats</button></div></div>`;
+    const go = () => { st.naam = $('nm').value.trim() || 'collega'; save(); list(); };
+    $('go').onclick = go; $('nm').onkeydown = e => e.key === 'Enter' && go(); return;
+  }
+  const open = L.filter(l => !prog(l.id).done).length;
+  $('phone').innerHTML = `<div class="ph-head"><div><b>Chats</b><small>${esc(st.naam)} · Maghreb Estates</small></div></div><div class="chats">
+    <div class="info">${open ? `${open} van de ${L.length} gesprekken staan nog open. Tik op een chat om te beginnen.` : 'Alle gesprekken afgerond. Goed gedaan!'}</div>
+    ${L.map(l => { const p = prog(l.id), last = p.done ? `Afgerond · ${p.picks.length} berichten beantwoord` : (p.step ? l.r[p.step].lead || l.open : l.open).slice(-1)[0];
+      const s = score(l), m = maxOf(l), pc = Math.round((s.T + s.E + s.V) / (m.T + m.E + m.V) * 100);
+      return `<div class="chat-row" data-id="${l.id}"><div class="av" style="background:${l.kleur}">${l.naam.split(' ').map(w => w[0]).join('')}</div><div class="mid"><b>${esc(l.naam)}</b><p>${esc(last)}</p></div><div class="rt">${l.tijd}<br>${p.done ? `<span class="badge done">${pc}%</span>` : `<span class="badge">${l.r.length - p.picks.length}</span>`}</div></div>`; }).join('')}
+    <div style="text-align:center;padding:16px"><button class="btn ghost sm" id="other">Andere naam</button></div></div>`;
+  document.querySelectorAll('.chat-row').forEach(r => r.onclick = () => chat(L.find(l => l.id === r.dataset.id)));
+  $('other').onclick = () => { st.naam = ''; save(); list(); };
+}
+function chat(l) {
+  const p = prog(l.id); st.p[l.id] = p; save();
+  sideLead(l);
+  $('phone').innerHTML = `<div class="ph-head"><button id="back" aria-label="Terug">‹</button><div class="av" style="background:${l.kleur}">${l.naam.split(' ').map(w => w[0]).join('')}</div><div><b>${esc(l.naam)}</b><small>online</small></div></div>
+    <div class="msgs" id="msgs"><div class="day"><span>Vandaag</span></div><div class="sys">Oefenscenario: ${esc(l.scen)}</div></div><div class="opts" id="opts"></div>`;
+  $('back').onclick = list;
+  const M = $('msgs');
+  let t = 0; const time = () => { const [h, m] = l.tijd.split(':').map(Number); const d = new Date(0, 0, 0, h, m + t++); return d.toTimeString().slice(0, 5); };
+  const add = (cls, txt) => { M.insertAdjacentHTML('beforeend', `<div class="b ${cls}">${esc(txt)}<small>${time()}</small></div>`); M.scrollTop = M.scrollHeight; };
+  const fb = (kind, txt) => { M.insertAdjacentHTML('beforeend', `<div class="fb ${kind}">${kind === 'good' ? '✓ Sterk antwoord. ' : kind === 'mid' ? 'Kan beter. ' : '✗ Liever niet. '}${esc(txt)}</div>`); M.scrollTop = M.scrollHeight; };
+  // Herhaal eerdere keuzes
+  l.open.forEach(m => add('in', m));
+  p.picks.forEach((pi, i) => { const o = l.r[i].o[pi]; add('out', o[0]); fb(o[2], o[3]); add('in', o[4]); if (l.r[i + 1]) l.r[i + 1].lead.forEach(m => add('in', m)); });
+  const ask = () => {
+    if (p.step >= l.r.length) {
+      p.done = true; save(); sideLead(l);
+      const s = score(l), m = maxOf(l), pc = Math.round((s.T + s.E + s.V) / (m.T + m.E + m.V) * 100);
+      $('opts').innerHTML = `<div class="h"><span>Gesprek afgerond</span><span>${pc}%</span></div><p class="small" style="margin:0 0 10px">${pc >= 80 ? 'Sterk gesprek: eerlijk, inhoudelijk en met een duidelijke volgende stap.' : pc >= 50 ? 'Goede basis. Lees de feedback nog eens terug bij de oranje berichten.' : 'Dit kan beter. Probeer het opnieuw en let op transparantie en onderbouwing.'}</p><div class="btns" style="margin:0"><button class="btn outline sm" id="again">Opnieuw</button><button class="btn sm" id="tolist">Naar chats</button></div>`;
+      $('again').onclick = () => { st.p[l.id] = { step: 0, picks: [], done: false }; save(); chat(l); };
+      $('tolist').onclick = list; return;
+    }
+    const r = l.r[p.step];
+    $('opts').innerHTML = `<div class="h"><span>Kies je antwoord</span><span>Bericht ${p.step + 1} van ${l.r.length}</span></div>` + r.o.map((o, i) => `<button class="opt" data-i="${i}"><b>${'ABC'[i]}</b><span>${esc(o[0])}</span></button>`).join('');
+    $('opts').querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      const o = r.o[+b.dataset.i]; p.picks.push(+b.dataset.i); p.step++; save();
+      $('opts').innerHTML = '';
+      add('out', o[0]); fb(o[2], o[3]); sideLead(l);
+      M.insertAdjacentHTML('beforeend', '<div class="typing" id="typ"><i></i><i></i><i></i></div>'); M.scrollTop = M.scrollHeight;
+      setTimeout(() => {
+        $('typ') && $('typ').remove(); add('in', o[4]);
+        const nx = l.r[p.step];
+        if (nx) setTimeout(() => { nx.lead.forEach(m => add('in', m)); ask(); }, 700); else ask();
+      }, 1000);
+    });
+  };
+  ask();
+}
+list();
+</script>
+</body>
+</html>

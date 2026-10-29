@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Post en Story Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .stage { background: var(--cream-dark); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; justify-content: center; }
+  canvas { max-width: 100%; max-height: 72vh; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,.15); background: #fff; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Post en story maker</h1><p>Afbeeldingen in huisstijl voor Instagram, Facebook en LinkedIn</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+<main class="wrap tool">
+  <div class="card">
+    <div class="field"><label>Formaat</label><div class="seg" id="fmt"><button data-v="1080x1080" class="on">Post 1:1</button><button data-v="1080x1350">Portret 4:5</button><button data-v="1080x1920">Story 9:16</button><button data-v="1200x627">LinkedIn</button></div></div>
+    <div class="field"><label>Sjabloon</label><div class="seg" id="tpl"><button data-v="project" class="on">Project</button><button data-v="cijfer">Marktcijfer</button><button data-v="tip">Tip</button></div></div>
+    <div class="field"><label>Kleur</label><div class="seg" id="theme"><button data-v="groen" class="on">Groen</button><button data-v="creme">Crème</button><button data-v="terra">Terracotta</button></div></div>
+    <div class="field"><label>Bovenregel</label><input type="text" id="eyebrow" value="Nieuw in ons aanbod"></div>
+    <div class="field"><label id="lKop">Kop</label><input type="text" id="kop" value="Projet Or, Marrakech"></div>
+    <div class="field"><label>Tekst</label><textarea id="tekst">Moderne residentie in Agdal met twee zwembaden, spa en fitness. Vanaf 1,4 miljoen MAD.</textarea></div>
+    <div class="field" id="fotoBox"><label>Foto</label><input type="file" id="foto" accept="image/*"><div class="hint">Zonder foto krijgt de achtergrond een zellige-patroon.</div></div>
+    <div class="field"><label>Onderregel</label><input type="text" id="cta" value="maghreb-estates.com"></div>
+    <div class="btns"><button class="btn" id="dl">Download PNG</button><button class="btn outline" id="fill">Vul marktcijfer Tanger</button></div>
+  </div>
+  <div class="result"><div class="stage"><canvas id="c" width="1080" height="1080"></canvas></div></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const c = $('c'), x = c.getContext('2d');
+let W = 1080, H = 1080, tpl = 'project', theme = 'groen', photo = null;
+const logoL = new Image(); logoL.src = 'assets/logo-licht.png';
+const logoD = new Image(); logoD.src = 'assets/logo.png';
+const TH = {
+  groen: { bg: '#1C2E1D', fg: '#F5F1E8', sub: 'rgba(245,241,232,.75)', acc: '#C4622D', logo: logoL, pat: 'rgba(245,241,232,.06)' },
+  creme: { bg: '#F5F1E8', fg: '#1C2E1D', sub: '#55685a', acc: '#C4622D', logo: logoD, pat: 'rgba(28,46,29,.06)' },
+  terra: { bg: '#C4622D', fg: '#ffffff', sub: 'rgba(255,255,255,.85)', acc: '#1C2E1D', logo: logoL, pat: 'rgba(255,255,255,.08)' },
+};
+const seg = (id, cb) => document.querySelectorAll(`#${id} button`).forEach(b => b.onclick = () => { document.querySelectorAll(`#${id} button`).forEach(y => y.classList.toggle('on', y === b)); cb(b.dataset.v); draw(); });
+seg('fmt', v => { [W, H] = v.split('x').map(Number); c.width = W; c.height = H; });
+seg('tpl', v => {
+  tpl = v; $('lKop').textContent = v === 'cijfer' ? 'Cijfer' : v === 'tip' ? 'Tip' : 'Kop';
+  if (v === 'cijfer') { $('eyebrow').value = 'Marktcijfer · Tanger'; $('kop').value = '15.000 MAD/m²'; $('tekst').value = 'Mediaan vraagprijs voor appartementen in Tanger, oktober 2026. Bron: eigen analyse van meer dan 1.000 advertenties.'; }
+  if (v === 'tip') { $('eyebrow').value = 'Tip voor kopers'; $('kop').value = 'Een melkia is geen titre foncier.'; $('tekst').value = 'Laat de eigendomstitel altijd controleren voordat u iets tekent of betaalt.'; }
+});
+seg('theme', v => theme = v);
+$('foto').onchange = e => { const f = e.target.files[0]; if (!f) return; const im = new Image(); im.onload = () => { photo = im; draw(); }; im.src = URL.createObjectURL(f); };
+
+function zellige(t, x0, y0, w, h) {
+  // Achtpuntige ster-raster, subtiel
+  x.save(); x.beginPath(); x.rect(x0, y0, w, h); x.clip();
+  x.strokeStyle = t.pat; x.lineWidth = 2;
+  const s = 90;
+  for (let yy = y0 - s; yy < y0 + h + s; yy += s) for (let xx = x0 - s; xx < x0 + w + s; xx += s) {
+    const cx = xx + s / 2, cy = yy + s / 2, r = s * 0.42;
+    x.beginPath();
+    for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, rr = i % 2 ? r * 0.62 : r; x.lineTo(cx + rr * Math.cos(a), cy + rr * Math.sin(a)); }
+    x.closePath(); x.stroke();
+  }
+  x.restore();
+}
+function wrap(text, maxW, font, lh, x0, y0, color, maxLines = 8) {
+  x.font = font; x.fillStyle = color;
+  const words = text.split(/\s+/); let line = '', y = y0, n = 0;
+  for (const w of words) {
+    const t = line ? line + ' ' + w : w;
+    if (x.measureText(t).width > maxW && line) { x.fillText(line, x0, y); y += lh; line = w; if (++n >= maxLines - 1) break; }
+    else line = t;
+  }
+  if (line) x.fillText(line, x0, y);
+  return y + lh;
+}
+function cover(im, x0, y0, w, h) {
+  const r = Math.max(w / im.width, h / im.height), iw = im.width * r, ih = im.height * r;
+  x.drawImage(im, x0 + (w - iw) / 2, y0 + (h - ih) / 2, iw, ih);
+}
+function draw() {
+  const t = TH[theme], m = Math.round(W * 0.08), u = Math.min(W, H) / 1080;
+  x.fillStyle = t.bg; x.fillRect(0, 0, W, H);
+  const wide = W / H > 1.5;
+  let textTop = m;
+  if (tpl === 'project' && photo) {
+    if (wide) { cover(photo, W * 0.5, 0, W * 0.5, H); }
+    else { const ph = H * 0.52; cover(photo, 0, 0, W, ph); x.fillStyle = t.acc; x.fillRect(0, ph, W, 8 * u); textTop = ph + m * 0.8; }
+  } else {
+    zellige(t, 0, 0, W, H);
+    textTop = wide ? m : H * (tpl === 'project' ? 0.38 : 0.3);
+  }
+  const tw = wide ? W * (tpl === 'project' && photo ? 0.42 : 0.84) : W - 2 * m;
+  // logo
+  const lg = t.logo; if (lg.complete && lg.naturalWidth) { const lh = 64 * u, lw = lh * lg.naturalWidth / lg.naturalHeight; x.drawImage(lg, W - m - lw, H - m - lh + 6 * u, lw, lh); }
+  // bovenregel
+  x.font = `500 ${26 * u}px Jost`; x.fillStyle = t.acc === '#1C2E1D' ? t.fg : t.acc;
+  x.letterSpacing = `${5 * u}px`; x.fillText($('eyebrow').value.toUpperCase(), m, textTop); x.letterSpacing = '0px';
+  x.fillStyle = t.acc; x.fillRect(m, textTop + 22 * u, 60 * u, 3 * u);
+  // kop
+  const big = tpl === 'cijfer' ? 130 : tpl === 'tip' ? 82 : 76;
+  let y = wrap($('kop').value, tw, `${tpl === 'tip' ? 'italic ' : ''}500 ${big * u}px "Cormorant Garamond"`, big * 1.05 * u, m, textTop + (big + 50) * u, t.fg, 4);
+  y = wrap($('tekst').value, tw, `300 ${34 * u}px Jost`, 48 * u, m, y + 16 * u, t.sub, H > 1500 ? 10 : 5);
+  // onderregel
+  x.font = `500 ${26 * u}px Jost`; x.fillStyle = t.sub; x.fillText($('cta').value, m, H - m);
+}
+$('fill').onclick = () => { document.querySelector('#tpl [data-v=cijfer]').click(); };
+['eyebrow', 'kop', 'tekst', 'cta'].forEach(id => $(id).addEventListener('input', draw));
+$('dl').onclick = () => { const a = document.createElement('a'); a.download = `maghreb-${tpl}-${W}x${H}.png`; a.href = c.toDataURL('image/png'); a.click(); };
+document.fonts.load('500 40px "Cormorant Garamond"').then(() => document.fonts.load('300 20px Jost')).then(() => document.fonts.load('italic 500 40px "Cormorant Garamond"')).then(draw);
+logoL.onload = logoD.onload = draw;
+draw();
+</script>
+</body>
+</html>

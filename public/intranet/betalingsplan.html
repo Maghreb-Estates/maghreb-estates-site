@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Betalingsplan VEFA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .tool { grid-template-columns: 380px minmax(0, 1fr); }
+  @media (max-width: 900px) { .tool { grid-template-columns: 1fr; } }
+  .step { display: flex; gap: 10px; align-items: baseline; margin-bottom: 12px; }
+  .step b { font-family: var(--serif); color: var(--accent); font-size: 18px; }
+  .phase { border-left: 3px solid var(--c); padding: 8px 0 8px 12px; margin-bottom: 12px; }
+  .phase .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .phase .top input { width: 90px; text-align: right; }
+  .hero-plan { background: linear-gradient(160deg, #24392a, var(--green)); color: var(--cream); padding: 26px 28px; position: relative; min-height: 170px; display: flex; flex-direction: column; justify-content: flex-end; background-size: cover; background-position: center; }
+  .hero-plan::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28,46,29,.2), rgba(28,46,29,.85)); }
+  .hero-plan > * { position: relative; }
+  .hero-plan img.lg { position: absolute; top: 20px; right: 24px; height: 30px; }
+  .hero-plan .eyebrow { color: #e3a07a; }
+  .hero-plan h2 { color: var(--cream); font-size: 34px; }
+  .split { display: flex; height: 30px; border-radius: 3px; overflow: hidden; margin: 10px 0 6px; }
+  .split div { display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 600; }
+  .split-l { display: flex; font-size: 12px; color: var(--muted); }
+  .grp td:first-child { font-weight: 600; }
+  .grp td { padding-top: 16px !important; border-bottom: 1px solid var(--c) !important; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 6px; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Betalingsplan VEFA</h1><p>Betaalschema van een nieuwbouwproject (vente en l’état futur d’achèvement) als tijdlijn</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+
+<main class="wrap tool">
+  <div class="card">
+    <div class="step"><b>1</b><h3>Project</h3></div>
+    <div class="field"><label>Projectnaam</label><input type="text" id="naam" value="Projet Or"></div>
+    <div class="grid2">
+      <div class="field"><label>Ontwikkelaar</label><input type="text" id="dev" placeholder="Bijv. Prestigia"></div>
+      <div class="field"><label>Locatie</label><input type="text" id="loc" value="Agdal, Marrakech"></div>
+      <div class="field"><label>Unit</label><input type="text" id="unit" value="2 slaapkamers, 92 m²"></div>
+      <div class="field"><label>Koopprijs</label><div class="affix"><span>MAD</span><input type="text" id="prijs" value="1.400.000"></div></div>
+      <div class="field"><label>Reservering</label><input type="month" id="start"></div>
+      <div class="field"><label>Verwachte oplevering</label><input type="month" id="eind"></div>
+    </div>
+    <div class="field"><label>Projectfoto <em>optioneel</em></label><input type="file" id="foto" accept="image/*"></div>
+
+    <div class="step" style="margin-top:10px"><b>2</b><h3>Betalingsschema</h3></div>
+    <div class="phase" style="--c:var(--accent)"><div class="top"><span class="lbl">Bij reservering <em>contrat de réservation</em></span><div class="affix"><input type="text" id="p1" value="10"><span>%</span></div></div></div>
+    <div class="phase" style="--c:var(--green)">
+      <div class="top"><span class="lbl">Tijdens de bouw <em>per bouwfase</em></span><div class="affix"><input type="text" id="p2" value="60"><span>%</span></div></div>
+      <div class="seg" id="freq" style="margin:10px 0"><button data-v="1">Maand</button><button data-v="3" class="on">Kwartaal</button><button data-v="6">Halfjaar</button><button data-v="0">Mijlpalen</button></div>
+      <div class="grid2">
+        <div class="field" id="nBox" style="display:none"><label>Aantal mijlpalen</label><input type="number" id="n" value="4" min="1" max="12"></div>
+        <div class="field"><label>Eerste termijn na</label><div class="affix"><input type="text" id="na" value="3"><span>mnd</span></div></div>
+      </div>
+    </div>
+    <div class="phase" style="--c:var(--gold)"><div class="top"><span class="lbl">Bij oplevering <em>acte définitif</em></span><div class="affix"><input type="text" id="p3" value="30"><span>%</span></div></div></div>
+    <div id="chk"></div>
+
+    <div class="step" style="margin-top:16px"><b>3</b><h3>Kosten</h3></div>
+    <label class="check"><input type="checkbox" id="kosten" checked><div><b>Kosten koper meenemen</b><span>Registratie 4%, conservation foncière 1,5% + 200 MAD en notaris circa 1,1%. Te betalen bij de definitieve akte.</span></div></label>
+    <label class="check"><input type="checkbox" id="toonEur"><div><b>Bedragen ook in euro tonen</b></div></label>
+    <label class="check"><input type="checkbox" id="los"><div><b>Alle termijnen los tonen</b></div></label>
+
+    <div class="btns">
+      <button class="btn" id="pdf">Download PDF</button>
+      <button class="btn outline" id="png">Download afbeelding</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="sheet" id="sheet">
+      <div class="hero-plan" id="hero"><img class="lg" src="assets/logo-licht.png" alt=""><div class="eyebrow">Betalingsplan</div><h2 id="oNaam"></h2><div class="small" id="oSub" style="opacity:.8"></div></div>
+      <div class="kpis" style="margin:0;border-radius:0;border-left:0;border-right:0">
+        <div class="kpi"><div class="k">Koopprijs</div><div class="v" id="kP"></div></div>
+        <div class="kpi"><div class="k">Betalingsplan</div><div class="v" id="kS"></div></div>
+        <div class="kpi"><div class="k">Verwachte oplevering</div><div class="v" id="kO"></div></div>
+        <div class="kpi dark"><div class="k">Totale investering</div><div class="v" id="kT"></div></div>
+      </div>
+      <div class="sheet-body">
+        <h3>Verdeling van de koopprijs</h3>
+        <div class="split" id="split"></div><div class="split-l" id="splitL"></div>
+        <h3 style="margin-top:22px">Tijdlijn van de betalingen</h3>
+        <svg id="tl" viewBox="0 0 640 110" width="100%" style="display:block;margin-top:6px"></svg>
+        <h3 style="margin-top:16px">Betalingsoverzicht</h3>
+        <table class="rows" id="tbl"></table>
+        <div class="kpis">
+          <div class="kpi"><div class="k">Tot oplevering</div><div class="v" id="tA"></div></div>
+          <div class="kpi"><div class="k">Bij oplevering</div><div class="v" id="tB"></div></div>
+          <div class="kpi dark"><div class="k">Totaal</div><div class="v" id="tC"></div></div>
+        </div>
+        <p class="note">Indicatief overzicht op basis van het betalingsschema van de ontwikkelaar. Bij VEFA (wet 44-00, gewijzigd door 107-12) hoort een garantie d’achèvement of een garantie de remboursement van een bank. Het contrat de réservation en het contrat préliminaire zijn leidend.</p>
+      </div>
+      <div class="sheet-foot"><span>Maghreb Estates</span><span>a.douider@maghreb-estates.com · maghreb-estates.com</span></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const { fmt, num, money, mad, eur, fxReady, esc } = ME;
+const $ = id => document.getElementById(id);
+money($('prijs'));
+const now = new Date();
+const ym = d => d.toISOString().slice(0, 7);
+$('start').value = ym(new Date(now.getFullYear(), now.getMonth() + 1, 2));
+$('eind').value = ym(new Date(now.getFullYear() + 2, now.getMonth() + 6, 2));
+let freq = 3;
+document.querySelectorAll('#freq button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#freq button').forEach(x => x.classList.toggle('on', x === b));
+  freq = +b.dataset.v; $('nBox').style.display = freq ? 'none' : ''; calc();
+});
+$('foto').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader(); r.onload = () => $('hero').style.backgroundImage = `url(${r.result})`; r.readAsDataURL(f);
+};
+const MND = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+const label = (y, m) => `${MND[m]} ${y}`;
+const addM = (y, m, k) => { const t = y * 12 + m + k; return [Math.floor(t / 12), t % 12]; };
+
+function calc() {
+  const fx = ME.fx, P = num($('prijs').value), showE = $('toonEur').checked;
+  const [sy, sm] = $('start').value.split('-').map(Number), [ey, em] = $('eind').value.split('-').map(Number);
+  const s = [sy, sm - 1], e = [ey, em - 1];
+  const span = (e[0] * 12 + e[1]) - (s[0] * 12 + s[1]);
+  const p1 = num($('p1').value), p2 = num($('p2').value), p3 = num($('p3').value);
+  const sum = p1 + p2 + p3;
+  $('chk').innerHTML = Math.abs(sum - 100) < 0.01 ? '<div class="ok-bar">Totaal 100%, het schema klopt</div>' : `<div class="warn-bar">Totaal ${fmt(sum)}%. Het schema moet op 100% uitkomen.</div>`;
+
+  // Termijnen tijdens de bouw
+  const na = Math.max(0, Math.round(num($('na').value)));
+  let terms = [];
+  if (freq) { for (let k = na; k < span; k += freq) terms.push(k); }
+  else { const n = Math.max(1, +$('n').value || 1); for (let i = 1; i <= n; i++) terms.push(Math.round(span * i / (n + 1))); }
+  if (!terms.length) terms = [Math.max(0, Math.round(span / 2))];
+  const per = P * p2 / 100 / terms.length;
+
+  const cost = $('kosten').checked ? P * 0.04 + P * 0.015 + 200 + Math.max(5000, P * 0.01) * 1.1 : 0;
+  const A = P * p1 / 100 + P * p2 / 100, B = P * p3 / 100 + cost;
+  const money2 = v => mad(v) + (showE ? ` <span class="muted small">${eur(v / fx)}</span>` : '');
+
+  $('oNaam').textContent = $('naam').value || 'Nieuwbouwproject';
+  $('oSub').textContent = [$('dev').value, $('loc').value, $('unit').value].filter(Boolean).join(' · ');
+  $('kP').textContent = mad(P);
+  $('kS').textContent = `${fmt(p1)}/${fmt(p2)}/${fmt(p3)}`;
+  $('kO').textContent = label(...e);
+  $('kT').textContent = mad(P + cost);
+  $('split').innerHTML = `<div style="width:${p1}%;background:var(--accent)">${fmt(p1)}%</div><div style="width:${p2}%;background:var(--green)">${fmt(p2)}%</div><div style="width:${p3}%;background:var(--gold)">${fmt(p3)}%</div>`;
+  $('splitL').innerHTML = `<span style="width:${p1}%">Reservering</span><span style="width:${p2}%">Tijdens de bouw</span><span style="width:${p3}%">Oplevering</span>`;
+
+  // Tijdlijn
+  const X = k => 30 + (span ? k / span : 0) * 580;
+  let svg = `<line x1="30" y1="55" x2="610" y2="55" stroke="#d8d1c4" stroke-width="2"/>`;
+  for (let y = s[0] + 1; y <= e[0]; y++) { const k = (y * 12) - (s[0] * 12 + s[1]); if (k > 0 && k < span) svg += `<line x1="${X(k)}" y1="62" x2="${X(k)}" y2="68" stroke="#7a8c7a"/><text x="${X(k)}" y="82" text-anchor="middle" font-size="11" fill="#55685a" font-family="Jost">${y}</text>`; }
+  svg += `<circle cx="${X(0)}" cy="55" r="11" fill="#C4622D"/>`;
+  terms.forEach(k => svg += `<circle cx="${X(k)}" cy="55" r="6" fill="#1C2E1D"/>`);
+  svg += `<circle cx="${X(span)}" cy="55" r="14" fill="#C9A84C"/><line x1="${X(span)}" y1="14" x2="${X(span)}" y2="40" stroke="#C9A84C" stroke-dasharray="3 3"/>`;
+  svg += `<text x="${X(span)}" y="10" text-anchor="end" font-size="11" font-weight="600" fill="#1C2E1D" font-family="Jost">Oplevering ${label(...e)}</text>`;
+  svg += `<text x="${X(0)}" y="104" text-anchor="start" font-size="11" fill="#55685a" font-family="Jost">${label(...s)}</text><text x="${X(span)}" y="104" text-anchor="end" font-size="11" fill="#55685a" font-family="Jost">${label(...e)}</text>`;
+  $('tl').innerHTML = svg;
+
+  // Tabel
+  const g = (c, t, v) => `<tr class="grp" style="--c:${c}"><td colspan="3"><span class="dot"></span>${t}</td><td class="r">${money2(v)}</td></tr>`;
+  const r = (d, t, p, v) => `<tr><td class="small">${d}</td><td>${esc(t)}</td><td class="r small">${p}</td><td class="r">${money2(v)}</td></tr>`;
+  let h = g('var(--accent)', 'Bij reservering', P * p1 / 100) + r(label(...s), 'Aanbetaling', fmt(p1) + '%', P * p1 / 100);
+  h += g('var(--green)', 'Tijdens de bouw', P * p2 / 100);
+  if ($('los').checked || terms.length <= 2) terms.forEach((k, i) => h += r(label(...addM(...s, k)), `Termijn ${i + 1} van ${terms.length}`, fmt(p2 / terms.length) + '%', per));
+  else h += r(`${label(...addM(...s, terms[0]))} t/m ${label(...addM(...s, terms[terms.length - 1]))}`, `${terms.length} termijnen ${freq === 1 ? 'per maand' : freq === 3 ? 'per kwartaal' : freq === 6 ? 'per halfjaar' : 'per mijlpaal'}, ${mad(per)} per termijn`, fmt(p2) + '%', P * p2 / 100);
+  h += g('var(--gold)', 'Bij oplevering', B) + r(label(...e), 'Restbetaling bij de definitieve akte', fmt(p3) + '%', P * p3 / 100);
+  if (cost) h += r(label(...e), 'Registratie, conservation foncière en notaris', '', cost);
+  $('tbl').innerHTML = h;
+  $('tA').textContent = mad(A); $('tB').textContent = mad(B); $('tC').textContent = mad(P + cost);
+}
+document.querySelectorAll('input').forEach(i => { i.addEventListener('input', calc); i.addEventListener('change', calc); });
+$('pdf').onclick = () => ME.printEl($('sheet'));
+$('png').onclick = () => ME.pngEl($('sheet'), 'betalingsplan');
+calc(); fxReady.then(calc);
+</script>
+</body>
+</html>

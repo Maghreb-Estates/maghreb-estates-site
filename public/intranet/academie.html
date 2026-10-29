@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Maghreb Academie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .intro { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; padding: 36px 0 24px; align-items: start; }
+  @media (max-width: 900px) { .intro { grid-template-columns: 1fr; } }
+  .intro h2 { font-size: clamp(40px, 6vw, 60px); margin-bottom: 14px; }
+  .intro p { font-size: 16px; color: var(--muted); max-width: 560px; }
+  .mine { border-top: 3px solid var(--accent); }
+  .mine .n { font-family: var(--serif); font-size: 38px; color: var(--green); }
+  .prog { height: 5px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .prog i { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+  .cont { display: flex; align-items: center; gap: 16px; border-left: 3px solid var(--accent); margin-bottom: 18px; }
+  .cont .t { flex: 1; } .cont .t b { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--green); }
+  .cont .t span { color: var(--accent); font-family: var(--serif); font-size: 20px; margin-right: 8px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .chip { font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--white); color: var(--green); cursor: pointer; }
+  .chip.on { background: var(--green); color: var(--cream); border-color: var(--green); }
+  .chip small { opacity: .65; margin-left: 4px; }
+  .cat { padding: 22px 0 8px; border-top: 1px solid var(--border); margin-top: 14px; }
+  .cat-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .cat-h p { margin: 2px 0 12px; color: var(--muted); font-size: 13.5px; }
+  .cat-h .pr { font-size: 12.5px; color: var(--muted); }
+  .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 760px) { .mods { grid-template-columns: 1fr; } }
+  .mod { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; text-align: left; font: inherit; width: 100%; }
+  .mod.done { border-left-color: var(--accent); }
+  .mod:hover { box-shadow: var(--shadow); }
+  .mod .code { font-family: var(--serif); font-size: 22px; color: var(--accent); width: 40px; flex-shrink: 0; }
+  .mod .mid { flex: 1; min-width: 0; }
+  .mod b { font-weight: 500; display: block; }
+  .mod .m { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin-top: 3px; flex-wrap: wrap; }
+  .mod .st { font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--green); color: var(--green); white-space: nowrap; }
+  .mod .st.ok { background: var(--ok-soft); border-color: var(--ok-soft); color: var(--ok); }
+  .mod .st.busy { background: var(--green); color: var(--cream); }
+  .final { background: linear-gradient(120deg, #b98a3a, #e0c486 50%, #b98a3a); border-radius: var(--radius); padding: 20px; margin: 22px 0 64px; }
+  .final h3 { font-size: 26px; }
+  .final .mod { margin-top: 12px; }
+  /* Module */
+  .mview { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 28px; padding: 28px 0 64px; align-items: start; }
+  @media (max-width: 860px) { .mview { grid-template-columns: 1fr; } }
+  .toc { position: sticky; top: 20px; }
+  .toc button { display: flex; gap: 10px; width: 100%; text-align: left; font: inherit; font-size: 13.5px; background: none; border: 0; padding: 8px 6px; border-radius: var(--radius); cursor: pointer; color: var(--text); }
+  .toc button.on { background: var(--green-light); font-weight: 500; }
+  .toc button i { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border); font-style: normal; font-size: 11px; display: grid; place-items: center; flex-shrink: 0; }
+  .toc button.seen i { background: var(--green); border-color: var(--green); color: #fff; }
+  .lesson h2 { font-size: 34px; margin: 6px 0 16px; }
+  .lesson .body { font-size: 16px; line-height: 1.75; max-width: 680px; }
+  .lesson .body p { margin-bottom: 1em; }
+  .lesson .body ul { padding-left: 20px; margin: 0 0 1em; }
+  .lesson .body li { margin-bottom: .4em; }
+  .lesson .body .box { background: var(--cream-dark); border-left: 3px solid var(--accent); padding: 12px 16px; margin: 0 0 1em; font-size: 15px; }
+  .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 24px; max-width: 680px; }
+  .q { margin-bottom: 22px; }
+  .q b { display: block; font-weight: 500; margin-bottom: 8px; }
+  .q label { display: flex; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; cursor: pointer; background: var(--white); font-size: 14.5px; }
+  .q label.right { border-color: var(--ok); background: var(--ok-soft); }
+  .q label.wrong { border-color: var(--accent); background: var(--accent-soft); }
+  .q input { accent-color: var(--green); }
+  .cert { border: 6px double var(--gold); padding: 40px; text-align: center; background: var(--white); max-width: 680px; }
+  .cert img { height: 50px; margin-bottom: 18px; }
+  .cert h2 { font-size: 40px; }
+  .cert .nm { font-family: var(--serif); font-size: 34px; color: var(--accent); margin: 10px 0; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Maghreb Academie</h1><p>Leren bij Maghreb Estates</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+<main class="wrap" id="app"></main>
+<script>
+const { esc } = ME;
+const $ = id => document.getElementById(id);
+const CATS = [
+  ['over', 'Over Maghreb Estates', 'Wie we zijn, waar we voor staan en hoe we werken.'],
+  ['recht', 'Eigendom en recht', 'Eigendomstitels, de notaris en de stappen van een aankoop.'],
+  ['geld', 'Geld en belasting', 'Kosten koper, betalen vanuit het buitenland en belastingen voor eigenaren.'],
+  ['markt', 'De markt', 'Onze focussteden en nieuwbouw (VEFA).'],
+  ['praktijk', 'In de praktijk', 'Het gesprek met de koper, stap voor stap.'],
+];
+const M = [
+  { id: 'M1', cat: 'over', t: 'Welkom bij Maghreb Estates', lvl: 'Beginner', min: 10, parts: [
+    ['Wat we doen', `<p>Maghreb Estates is een real estate advisory in Marokko. We begeleiden Nederlandstalige en andere Europese kopers, investeerders en eigenaren die vastgoed willen kopen, beoordelen, verhuren, beheren of verkopen. Veel van onze klanten zijn Marokkaanse Nederlanders en Belgen.</p><p>Onze diensten: aankoopbegeleiding, rendementsanalyse, due diligence, nieuwbouwcontrole, vastgoedbeheer, Airbnb-beheer en verkoopbegeleiding.</p>`],
+    ['Waar we voor staan', `<ul><li><b>Transparant.</b> Als een ontwikkelaar ons betaalt, zeggen we dat. Altijd.</li><li><b>Data-gedreven.</b> We scrapen elke week de grote portals en gebruiken Airbnb-data. Een mening onderbouwen we met cijfers.</li><li><b>Dichtbij.</b> We spreken de taal van de klant: Nederlands, Frans, Engels, Arabisch, Darija en Amazigh.</li></ul><div class="box">Vuistregel: als je iets niet weet, zeg je dat en zoek je het uit. Een fout antwoord kost meer vertrouwen dan “ik kom erop terug”.</div>`],
+    ['Hoe we werken', `<p>Ayoub is het vaste aanspreekpunt. Voor bezichtigingen, dossiercontrole, notaris en beheer werken we met lokale partners. Kantoor: Agdal, Rabat.</p><p>Focussteden: Tanger, Casablanca, Rabat, Marrakech, Agadir, Nador en Al Hoceima.</p>`],
+  ], quiz: [
+    ['Een ontwikkelaar betaalt ons een vergoeding. Wat doe je?', ['Niets zeggen, de klant betaalt dan minder', 'Het melden aan de klant', 'Alleen melden als de klant het vraagt'], 1],
+    ['Waar baseren we een prijsoordeel op?', ['Op gevoel en ervaring', 'Op referentieobjecten en marktdata', 'Op de vraagprijs van de verkoper'], 1],
+  ]},
+  { id: 'M2', cat: 'over', t: 'Onze data en tools', lvl: 'Beginner', min: 15, parts: [
+    ['Het marktdashboard', `<p>Elke week halen we advertenties op van Mubawab, Avito, Sarouty en Agenz en slaan ze op in onze database. Het marktdashboard laat per stad en wijk de mediaan vraagprijs per m², de huurprijzen en het bruto rendement zien.</p><div class="box">Let op: het zijn vraagprijzen, geen transactieprijzen. Er zit vaak 5 tot 15% onderhandelingsruimte in.</div>`],
+    ['Airbnb-data', `<p>Voor Tanger, Marrakech, Agadir, Rabat en Casablanca hebben we Airbnb-cijfers van AirROI: nachtprijs, bezetting en omzet per wijk. Die data is betaald; andere steden halen we alleen op als een klant erom vraagt.</p>`],
+    ['De tools op dit intranet', `<ul><li>Kosten koper, huur, verkoop en hypotheek: berekeningen die je direct als PDF of WhatsApp deelt.</li><li>Vergelijker: zet woningen naast de mediaan van de stad.</li><li>Due diligence checklist: per dossier afvinken.</li></ul>`],
+  ], quiz: [
+    ['Wat laat het marktdashboard zien?', ['Transactieprijzen van de notaris', 'Vraagprijzen uit advertenties', 'Taxatiewaarden van de bank'], 1],
+    ['Voor welke stad hebben we standaard géén Airbnb-data?', ['Marrakech', 'Agadir', 'Nador'], 2],
+  ]},
+  { id: 'M3', cat: 'recht', t: 'Titre foncier, melkia en réquisition', lvl: 'Beginner', min: 20, parts: [
+    ['Titre foncier', `<p>Een <b>titre foncier</b> is een eigendomstitel die is ingeschreven bij de Conservation Foncière (ANCFCC, het kadaster). Het is het sterkste bewijs van eigendom: wat op de titel staat, geldt.</p><p>Met een <b>certificat de propriété</b> zie je wie de eigenaar is, de oppervlakte, en of er lasten op rusten zoals een hypotheek of beslag. Vraag hem altijd recent op, niet ouder dan een maand.</p>`],
+    ['Melkia', `<p>Een <b>melkia</b> is een traditioneel eigendomsbewijs, opgesteld door adoul op basis van getuigenverklaringen. Het is niet ingeschreven bij het kadaster. Je komt het vooral tegen buiten de grote steden, in het noorden en bij geërfde grond.</p><div class="box">Een melkia is niet per se slecht, maar het risico is groter: grenzen zijn minder zeker en er kunnen andere claims zijn. Liefst eerst titreren.</div>`],
+    ['Réquisition', `<p>Een <b>réquisition</b> is een lopende aanvraag om een titre foncier te krijgen. Tijdens de procedure kunnen derden bezwaar maken (opposition). Vraag naar de status, de datum en of er opposities zijn.</p>`],
+  ], quiz: [
+    ['Welk document geeft de sterkste zekerheid over eigendom?', ['Melkia', 'Titre foncier', 'Réquisition'], 1],
+    ['Hoe oud mag een certificat de propriété het liefst zijn?', ['Maximaal een maand', 'Maximaal een jaar', 'Maakt niet uit'], 0],
+    ['Wie stelt een melkia op?', ['De notaris', 'Adoul', 'De gemeente'], 1],
+  ]},
+  { id: 'M4', cat: 'recht', t: 'De aankoop bij de notaris', lvl: 'Expert', min: 25, parts: [
+    ['De stappen', `<ul><li><b>Bod en akkoord</b> op prijs en voorwaarden.</li><li><b>Compromis de vente</b>: voorlopig koopcontract, bindend, vaak met een aanbetaling van 10%.</li><li><b>Controle</b> van titel, stukken en belastingen door de notaris.</li><li><b>Acte définitif</b>: de definitieve akte, betaling van het restbedrag.</li><li><b>Registratie</b> en inschrijving bij de Conservation Foncière op naam van de koper.</li></ul>`],
+    ['Notaris of adoul', `<p>Bij een titre foncier werk je met een notaris. Adoul werken vooral met traditionele akten zoals de melkia. Wij adviseren een eigen notaris voor de koper, niet automatisch die van de verkoper of ontwikkelaar.</p>`],
+    ['Stukken van de verkoper', `<ul><li>Certificat de propriété</li><li>Quitus fiscal en betaalbewijzen van de taxe de services communaux</li><li>Attestation du syndic bij een appartement</li><li>Bij erfenis: acte d’hérédité en akkoord van alle erfgenamen</li></ul>`],
+  ], quiz: [
+    ['Wat is de compromis de vente?', ['Een vrijblijvend bod', 'Een bindend voorlopig koopcontract', 'De definitieve akte'], 1],
+    ['Wanneer is de koper eigenaar?', ['Na het tekenen van de compromis', 'Na inschrijving bij de Conservation Foncière', 'Na de eerste aanbetaling'], 1],
+  ]},
+  { id: 'M5', cat: 'geld', t: 'Kosten koper en betalen vanuit Europa', lvl: 'Beginner', min: 15, parts: [
+    ['Kosten koper', `<p>Reken op ongeveer 6 tot 7% bovenop de koopsom:</p><ul><li>Registratierechten: 4%</li><li>Conservation Foncière: 1,5% plus circa 200 MAD</li><li>Notaris: circa 1% plus 10% btw</li><li>Diverse kosten en zegels</li></ul><p>Komt er een makelaar bij, dan meestal 2,5% plus btw.</p>`],
+    ['Convertibele dirhams', `<p>Laat de koper het geld vanuit het buitenland overmaken naar een rekening in <b>convertibele dirhams</b>, met bewijs van de overboeking. Bij verkoop kan de koper de opbrengst dan weer naar Europa terughalen, inclusief de winst.</p><div class="box">Contant betalen of via familie in Marokko? Dan wordt terughalen later lastig. Dit is een van de belangrijkste adviezen die we geven.</div>`],
+  ], quiz: [
+    ['Hoeveel zijn de registratierechten bij aankoop van een woning?', ['1,5%', '4%', '10%'], 1],
+    ['Waarom betalen via convertibele dirhams?', ['Lagere rente', 'Om de opbrengst later terug te kunnen halen', 'Het is goedkoper'], 1],
+  ]},
+  { id: 'M6', cat: 'geld', t: 'Belastingen voor eigenaren en verkopers', lvl: 'Expert', min: 20, parts: [
+    ['Tijdens het bezit', `<ul><li><b>Taxe de services communaux (TSC):</b> gemeentelijke heffing, circa 10,5% van de huurwaarde in stedelijk gebied.</li><li><b>Taxe d’habitation:</b> voor de bewoner; geldt niet voor een verhuurde woning.</li><li><b>Huurbelasting:</b> bevrijdende heffing op de bruto huur, 10% tot 120.000 MAD per jaar en 15% daarboven.</li></ul>`],
+    ['Bij verkoop: TPI', `<p>De <b>taxe sur les profits immobiliers</b> is 20% van de winst, met een minimum van 3% van de verkoopprijs, ook als er geen winst is. Zonder bewijs van aankoopkosten rekent de belastingdienst 15% van de aankoopprijs als kosten.</p><p>Hoofdverblijf dat minimaal 5 jaar zelf bewoond is, kan vrijgesteld zijn. Voor een vakantiewoning geldt dat meestal niet.</p>`],
+    ['En Nederland?', `<p>Een woning in Marokko valt voor Nederlandse inwoners in box 3. Er is een belastingverdrag; voor de details verwijzen we naar een belastingadviseur. Wij geven geen Nederlands belastingadvies.</p>`],
+  ], quiz: [
+    ['Hoeveel is de TPI minimaal?', ['0% bij verlies', '3% van de verkoopprijs', '20% van de verkoopprijs'], 1],
+    ['Huurbelasting bij 90.000 MAD bruto huur per jaar?', ['10%', '15%', '20%'], 0],
+  ]},
+  { id: 'M7', cat: 'markt', t: 'Onze focussteden', lvl: 'Beginner', min: 20, parts: [
+    ['Het noorden: Tanger, Nador, Al Hoceima', `<p><b>Tanger</b> groeit snel door de haven, industrie en de verbinding met Spanje. Sterk bij de diaspora uit het noorden. <b>Nador</b> en <b>Al Hoceima</b> zijn sterk verbonden met de Riffijnse diaspora in Nederland en België: veel vraag in de zomer, veel geërfde woningen en meer melkia.</p>`],
+    ['De as Rabat–Casablanca', `<p><b>Casablanca</b> is de economische hoofdstad: grootste markt, veel verhuur aan professionals. <b>Rabat</b> is de bestuurlijke hoofdstad, met de hoogste vraagprijzen per m² van onze steden in wijken als Agdal, Hay Riad en Souissi.</p>`],
+    ['Toerisme: Marrakech en Agadir', `<p><b>Marrakech</b> is de sterkste Airbnb-markt, met grote verschillen per wijk (Hivernage, Guéliz, Agdal, de medina). <b>Agadir</b> heeft een lang zonseizoen, lagere prijzen per m² en een groeiende markt voor tweede woningen.</p><div class="box">Check de actuele cijfers altijd op de startpagina of in het marktdashboard. Noem geen cijfers uit je hoofd.</div>`],
+  ], quiz: [
+    ['Welke stad is de sterkste Airbnb-markt?', ['Nador', 'Marrakech', 'Rabat'], 1],
+    ['Waar kom je relatief vaak melkia tegen?', ['Bij nieuwbouw in Casablanca', 'Bij geërfde woningen in het noorden', 'Bij appartementen in Agdal'], 1],
+  ]},
+  { id: 'M8', cat: 'markt', t: 'Nieuwbouw en VEFA', lvl: 'Expert', min: 25, parts: [
+    ['Wat is VEFA', `<p><b>Vente en l’état futur d’achèvement</b>: kopen op plan. Geregeld in wet 44-00, aangescherpt door wet 107-12. De koper betaalt in termijnen die gekoppeld zijn aan de bouwfasen.</p>`],
+    ['De contracten', `<ul><li><b>Contrat de réservation:</b> reservering, meestal met een kleine aanbetaling.</li><li><b>Contrat préliminaire:</b> het eigenlijke koopcontract, met plattegrond, technische omschrijving, prijs, betalingsschema en opleverdatum.</li><li><b>Acte définitif:</b> bij oplevering, met de restbetaling en de kosten koper.</li></ul>`],
+    ['Waar let je op', `<ul><li>Een garantie d’achèvement of de remboursement van een bank.</li><li>Staat het project op een titre-mère, en is er een bouwvergunning?</li><li>Eerdere projecten van de ontwikkelaar: op tijd en volgens belofte opgeleverd?</li><li>Oppervlakte: privatif of inclusief gemeenschappelijke delen?</li><li>Boeteclausule bij vertraging.</li></ul>`],
+  ], quiz: [
+    ['Wat beschermt de koper als de ontwikkelaar niet afbouwt?', ['De compromis de vente', 'Een bankgarantie (garantie d’achèvement of de remboursement)', 'De syndic'], 1],
+    ['Wanneer betaal je bij VEFA de kosten koper?', ['Bij reservering', 'Bij de definitieve akte', 'Nooit'], 1],
+  ]},
+  { id: 'M9', cat: 'praktijk', t: 'Het eerste gesprek met een koper', lvl: 'Beginner', min: 15, parts: [
+    ['Luisteren eerst', `<p>Vraag naar het <b>doel</b> (eigen gebruik, verhuur, beide), de <b>stad</b>, het <b>budget</b>, de <b>planning</b> en of er <b>familie</b> meekijkt. Bij Marokkaans-Nederlandse kopers speelt familie vaak een grote rol: zie ze als partner, niet als concurrent.</p>`],
+    ['Eerlijk over rendement', `<p>Beloof nooit een rendement. Reken het uit met de huurcalculator, met alle kosten. Wie zelf in juli en augustus in de woning wil zitten, mist de beste verhuurmaanden.</p>`],
+    ['Altijd een volgende stap', `<p>Sluit elk gesprek af met een concrete stap: een berekening, een objectvoorstel, een videobezichtiging of een afspraak. Oefen dit in de WhatsApp-gesprekstraining.</p>`],
+  ], quiz: [
+    ['Een klant vraagt of 8% rendement haalbaar is. Je…', ['zegt ja om de klant te houden', 'rekent het uit met alle kosten', 'zegt dat het niet te voorspellen is'], 1],
+    ['De oom van de klant zoekt mee. Je…', ['ontmoedigt dat', 'betrekt hem en legt uit wat wij toevoegen', 'negeert hem'], 1],
+  ]},
+];
+const FINAL = { id: 'M10', t: 'Eindtoets', min: 20 };
+let st = ME.keep.get('academie', { naam: '', p: {} });
+const save = () => ME.keep.set('academie', st);
+const P = id => st.p[id] || { seen: [], score: null };
+const isDone = m => { const p = P(m.id); return p.score != null && p.score >= 0.8 * m.quiz.length; };
+let filter = 'all';
+
+function home() {
+  window.scrollTo(0, 0);
+  const done = M.filter(isDone).length + (P('M10').score >= 8 ? 1 : 0);
+  const busy = M.find(m => P(m.id).seen.length && !isDone(m));
+  const app = $('app');
+  app.innerHTML = `
+    <div class="intro">
+      <div><h2>Maghreb Academie</h2><p>De leeromgeving voor iedereen die met Maghreb Estates werkt. Voor nieuwe collega’s en partners die de basis leren, en voor wie zijn kennis over vastgoed in Marokko actueel wil houden. De eindtoets bestaat uit 10 vragen uit alle modules, met een eigen certificaat.</p></div>
+      <div class="card mine"><h3>Mijn voortgang</h3>
+        <div class="field" style="margin:8px 0"><input type="text" id="nm" placeholder="Jouw naam (voor het certificaat)" value="${esc(st.naam)}"></div>
+        <div><span class="n">${done}</span> <span class="muted">van ${M.length + 1} modules afgerond</span></div>
+        <div class="prog"><i style="width:${done / (M.length + 1) * 100}%"></i></div>
+        <p class="note">Je voortgang wordt bewaard op dit apparaat.</p></div>
+    </div>
+    ${busy ? `<div class="card cont"><div class="t"><div class="eyebrow">Ga verder</div><span>${busy.id}</span><b>${esc(busy.t)}</b><div class="small muted">Onderdeel ${Math.min(busy.parts.length, P(busy.id).seen.length + 1)} van ${busy.parts.length}</div></div><button class="btn" data-open="${busy.id}">Verder</button></div>` : ''}
+    <div class="filters"><button class="chip ${filter === 'all' ? 'on' : ''}" data-f="all">Alle <small>${M.length + 1}</small></button>${CATS.map(c => `<button class="chip ${filter === c[0] ? 'on' : ''}" data-f="${c[0]}">${c[1]} <small>${M.filter(m => m.cat === c[0]).length}</small></button>`).join('')}</div>
+    ${CATS.filter(c => filter === 'all' || filter === c[0]).map(c => { const ms = M.filter(m => m.cat === c[0]); const d = ms.filter(isDone).length; return `
+      <div class="cat"><div class="cat-h"><div><h2>${c[1]}</h2><p>${c[2]}</p></div><span class="pr">${d} van ${ms.length} afgerond</span></div>
+      <div class="mods">${ms.map(modBtn).join('')}</div></div>`; }).join('')}
+    <div class="final"><h3>Afronding</h3><div class="small">De eindtoets van de Maghreb Academie: 10 vragen uit alle modules, met een eigen certificaat.</div>
+      <button class="mod ${P('M10').score >= 8 ? 'done' : ''}" data-open="M10"><span class="code">M10</span><span class="mid"><b>Eindtoets</b><span class="m"><span class="pill">Eindexamen</span> 10 vragen, 20 min</span></span><span class="st ${P('M10').score >= 8 ? 'ok' : ''}">${P('M10').score >= 8 ? '✓ Geslaagd' : 'Start'}</span></button></div>`;
+  $('nm').onchange = e => { st.naam = e.target.value.trim(); save(); };
+  app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; home(); });
+  app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => b.dataset.open === 'M10' ? exam() : open(M.find(m => m.id === b.dataset.open), 0));
+}
+function modBtn(m) {
+  const p = P(m.id), d = isDone(m), busy = p.seen.length && !d;
+  return `<button class="mod ${d ? 'done' : ''}" data-open="${m.id}"><span class="code">${m.id}</span><span class="mid"><b>${esc(m.t)}</b><span class="m"><span class="pill ${m.lvl === 'Expert' ? 'gold' : ''}">${m.lvl}</span>${m.parts.length} onderdelen, ${m.min} min</span></span>
+    <span class="st ${d ? 'ok' : busy ? 'busy' : ''}">${d ? '✓ Afgerond' : busy ? `Bezig ${p.seen.length}/${m.parts.length}` : 'Start'}</span></button>`;
+}
+function open(m, i) {
+  window.scrollTo(0, 0);
+  const p = P(m.id); st.p[m.id] = p;
+  if (i < m.parts.length && !p.seen.includes(i)) { p.seen.push(i); save(); }
+  const quiz = i >= m.parts.length;
+  $('app').innerHTML = `<div class="mview">
+    <aside class="toc card"><a href="#" id="back" class="small">‹ Alle modules</a><h3 style="margin:10px 0">${m.id} ${esc(m.t)}</h3>
+      ${m.parts.map((x, k) => `<button class="${k === i ? 'on' : ''} ${p.seen.includes(k) ? 'seen' : ''}" data-k="${k}"><i>${p.seen.includes(k) ? '✓' : k + 1}</i>${esc(x[0])}</button>`).join('')}
+      <button class="${quiz ? 'on' : ''} ${isDone(m) ? 'seen' : ''}" data-k="${m.parts.length}"><i>${isDone(m) ? '✓' : '?'}</i>Toets</button></aside>
+    <article class="lesson">${quiz ? quizHtml(m) : `<div class="eyebrow">Onderdeel ${i + 1} van ${m.parts.length}</div><h2>${esc(m.parts[i][0])}</h2><div class="body">${m.parts[i][1]}</div>
+      <div class="nav"><button class="btn outline" id="prev" ${i === 0 ? 'disabled style="visibility:hidden"' : ''}>‹ Vorige</button><button class="btn" id="next">${i === m.parts.length - 1 ? 'Naar de toets' : 'Volgende ›'}</button></div>`}</article></div>`;
+  $('back').onclick = e => { e.preventDefault(); home(); };
+  document.querySelectorAll('.toc [data-k]').forEach(b => b.onclick = () => open(m, +b.dataset.k));
+  if (!quiz) { $('next').onclick = () => open(m, i + 1); $('prev').onclick = () => open(m, i - 1); }
+  else bindQuiz(m.quiz, n => { p.score = n; save(); }, m.quiz.length * 0.8, () => home());
+}
+function quizHtml(m, title = 'Toets', sub = 'Minimaal 80% goed om de module af te ronden.') {
+  return `<div class="eyebrow">${esc(m.id)}</div><h2>${title}</h2><p class="muted">${sub}</p><form id="qz">${(m.quiz || m.q).map((q, k) => `<div class="q"><b>${k + 1}. ${esc(q[0])}</b>${q[1].map((o, j) => `<label><input type="radio" name="q${k}" value="${j}"> ${esc(o)}</label>`).join('')}</div>`).join('')}
+    <div id="res"></div><div class="nav" style="justify-content:flex-start"><button class="btn" type="submit">Controleer</button><button class="btn outline" type="button" id="tohome">Naar overzicht</button></div></form>`;
+}
+function bindQuiz(qs, onScore, need, onDone) {
+  $('tohome').onclick = onDone;
+  $('qz').onsubmit = e => {
+    e.preventDefault();
+    let n = 0;
+    qs.forEach((q, k) => {
+      const sel = document.querySelector(`input[name=q${k}]:checked`);
+      document.querySelectorAll(`input[name=q${k}]`).forEach(inp => {
+        const lab = inp.parentElement; lab.classList.remove('right', 'wrong');
+        if (+inp.value === q[2]) lab.classList.add('right'); else if (inp === sel) lab.classList.add('wrong');
+      });
+      if (sel && +sel.value === q[2]) n++;
+    });
+    onScore(n);
+    $('res').innerHTML = n >= need ? `<div class="ok-bar" style="margin-bottom:10px">${n} van ${qs.length} goed. Afgerond!</div>` : `<div class="warn-bar" style="margin-bottom:10px">${n} van ${qs.length} goed. Lees de onderdelen nog eens en probeer het opnieuw.</div>`;
+    if (n >= need && qs.length === 10) cert(n);
+  };
+}
+function exam() {
+  window.scrollTo(0, 0);
+  const qs = M.flatMap(m => m.quiz).sort(() => Math.random() - .5).slice(0, 10);
+  $('app').innerHTML = `<div style="padding:28px 0 64px;max-width:720px">${quizHtml({ id: 'M10 · Eindtoets', q: qs }, 'Eindtoets', '10 vragen uit alle modules. Minimaal 8 goed voor het certificaat.')}<div id="cert"></div></div>`;
+  bindQuiz(qs, n => { st.p.M10 = { seen: [], score: Math.max(n, P('M10').score || 0) }; save(); }, 8, () => home());
+}
+function cert(n) {
+  $('cert').innerHTML = `<div class="cert" id="certEl" style="margin-top:20px"><img src="assets/logo.png" alt="Maghreb Estates"><div class="eyebrow">Certificaat</div><h2>Maghreb Academie</h2><p class="muted">Hierbij verklaren wij dat</p><div class="nm">${esc(st.naam || 'Naam')}</div><p class="muted">de eindtoets van de Maghreb Academie met succes heeft afgerond, met ${n} van de 10 vragen goed.</p><p class="small muted">${ME.today()} · Maghreb Estates, Rabat</p></div>
+    <div class="btns noprint" style="max-width:680px"><button class="btn" id="cpdf">Download PDF</button><button class="btn outline" id="cpng">Download afbeelding</button></div>`;
+  $('cpdf').onclick = () => ME.printEl($('certEl'));
+  $('cpng').onclick = () => ME.pngEl($('certEl'), 'certificaat-maghreb-academie');
+}
+home();
+</script>
+</body>
+</html>

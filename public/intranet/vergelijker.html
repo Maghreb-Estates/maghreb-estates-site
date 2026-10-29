@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Vergelijker Objecten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .tool { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  @media (max-width: 1000px) { .tool { grid-template-columns: 1fr; } }
+  .matrix { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 420px; }
+  .matrix input[type=file] { width: 100%; }
+  .matrix th { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--green); text-align: left; padding: 6px 6px 8px; border-bottom: 2px solid var(--accent); }
+  .matrix td { padding: 4px 6px; vertical-align: middle; }
+  .matrix td:first-child { font-size: 12.5px; font-weight: 500; width: 130px; color: var(--green); }
+  .matrix td:first-child em { display: block; font-style: normal; font-weight: 400; color: var(--muted-2); font-size: 11px; }
+  .matrix input, .matrix select { padding: 7px 9px; font-size: 13.5px; }
+  .matrix .auto { background: #f7f4ee; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 9px; font-family: var(--mono); font-size: 13px; color: var(--muted); min-height: 34px; }
+  .cmp { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cmp th { font-family: var(--serif); font-size: 18px; font-weight: 500; text-align: left; padding: 8px 8px; border-top: 3px solid var(--gold); color: var(--green); }
+  .cmp td { padding: 8px; border-bottom: 1px solid var(--cream-dark); }
+  .cmp td:not(:first-child) { font-family: var(--mono); }
+  .cmp tr:nth-child(even) td { background: #faf8f3; }
+  .cmp td:first-child { color: var(--muted); width: 32%; }
+  .cmp tr.tot td { font-weight: 600; color: var(--green); border-top: 2px solid var(--green); }
+  .cmp img { width: 100%; height: 90px; object-fit: cover; border-radius: 3px; display: block; }
+  .best { color: var(--ok) !important; font-weight: 600; }
+  .hi { color: var(--accent) !important; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Vergelijker objecten</h1><p>Zet 2 of 3 woningen naast elkaar, getoetst aan de mediaan vraagprijs per m² in de stad</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+
+<main class="wrap tool">
+  <div class="card">
+    <div class="grid2" style="align-items:end">
+      <div class="field"><label>Aantal woningen</label><div class="seg" id="cnt"><button data-v="2" class="on">2</button><button data-v="3">3</button></div></div>
+      <div class="field"><label>Doel</label><div class="seg" id="doel"><button data-v="huur" class="on">Verhuur</button><button data-v="eigen">Eigen gebruik</button></div></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Titel</label><input type="text" id="titel" value="Vergelijking van woningen"></div>
+      <div class="field"><label>Ondertitel <em>optioneel</em></label><input type="text" id="sub" placeholder="Bijv. voor familie El Amrani"></div>
+    </div>
+    <div style="overflow-x:auto"><table class="matrix" id="matrix"></table></div>
+    <p class="hint" style="margin-top:10px">Marktmediaan: appartementen te koop, laatste 30 dagen, uit onze eigen scrape. Kosten koper gerekend met 4% registratie, 1,5% conservation foncière en notaris.</p>
+  </div>
+  <div>
+    <div class="sheet" id="sheet">
+      <div class="sheet-head"><div><h3 id="oT"></h3><p id="oS"></p></div><img src="assets/logo-licht.png" alt=""></div>
+      <div class="sheet-body" style="overflow-x:auto"><table class="cmp" id="cmp"></table>
+        <p class="note">Indicatief, op basis van de opgegeven prijzen en vraagprijzen van portals. Geen taxatie. Opgesteld op <span id="dt"></span>.</p></div>
+      <div class="sheet-foot"><span>Maghreb Estates</span><span>a.douider@maghreb-estates.com · maghreb-estates.com</span></div>
+    </div>
+    <div class="btns noprint"><button class="btn" id="pdf">Download PDF</button><button class="btn outline" id="png">Download afbeelding</button></div>
+  </div>
+</main>
+
+<script>
+const { fmt, num, money, mad, pct, esc, today } = ME;
+const $ = id => document.getElementById(id);
+const CITIES = ['Tanger', 'Casablanca', 'Rabat', 'Marrakech', 'Agadir', 'Nador', 'Al Hoceima'];
+let n = 2, doel = 'huur';
+const objs = ME.keep.get('vergelijker', [
+  { naam: 'Nest', stad: 'Tanger', wijk: 'Route de Rabat', type: 'Appartement 2 slk', opl: '2027', prijs: '880.000', m2: '80', huur: '6.500' },
+  { naam: 'Projet Or', stad: 'Marrakech', wijk: 'Agdal', type: 'Appartement 2 slk', opl: '2027', prijs: '1.400.000', m2: '92', huur: '9.000' },
+  { naam: '', stad: 'Rabat', wijk: '', type: '', opl: '', prijs: '', m2: '', huur: '' },
+]);
+const fotos = [];
+const ROWS = [
+  ['foto', 'Foto', 'optioneel'], ['naam', 'Projectnaam'], ['stad', 'Stad'], ['wijk', 'Wijk'], ['type', 'Type woning'],
+  ['opl', 'Oplevering', 'bijv. 2027 of bestaand'], ['prijs', 'Koopprijs', 'MAD'], ['m2', 'Oppervlakte', 'm²'], ['huur', 'Verwachte huur', 'MAD per maand'],
+];
+
+// Mediaan per stad uit Supabase (gecachet per dag)
+const SB = 'https://pkkdjnxiperugvothjtn.supabase.co/rest/v1/listings';
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBra2RqbnhpcGVydWd2b3RoanRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MjgzODAsImV4cCI6MjA5OTAwNDM4MH0.VAADz-MxXEqf6-xWLjRP6OSkJ9_AOMjmj8D_YpEAd0Q';
+const med = ME.keep.get('mediaan', {});
+async function median(city) {
+  const key = city + new Date().toISOString().slice(0, 10);
+  if (med[key]) return med[key];
+  const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  try {
+    const r = await fetch(`${SB}?select=price,surface_m2&property_type=eq.apartment&transaction_type=eq.sale&city=eq.${encodeURIComponent(city)}&last_seen_at=gte.${since}&surface_m2=gte.30&surface_m2=lte.400&price=gt.0&limit=1000`, { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } });
+    const a = (await r.json()).map(x => x.price / x.surface_m2).filter(v => v > 2000 && v < 60000).sort((x, y) => x - y);
+    if (a.length < 10) return null;
+    med[key] = a[a.length >> 1]; ME.keep.set('mediaan', med); return med[key];
+  } catch (e) { return null; }
+}
+
+function drawMatrix() {
+  const cols = objs.slice(0, n);
+  let h = `<tr><td></td>${cols.map((_, i) => `<th>Woning ${i + 1}</th>`).join('')}</tr>`;
+  ROWS.forEach(([k, l, s]) => {
+    h += `<tr><td>${l}${s ? `<em>${s}</em>` : ''}</td>` + cols.map((o, i) => {
+      if (k === 'foto') return `<td><input type="file" accept="image/*" data-foto="${i}" style="font-size:12px;padding:5px"></td>`;
+      if (k === 'stad') return `<td><select data-i="${i}" data-k="stad">${CITIES.map(c => `<option ${c === o.stad ? 'selected' : ''}>${c}</option>`).join('')}</select></td>`;
+      return `<td><input type="text" data-i="${i}" data-k="${k}" value="${esc(o[k])}" ${['prijs', 'huur'].includes(k) ? 'data-money' : ''}></td>`;
+    }).join('') + '</tr>';
+  });
+  $('matrix').innerHTML = h;
+  $('matrix').querySelectorAll('[data-money]').forEach(money);
+  $('matrix').querySelectorAll('[data-k]').forEach(el => {
+    const f = () => { objs[el.dataset.i][el.dataset.k] = el.value; ME.keep.set('vergelijker', objs); render(); };
+    el.addEventListener('input', f); el.addEventListener('change', f);
+  });
+  $('matrix').querySelectorAll('[data-foto]').forEach(el => el.onchange = () => {
+    const f = el.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => { fotos[el.dataset.foto] = r.result; render(); }; r.readAsDataURL(f);
+  });
+}
+
+async function render() {
+  const cols = objs.slice(0, n);
+  const meds = await Promise.all(cols.map(o => median(o.stad)));
+  const c = cols.map((o, i) => {
+    const P = num(o.prijs), m2 = num(o.m2), H = num(o.huur);
+    const kk = P ? P * 0.055 + 200 + Math.max(5000, P * 0.01) * 1.1 : 0;
+    const ppm = m2 ? P / m2 : NaN;
+    return { o, P, m2, H, kk, ppm, inv: P + kk, br: P ? H * 11 / (P + kk) * 100 : NaN, med: meds[i], diff: meds[i] && ppm ? (ppm / meds[i] - 1) * 100 : NaN };
+  });
+  const best = (f, low) => { const v = c.map(f).filter(isFinite); if (v.length < 2) return null; return low ? Math.min(...v) : Math.max(...v); };
+  const bPpm = best(x => x.ppm, true), bBr = best(x => x.br, false);
+  const row = (l, f, cls = '') => `<tr class="${cls}"><td>${l}</td>${c.map(x => `<td>${f(x)}</td>`).join('')}</tr>`;
+  let h = `<tr><td></td>${c.map(x => `<th>${esc(x.o.naam || 'Woning')}</th>`).join('')}</tr>`;
+  if (fotos.slice(0, n).some(Boolean)) h += `<tr><td></td>${c.map((_, i) => `<td>${fotos[i] ? `<img src="${fotos[i]}" alt="">` : ''}</td>`).join('')}</tr>`;
+  h += row('Locatie', x => esc([x.o.wijk, x.o.stad].filter(Boolean).join(', ')));
+  h += row('Type', x => esc(x.o.type || '–'));
+  h += row('Oplevering', x => esc(x.o.opl || '–'));
+  h += row('Koopprijs', x => x.P ? fmt(x.P) : '–');
+  h += row('Oppervlakte', x => x.m2 ? fmt(x.m2) + ' m²' : '–');
+  h += row('Prijs per m²', x => isFinite(x.ppm) ? `<span class="${x.ppm === bPpm ? 'best' : ''}">${fmt(x.ppm)}</span>` : '–');
+  h += row('Marktmediaan per m² in de stad', x => x.med ? fmt(x.med) : '<span class="muted">geen data</span>');
+  h += row('Ten opzichte van de markt', x => isFinite(x.diff) ? `<span class="${x.diff > 15 ? 'hi' : x.diff < 0 ? 'best' : ''}">${x.diff > 0 ? '+' : ''}${pct(x.diff, 1)}</span>` : '–');
+  h += row('Kosten koper (ca.)', x => x.kk ? fmt(x.kk) : '–');
+  h += row('Totale investering', x => x.P ? fmt(x.inv) : '–', 'tot');
+  if (doel === 'huur') {
+    h += row('Verwachte huur per maand', x => x.H ? fmt(x.H) : '–');
+    h += row('Bruto rendement <span class="small">(11 mnd verhuurd)</span>', x => isFinite(x.br) ? `<span class="${x.br === bBr ? 'best' : ''}">${pct(x.br)}</span>` : '–');
+  }
+  $('cmp').innerHTML = h;
+  $('oT').textContent = $('titel').value || 'Vergelijking';
+  $('oS').textContent = $('sub').value || 'Bedragen in MAD';
+  $('dt').textContent = today();
+}
+document.querySelectorAll('#cnt button').forEach(b => b.onclick = () => { document.querySelectorAll('#cnt button').forEach(x => x.classList.toggle('on', x === b)); n = +b.dataset.v; drawMatrix(); render(); });
+document.querySelectorAll('#doel button').forEach(b => b.onclick = () => { document.querySelectorAll('#doel button').forEach(x => x.classList.toggle('on', x === b)); doel = b.dataset.v; render(); });
+['titel', 'sub'].forEach(id => $(id).addEventListener('input', render));
+$('pdf').onclick = () => ME.printEl($('sheet'));
+$('png').onclick = () => ME.pngEl($('sheet'), 'vergelijking');
+drawMatrix(); render();
+</script>
+</body>
+</html>

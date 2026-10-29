@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Maghreb Estates Intranet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .hero { background: var(--green); color: var(--cream); border-bottom: 3px solid var(--accent); position: relative; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; right: -120px; top: -120px; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(196,98,45,.16), transparent 65%); pointer-events: none; }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 56px; padding-top: 40px; padding-bottom: 44px; position: relative; z-index: 1; }
+  .greet { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .greet h2 { color: var(--cream); font-size: 24px; }
+  .greet span { font-size: 13px; color: rgba(245,241,232,.6); }
+  .tip { border-left: 2px solid var(--accent); padding: 4px 0 4px 20px; margin: 26px 0 28px; }
+  .tip .eyebrow { color: #e3a07a; }
+  .tip blockquote { margin: 8px 0 16px; font-family: var(--serif); font-size: clamp(22px, 2.6vw, 30px); line-height: 1.25; color: var(--cream); }
+  .tip button { font: inherit; font-size: 13px; color: var(--cream); background: transparent; border: 1px solid rgba(245,241,232,.35); border-radius: var(--radius); padding: 6px 14px; cursor: pointer; }
+  .tip button:hover { border-color: var(--cream); }
+  .academy { display: flex; align-items: center; gap: 18px; background: var(--cream); color: var(--text); border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  .academy .ic { width: 52px; height: 52px; border-radius: var(--radius); background: var(--white); display: grid; place-items: center; flex-shrink: 0; color: var(--green); }
+  .academy h3 { font-size: 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .academy p { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); }
+  .academy .btn { margin-left: auto; flex-shrink: 0; }
+  .side { text-align: right; display: flex; flex-direction: column; gap: 18px; }
+  .side img { height: 50px; align-self: flex-end; }
+  .side .blk { border-top: 1px solid rgba(245,241,232,.18); padding-top: 14px; }
+  .side .k { font-size: 11px; color: #e3a07a; letter-spacing: .06em; }
+  .side .v { font-family: var(--serif); font-size: 22px; line-height: 1.2; }
+  .side .s { font-size: 12px; color: rgba(245,241,232,.6); }
+  .wx { display: flex; justify-content: flex-end; align-items: center; gap: 14px; }
+  .wx .t { font-family: var(--serif); font-size: 36px; line-height: 1; }
+  .clock { display: flex; justify-content: flex-end; gap: 10px; align-items: baseline; font-size: 13px; color: rgba(245,241,232,.75); }
+  .clock b { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--cream); min-width: 62px; }
+  @media (max-width: 900px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 28px; }
+    .side { text-align: left; display: grid; grid-template-columns: 1fr 1fr; }
+    .side img { display: none; } .wx, .clock { justify-content: flex-start; }
+    .side .blk:first-of-type { border-top: 0; }
+  }
+  @media (max-width: 560px) { .academy { flex-wrap: wrap; } .academy .btn { margin-left: 0; width: 100%; } .side { grid-template-columns: 1fr; } }
+
+  section.sec { padding: 40px 0 8px; }
+  .sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .sec-head p { margin: 0; font-style: italic; color: var(--muted); font-size: 13.5px; }
+  .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 1000px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .tiles { grid-template-columns: 1fr; } }
+  .tile { display: block; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: transform .2s, box-shadow .2s, border-color .2s; }
+  .tile:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: #c5bca9; }
+  .tile .row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .tile .ic { width: 34px; height: 34px; border-radius: var(--radius); background: var(--green); color: var(--cream); display: grid; place-items: center; flex-shrink: 0; }
+  .tile h4 { font-size: 19px; font-weight: 400; }
+  .tile h4 b { font-weight: 600; }
+  .tile p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .tile .new { font-size: 9.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-left: auto; }
+
+  .market { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  @media (max-width: 900px) { .market { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .mc { background: var(--card); padding: 16px; }
+  .mc h4 { font-size: 20px; margin-bottom: 8px; }
+  .mc .k { font-size: 11px; color: var(--muted); }
+  .mc .v { font-family: var(--mono); font-size: 17px; font-weight: 500; color: var(--green); margin-bottom: 6px; }
+  .mc .n { font-size: 11px; color: var(--muted-2); }
+  .mnote { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  .dark { background: var(--green); color: var(--cream); margin-top: 48px; }
+  .dark .sec-head { border-color: rgba(245,241,232,.15); }
+  .dark h2, .dark h3 { color: var(--cream); }
+  .dark .sec-head p { color: rgba(245,241,232,.55); }
+  .ext { display: block; background: rgba(245,241,232,.05); border: 1px solid rgba(245,241,232,.14); border-radius: var(--radius); padding: 16px; color: var(--cream); text-decoration: none; transition: background .2s; }
+  .ext:hover { background: rgba(245,241,232,.1); }
+  .ext .row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .ext .lg { width: 36px; height: 36px; border-radius: var(--radius); display: grid; place-items: center; font-weight: 600; font-size: 15px; color: #fff; flex-shrink: 0; }
+  .ext b { display: block; font-weight: 500; }
+  .ext small { font-size: 12px; color: rgba(245,241,232,.5); }
+  .ext p { margin: 0; font-size: 13px; color: rgba(245,241,232,.72); line-height: 1.45; }
+  .conv { border-top: 1px solid rgba(245,241,232,.12); margin-top: 36px; padding: 28px 0; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; }
+  .conv .pair { display: flex; align-items: flex-end; gap: 10px; }
+  .conv .pair + .pair { margin-top: 12px; }
+  .conv label { font-size: 12px; font-weight: 500; display: block; margin-bottom: 4px; }
+  .conv label em { font-style: italic; font-weight: 400; color: rgba(245,241,232,.5); }
+  .conv input { width: 170px; font-family: var(--mono); }
+  .conv .sw { color: #e3a07a; padding-bottom: 10px; }
+  @media (max-width: 760px) { .conv { grid-template-columns: 1fr; } .conv input { width: 100%; } .conv .pair > div { flex: 1; } }
+  footer { border-top: 1px solid rgba(245,241,232,.12); padding: 20px 0 28px; font-size: 13px; color: rgba(245,241,232,.6); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  footer a { color: var(--cream); margin-left: 18px; }
+  footer a:first-child { margin-left: 0; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="greet"><h2 id="greet">Goedendag</h2><span id="date"></span></div>
+      <div class="tip">
+        <div class="eyebrow">Tip van de dag</div>
+        <blockquote id="tip"></blockquote>
+        <button id="nextTip" type="button">Nog een tip</button>
+      </div>
+      <div class="academy">
+        <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/></svg></div>
+        <div>
+          <h3>Maghreb Academie <span class="pill gold">E-learning</span></h3>
+          <p>Leer hoe vastgoed in Marokko werkt: titre foncier, de notaris, belastingen, nieuwbouw en het eerste gesprek met een koper.</p>
+        </div>
+        <a class="btn" href="academie.html">Start de Academie</a>
+      </div>
+    </div>
+    <aside class="side">
+      <img src="assets/logo-licht.png" alt="Maghreb Estates">
+      <div class="blk">
+        <div class="wx"><span id="wxIc"></span><div><div class="t" id="wxT">–</div></div></div>
+        <div class="s" id="wxS">Rabat</div>
+      </div>
+      <div class="blk">
+        <div class="k">Wisselkoers</div>
+        <div class="v" id="fx">1 EUR = … MAD</div>
+        <div class="s" id="fx2"></div>
+      </div>
+      <div class="blk">
+        <div class="k">Tijd</div>
+        <div class="clock"><span>Rabat</span><b id="tMa">–</b></div>
+        <div class="clock"><span>Nederland</span><b id="tNl">–</b></div>
+        <div class="s" id="tDiff"></div>
+      </div>
+    </aside>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="sec">
+    <div class="sec-head"><h2>Markt deze maand</h2><p id="mHead">Mediaan vraagprijzen uit onze eigen scrape</p></div>
+    <div class="market" id="market">
+      <div class="mc"><div class="empty">Marktcijfers laden…</div></div>
+    </div>
+    <div class="mnote">Appartementen, laatste 30 dagen, Mubawab, Avito en Sarouty (Supabase). Vraagprijzen, geen transactieprijzen. Steekproef tot 1.000 objecten per stad. Diepere analyse in het <a href="https://maghreb-estates.com/dashboard/" target="_blank" rel="noopener">marktdashboard</a>.</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><h2>Adviseurtools</h2><p>Calculators, vergelijkingen en controles voor kopers en investeerders</p></div>
+    <div class="tiles">
+      <a class="tile" href="kosten-koper.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7h8M8 11h2M12 11h4M8 15h2M12 15h4"/></svg></span><h4><b>Kosten koper</b> calculator</h4></div><p>Registratie, conservation foncière, notaris en makelaar, in MAD en euro.</p></a>
+      <a class="tile" href="huurcalculator.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg></span><h4><b>Huur</b>calculator</h4></div><p>Netto rendement voor lange verhuur of Airbnb, met syndic, TSC en huurbelasting.</p></a>
+      <a class="tile" href="verkoopcalculator.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span><h4><b>Verkoop</b>calculator</h4></div><p>Netto opbrengst en meerwaardebelasting (TPI 20%, minimaal 3%).</p></a>
+      <a class="tile" href="hypotheek.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 21V10l8-6 8 6v11"/><circle cx="12" cy="14" r="3"/></svg></span><h4><b>Hypotheek</b> MRE</h4></div><p>Maandlast van een Marokkaanse hypotheek voor Marokkanen in het buitenland.</p></a>
+      <a class="tile" href="betalingsplan.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h18"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span><h4><b>Betalingsplan</b> VEFA</h4></div><p>Zet het betaalschema van een nieuwbouwproject om in een heldere tijdlijn.</p></a>
+      <a class="tile" href="vergelijker.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="16" rx="1"/></svg></span><h4><b>Vergelijker</b> objecten</h4></div><p>Zet 2 of 3 woningen naast elkaar, getoetst aan de mediaan van de wijk.</p></a>
+      <a class="tile" href="aanbod.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7h6l2 2h10v10H3z"/></svg></span><h4><b>Aanbod</b> en brochures</h4></div><p>Onze projecten met prijzen, ontwikkelaar, status en de links om te delen.</p></a>
+      <a class="tile" href="checklist.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l2 2 4-4"/><rect x="4" y="3" width="16" height="18" rx="1.5"/></svg></span><h4><b>Due diligence</b> checklist</h4></div><p>Titre foncier, melkia, note de renseignement, syndic en notaris: per dossier afvinken.</p></a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><h2>Communicatie</h2><p>Mails, beelden in huisstijl en WhatsApp-gesprekstraining</p></div>
+    <div class="tiles">
+      <a class="tile" href="mail-maker.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 7l9 6 9-6"/></svg></span><h4><b>Mail</b> maker</h4></div><p>Stel een mail of WhatsApp samen uit vaste tekstblokken, in NL, FR of EN.</p></a>
+      <a class="tile" href="post-maker.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="1.5"/><circle cx="9" cy="9" r="2"/><path d="M21 16l-5-5-9 9"/></svg></span><h4><b>Post</b> en <b>story</b> maker</h4></div><p>Afbeelding in huisstijl voor Instagram, Facebook en LinkedIn.</p></a>
+      <a class="tile" href="gesprekstraining.html"><div class="row"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20l1.5-4A8 8 0 1 1 8 19z"/></svg></span><h4><b>WhatsApp</b> training</h4></div><p>Oefen gesprekken met fictieve leads uit Nederland en België.</p></a>
+    </div>
+  </section>
+</main>
+
+<div class="dark">
+  <div class="wrap">
+    <section class="sec">
+      <div class="sec-head"><h3 style="font-size:26px">Data, portals en instanties</h3><p>Externe websites, openen in een nieuw tabblad</p></div>
+      <div class="tiles">
+        <a class="ext" href="https://maghreb-estates.com/dashboard/" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:var(--accent)">ME</span><div><b>Marktdashboard</b><small>maghreb-estates.com/dashboard</small></div></div><p>Onze eigen marktanalyse: prijzen per wijk, rendement, Airbnb-data en objecten.</p></a>
+        <a class="ext" href="https://supabase.com/dashboard/project/pkkdjnxiperugvothjtn" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:#3ecf8e">S</span><div><b>Supabase</b><small>supabase.com</small></div></div><p>De database achter het dashboard: marktdata, CRM-contacten en de Airbnb-cache.</p></a>
+        <a class="ext" href="https://www.mubawab.ma" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:#e4572e">M</span><div><b>Mubawab</b><small>mubawab.ma</small></div></div><p>Grootste vastgoedportal van Marokko. Handig voor vraagprijzen en referentieobjecten.</p></a>
+        <a class="ext" href="https://www.avito.ma/fr/maroc/immobilier" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:#2b6cb0">A</span><div><b>Avito</b><small>avito.ma</small></div></div><p>Breed particulier aanbod, vaak lager geprijsd. Goed voor bestaande woningen.</p></a>
+        <a class="ext" href="https://www.sarouty.ma" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:#c0392b">S</span><div><b>Sarouty</b><small>sarouty.ma</small></div></div><p>Portal met veel makelaarsaanbod en nieuwbouwprojecten.</p></a>
+        <a class="ext" href="https://www.agenz.ma" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:#6b46c1">A</span><div><b>Agenz</b><small>agenz.ma</small></div></div><p>Prijsschattingen en gerealiseerde prijzen per wijk, vooral Casablanca en Rabat.</p></a>
+        <a class="ext" href="https://www.ancfcc.gov.ma" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:#9c7a2b">C</span><div><b>ANCFCC</b><small>ancfcc.gov.ma</small></div></div><p>Kadaster en conservation foncière. Hier vraag je een certificat de propriété op.</p></a>
+        <a class="ext" href="https://www.tax.gov.ma" target="_blank" rel="noopener"><div class="row"><span class="lg" style="background:#1f6f5c">D</span><div><b>DGI</b><small>tax.gov.ma</small></div></div><p>Marokkaanse belastingdienst: registratierechten, TPI, huurbelasting en quitus fiscal.</p></a>
+      </div>
+    </section>
+
+    <div class="conv">
+      <div>
+        <h3>Omrekenhulp</h3>
+        <p style="font-style:italic;color:rgba(245,241,232,.55);margin:2px 0 0;font-size:13.5px">Euro en dirham, en de “centimes” waarin Marokkanen prijzen noemen<br>(“100 miljoen” = 1.000.000 MAD)</p>
+      </div>
+      <div>
+        <div class="pair">
+          <div><label>Euro <em>€</em></label><input type="text" id="cE" placeholder="100.000"></div>
+          <span class="sw">⇄</span>
+          <div><label>Dirham <em>MAD</em></label><input type="text" id="cM" placeholder="1.095.000"></div>
+        </div>
+        <div class="pair">
+          <div><label>Dirham <em>MAD</em></label><input type="text" id="cM2" placeholder="1.500.000"></div>
+          <span class="sw">⇄</span>
+          <div><label>Miljoen centimes <em>“mlyoun”</em></label><input type="text" id="cC" placeholder="150"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="wrap">
+      <span>Maghreb Estates · N°48 Appt 1, Avenue Fal Ouled Oumeir, Agdal, Rabat</span>
+      <span><a href="mailto:a.douider@maghreb-estates.com">a.douider@maghreb-estates.com</a><a href="https://maghreb-estates.com" target="_blank" rel="noopener">Website</a><a href="#" id="logout">Uitloggen</a></span>
+    </div>
+  </footer>
+</div>
+
+<script>
+const { fmt, num, fxReady, esc } = ME;
+
+// Begroeting, datum
+const h = new Date().getHours();
+document.getElementById('greet').textContent = h < 6 ? 'Goedenacht' : h < 12 ? 'Goedemorgen' : h < 18 ? 'Goedemiddag' : 'Goedenavond';
+document.getElementById('date').textContent = new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+// Tip van de dag
+const TIPS = [
+  'Vraag altijd een recent certificat de propriété op bij de ANCFCC, niet ouder dan een maand.',
+  'Een melkia is geen titre foncier. Reken bij melkia op extra controle en een titreringstraject.',
+  'Laat de koper betalen via een rekening in convertibele dirhams. Alleen zo kan het geld later terug naar Europa.',
+  'Bij nieuwbouw (VEFA) hoort een garantie d’achèvement. Vraag naar de bank die hem afgeeft.',
+  'Reken voor kosten koper op circa 6 tot 7% bovenop de koopsom, exclusief makelaar.',
+  'Vraag de verkoper om het quitus fiscal en de laatste aanslag van de taxe de services communaux.',
+  'Controleer bij een appartement of er een syndic is en of de bijdragen betaald zijn.',
+  'Een note de renseignement urbanistique laat zien wat er op en rond het perceel gebouwd mag worden.',
+  'Onder de 120.000 MAD bruto huur per jaar is de huurbelasting 10%, daarboven 15%.',
+  'Bij doorverkoop is de TPI 20% van de winst, met een minimum van 3% van de verkoopprijs.',
+  'Noem een vraagprijs nooit een marktprijs. Toets hem altijd aan referentieobjecten in dezelfde wijk.',
+  'De compromis de vente is bindend. Laat hem altijd eerst door de notaris of advocaat lezen.',
+  'Zeg het als een ontwikkelaar ons betaalt. Transparantie over onze vergoeding is een kernwaarde.',
+  'Bij vakantieverhuur bepalen de zomermaanden en de MRE-periode juli en augustus het jaarrendement.',
+  'Een réquisition is een lopende titelaanvraag. Vraag naar de status en eventuele opposities.',
+];
+let tipI = Math.floor(Date.now() / 864e5) % TIPS.length;
+const showTip = () => document.getElementById('tip').textContent = TIPS[tipI];
+document.getElementById('nextTip').onclick = () => { tipI = (tipI + 1) % TIPS.length; showTip(); };
+showTip();
+
+// Klok Rabat / Nederland
+function tick() {
+  const o = { hour: '2-digit', minute: '2-digit' };
+  const ma = new Date().toLocaleTimeString('nl-NL', { ...o, timeZone: 'Africa/Casablanca' });
+  const nl = new Date().toLocaleTimeString('nl-NL', { ...o, timeZone: 'Europe/Amsterdam' });
+  document.getElementById('tMa').textContent = ma;
+  document.getElementById('tNl').textContent = nl;
+  const toMin = s => { const [a, b] = s.split(':').map(Number); return a * 60 + b; };
+  let d = Math.round((toMin(nl) - toMin(ma)) / 60); if (d > 12) d -= 24; if (d < -12) d += 24;
+  document.getElementById('tDiff').textContent = d === 0 ? 'Zelfde tijd' : `Nederland ${Math.abs(d)} uur ${d > 0 ? 'voor' : 'achter'}`;
+}
+tick(); setInterval(tick, 20000);
+
+// Weer Rabat (Open-Meteo, gratis, geen sleutel)
+const WX = { 0: 'Helder', 1: 'Overwegend helder', 2: 'Half bewolkt', 3: 'Bewolkt', 45: 'Mist', 48: 'Mist', 51: 'Motregen', 53: 'Motregen', 55: 'Motregen', 61: 'Lichte regen', 63: 'Regen', 65: 'Zware regen', 80: 'Buien', 81: 'Buien', 82: 'Zware buien', 95: 'Onweer' };
+const sun = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#e3a07a" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const moon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="#F5F1E8"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+const cloud = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#F5F1E8" stroke-width="1.6"><path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 2A3 3 0 0 0 7 18z"/></svg>';
+fetch('https://api.open-meteo.com/v1/forecast?latitude=34.02&longitude=-6.84&current=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=Africa%2FCasablanca&forecast_days=1')
+  .then(r => r.json()).then(d => {
+    const c = d.current;
+    document.getElementById('wxT').textContent = Math.round(c.temperature_2m) + '°C';
+    document.getElementById('wxS').innerHTML = `Rabat: ${WX[c.weather_code] || 'Wisselend'}<br>Max ${Math.round(d.daily.temperature_2m_max[0])}° Min ${Math.round(d.daily.temperature_2m_min[0])}°`;
+    document.getElementById('wxIc').innerHTML = c.weather_code > 2 ? cloud : c.is_day ? sun : moon;
+  }).catch(() => { document.getElementById('wxS').textContent = 'Rabat: weer niet beschikbaar'; });
+
+// Wisselkoers + omrekenhulp
+fxReady.then(o => {
+  const r = o.rate;
+  document.getElementById('fx').textContent = `1 EUR = ${r.toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} MAD`;
+  document.getElementById('fx2').textContent = `1 MAD = € ${(1 / r).toLocaleString('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}` + (o.live ? '' : ' · indicatief');
+  const E = document.getElementById('cE'), M = document.getElementById('cM'), M2 = document.getElementById('cM2'), C = document.getElementById('cC');
+  E.oninput = () => M.value = E.value ? fmt(num(E.value) * r) : '';
+  M.oninput = () => E.value = M.value ? fmt(num(M.value) / r) : '';
+  M2.oninput = () => C.value = M2.value ? (num(M2.value) / 10000).toLocaleString('nl-NL', { maximumFractionDigits: 1 }) : '';
+  C.oninput = () => M2.value = C.value ? fmt(num(C.value) * 10000) : '';
+});
+
+// Marktcijfers uit Supabase (publieke anon-sleutel, alleen lezen; dezelfde als het dashboard)
+const SB = 'https://pkkdjnxiperugvothjtn.supabase.co/rest/v1/listings';
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBra2RqbnhpcGVydWd2b3RoanRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MjgzODAsImV4cCI6MjA5OTAwNDM4MH0.VAADz-MxXEqf6-xWLjRP6OSkJ9_AOMjmj8D_YpEAd0Q';
+const CITIES = ['Tanger', 'Casablanca', 'Rabat', 'Marrakech', 'Agadir'];
+const median = a => { if (!a.length) return NaN; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+async function q(params) {
+  const r = await fetch(`${SB}?${params}&limit=1000`, { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function loadMarket() {
+  const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const base = `select=price,surface_m2&property_type=eq.apartment&last_seen_at=gte.${since}&price=gt.0`;
+  try {
+    const rows = await Promise.all(CITIES.map(async c => {
+      const [s, r] = await Promise.all([
+        q(`${base}&city=eq.${c}&transaction_type=eq.sale&surface_m2=gte.30&surface_m2=lte.400`),
+        q(`${base}&city=eq.${c}&transaction_type=eq.long_term_rental`),
+      ]);
+      const pm = s.map(x => x.price / x.surface_m2).filter(v => v > 2000 && v < 60000);
+      const rent = r.map(x => x.price).filter(v => v >= 1500 && v <= 60000);
+      const pr = s.map(x => x.price).filter(v => v > 150000);
+      return { c, pm: median(pm), rent: median(rent), price: median(pr), n: pm.length + rent.length };
+    }));
+    const fx = ME.fx;
+    document.getElementById('market').innerHTML = rows.map(x => `
+      <div class="mc">
+        <h4>${esc(x.c)}</h4>
+        <div class="k">Vraagprijs per m²</div><div class="v">${fmt(x.pm)} MAD</div>
+        <div class="k">Mediaan koopprijs</div><div class="v">${(x.price / 1e6).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} mln <span class="small muted">€ ${fmt(x.price / fx / 1000)}k</span></div>
+        <div class="k">Mediaan huur per maand</div><div class="v">${fmt(x.rent)} MAD</div>
+        <div class="n">${fmt(x.n)} objecten</div>
+      </div>`).join('');
+  } catch (e) {
+    document.getElementById('market').innerHTML = '<div class="mc" style="grid-column:1/-1"><div class="empty">Marktcijfers konden niet geladen worden. Open het marktdashboard voor de actuele data.</div></div>';
+  }
+}
+document.getElementById('logout').onclick = e => { e.preventDefault(); ME.logout(); };
+loadMarket();
+</script>
+</body>
+</html>
