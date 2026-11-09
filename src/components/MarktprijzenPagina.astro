@@ -55,18 +55,21 @@ const dataset = {
   taal={taal}
   schema={[faqSchema(faqs), dataset]}
 >
-  <Breadcrumbs
-    items={[{ label: t.kruimel, href: pad }]}
-    home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
-  />
-
-  <section class="section mp-kop">
+  <!-- Kop in donkergroen, net als de verkooppagina: duidelijk los van de menubalk. -->
+  <section class="mp-kop">
+    <Breadcrumbs
+      items={[{ label: t.kruimel, href: pad }]}
+      home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
+    />
     <div class="container">
-      <div class="section__header">
-        <p class="eyebrow">{t.eyebrow}</p>
-        <h1>{t.titel}</h1>
-        <p class="section__desc">{vul(t.intro)}</p>
-      </div>
+      <p class="eyebrow eyebrow--light">{t.eyebrow}</p>
+      <h1>{t.titel}</h1>
+      <p class="mp-kop__intro">{vul(t.intro)}</p>
+    </div>
+  </section>
+
+  <section class="section mp-inhoud">
+    <div class="container">
 
       <dl class="mp-kern">
         <div><dt>{t.kern.bijgewerkt}</dt><dd><time datetime={data.bijgewerkt}>{datum(data.bijgewerkt)}</time></dd></div>

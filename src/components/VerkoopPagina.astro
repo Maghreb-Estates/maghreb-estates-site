@@ -88,20 +88,20 @@ const bogen = europa.map((e, i) => {
     serviceSchema({ naam: t.meta.dienst, beschrijving: vul(t.meta.dienstBeschrijving), path: pad, steden: werkgebied, type: t.meta.dienst }),
   ]}
 >
-  <Breadcrumbs
-    items={[{ label: t.kruimel, href: pad }]}
-    home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
-  />
-
-  <!-- HERO: tekst en knoppen links, foto rechts. Op mobiel eerst tekst en knoppen. -->
+  <!-- HERO: donkergroen (duidelijk los van de crème menubalk), met het kruimelpad
+       erin. Tekst en knoppen links, foto rechts; op mobiel eerst tekst en knoppen. -->
   <section class="vk-hero">
+    <Breadcrumbs
+      items={[{ label: t.kruimel, href: pad }]}
+      home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
+    />
     <div class="container vk-hero__grid">
       <div class="vk-hero__tekst">
-        <p class="eyebrow">{t.hero.eyebrow}</p>
+        <p class="eyebrow eyebrow--light">{t.hero.eyebrow}</p>
         <h1 set:html={t.hero.titel} />
         <p class="vk-hero__sub">{t.hero.sub}</p>
         <div class="vk-acties" data-verberg-sticky>
-          <a href="#aanmelden" class="btn btn--primary" data-cta="hero">{t.hero.estimatie}</a>
+          <a href="#aanmelden" class="btn btn--light" data-cta="hero">{t.hero.estimatie}</a>
           <a href={waBericht} class="btn btn--outline btn--wa" rel="noopener" data-plek="hero"><Icon name="whatsapp" size={17} />{t.hero.whatsapp}</a>
         </div>
         <ul class="vk-trust">

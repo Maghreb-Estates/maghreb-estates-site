@@ -858,20 +858,28 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
    ========================================================================== */
 #aanmelden, #prijzen { scroll-margin-top: 84px; }
 
-/* Hero: licht, tekst links en foto rechts, met royale witruimte. */
-.vk-hero { padding: 4px 0 72px; }
+/* Hero: donkergroen, zodat hij duidelijk loskomt van de crème menubalk (zelfde
+   kleur als het netwerkblok, de slot-CTA en de footer). Tekst links, foto rechts. */
+.vk-hero { padding: 0 0 72px; background: var(--green); color: var(--cream); }
+.vk-hero > .crumbs, .mp-kop > .crumbs { padding-bottom: 6px; color: rgba(245,241,232,0.6); }
+.vk-hero > .crumbs a, .mp-kop > .crumbs a { color: rgba(245,241,232,0.75); }
+.vk-hero > .crumbs a:hover, .mp-kop > .crumbs a:hover { color: var(--cream); }
+.vk-hero > .crumbs strong, .mp-kop > .crumbs strong { color: var(--cream); font-weight: 400; }
 .vk-hero__grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 56px; align-items: center; }
 .vk-hero h1 { font-size: clamp(36px, 4.4vw, 58px); line-height: 1.08; margin: 14px 0 20px; overflow-wrap: break-word; }
-.vk-hero h1 em { color: var(--green-mid); }
-.vk-hero__sub { font-size: 19px; color: var(--text-muted); max-width: 34em; margin-bottom: 30px; }
+.vk-hero h1 { color: var(--cream); }
+.vk-hero h1 em { color: var(--gold); }
+.vk-hero__sub { font-size: 19px; color: rgba(245,241,232,0.85); max-width: 34em; margin-bottom: 30px; }
+.vk-hero .btn--outline { color: var(--cream); border-color: rgba(245,241,232,0.55); }
+.vk-hero .btn--outline:hover { background: var(--cream); color: var(--green); border-color: var(--cream); }
 .vk-acties { display: flex; flex-wrap: wrap; gap: 12px; }
 .vk-acties .btn { padding-inline: 24px; }
 .btn--wa { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
 .btn--wa svg { flex-shrink: 0; }
 .vk-trust { list-style: none; margin: 30px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; }
-.vk-trust li { display: flex; align-items: flex-start; gap: 9px; font-size: 15px; line-height: 1.4; color: var(--text); }
+.vk-trust li { display: flex; align-items: flex-start; gap: 9px; font-size: 15px; line-height: 1.4; color: rgba(245,241,232,0.9); }
 .vk-trust svg { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
-.vk-hero__foto img { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; box-shadow: var(--shadow); }
+.vk-hero__foto img { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; }
 
 /* Aanmelden: intro en werkgebied links, formulier rechts. Op mobiel staat het
    formulier direct onder de intro. */
@@ -979,9 +987,13 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
 .prijzen__methode { max-width: 820px; }
 .prijzen__methode p { margin-bottom: 10px; font-size: 15px; color: var(--text-muted); }
 
-/* Marktprijzenpagina (MarktprijzenPagina.astro): kerncijfers, tabellen, methode. */
-.mp-kop { padding-top: 24px; }
-.mp-kop h1 { font-size: clamp(34px, 4.4vw, 52px); line-height: 1.12; }
+/* Marktprijzenpagina (MarktprijzenPagina.astro): donkergroene kop, dan kerncijfers,
+   tabellen en methode. */
+.mp-kop { padding-bottom: 64px; background: var(--green); color: var(--cream); }
+.mp-kop .container > .eyebrow { margin-top: 18px; }
+.mp-kop h1 { max-width: 24ch; margin-bottom: 20px; font-size: clamp(34px, 4.4vw, 52px); line-height: 1.12; color: var(--cream); }
+.mp-kop__intro { max-width: 46em; margin: 0; font-size: 18px; color: rgba(245,241,232,0.85); }
+.mp-inhoud { padding-top: 48px; }
 .mp-kern { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0 0 8px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .mp-kern > div { background: var(--white); padding: 16px 18px; }
 .mp-kern dt { margin-bottom: 4px; font-size: 11.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
