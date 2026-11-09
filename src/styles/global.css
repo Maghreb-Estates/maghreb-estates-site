@@ -196,7 +196,7 @@ em { font-style: italic; color: var(--green-mid); }
 .stap p { font-size: 15px; color: var(--text-muted); margin: 0; }
 
 /* ===== BREADCRUMBS ===== */
-.crumbs { padding: 18px 0; font-size: 13px; color: var(--text-muted); }
+.crumbs { padding-block: 18px; font-size: 13px; color: var(--text-muted); } /* alleen boven/onder: de zijmarge komt van .container */
 .crumbs a:hover { color: var(--green-mid); text-decoration: underline; }
 .crumbs span { margin: 0 8px; opacity: 0.5; }
 
