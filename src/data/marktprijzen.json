@@ -1,10 +1,10 @@
 {
-  "bijgewerkt": "2026-10-26",
+  "bijgewerkt": "2026-11-02",
   "periode": {
-    "van": "2026-10-16",
-    "tot": "2026-10-26"
+    "van": "2026-10-23",
+    "tot": "2026-11-02"
   },
-  "advertenties": 17171,
+  "advertenties": 17024,
   "bronnen": [
     "Mubawab",
     "Sarouty",
@@ -16,33 +16,33 @@
       "stad": "Rabat",
       "types": {
         "appartement": {
-          "mediaan": 19600,
+          "mediaan": 19700,
           "p25": 13600,
-          "p75": 24400,
-          "n": 563
+          "p75": 25000,
+          "n": 564
         },
         "villa": {
           "mediaan": 14800,
           "p25": 10000,
-          "p75": 22500,
-          "n": 581
+          "p75": 22300,
+          "n": 575
         }
       },
       "wijken": [
         {
           "naam": "Agdal",
           "mediaan": 19700,
-          "n": 76
+          "n": 81
         },
         {
           "naam": "Hay Riad",
-          "mediaan": 23700,
-          "n": 58
+          "mediaan": 23900,
+          "n": 59
         },
         {
           "naam": "Souissi",
-          "mediaan": 21400,
-          "n": 43
+          "mediaan": 21200,
+          "n": 41
         }
       ]
     },
@@ -50,53 +50,53 @@
       "stad": "Casablanca",
       "types": {
         "appartement": {
-          "mediaan": 15000,
-          "p25": 11300,
-          "p75": 19600,
-          "n": 6269
+          "mediaan": 15100,
+          "p25": 11400,
+          "p75": 19900,
+          "n": 6161
         },
         "villa": {
           "mediaan": 16700,
           "p25": 12900,
-          "p75": 21800,
-          "n": 1569
+          "p75": 21700,
+          "n": 1547
         }
       },
       "wijken": [
         {
           "naam": "Maârif",
-          "mediaan": 15900,
-          "n": 335
+          "mediaan": 16000,
+          "n": 328
         },
         {
           "naam": "Gauthier",
-          "mediaan": 16900,
-          "n": 158
+          "mediaan": 17100,
+          "n": 153
         },
         {
           "naam": "Racine",
           "mediaan": 18400,
-          "n": 236
+          "n": 231
         },
         {
           "naam": "Aïn Diab",
-          "mediaan": 22600,
-          "n": 174
+          "mediaan": 23000,
+          "n": 170
         },
         {
           "naam": "Les Hôpitaux",
-          "mediaan": 14300,
-          "n": 227
+          "mediaan": 14500,
+          "n": 212
         },
         {
           "naam": "Belvédère",
-          "mediaan": 12000,
-          "n": 161
+          "mediaan": 12600,
+          "n": 147
         },
         {
           "naam": "Oulfa",
-          "mediaan": 10600,
-          "n": 147
+          "mediaan": 10700,
+          "n": 138
         }
       ]
     },
@@ -104,23 +104,23 @@
       "stad": "Tanger",
       "types": {
         "appartement": {
-          "mediaan": 15100,
-          "p25": 11000,
-          "p75": 21800,
-          "n": 1371
+          "mediaan": 15200,
+          "p25": 11100,
+          "p75": 22000,
+          "n": 1374
         },
         "villa": {
           "mediaan": 15800,
           "p25": 11300,
-          "p75": 23800,
-          "n": 470
+          "p75": 23700,
+          "n": 465
         }
       },
       "wijken": [
         {
           "naam": "Malabata",
-          "mediaan": 23800,
-          "n": 65
+          "mediaan": 23600,
+          "n": 64
         },
         {
           "naam": "Tanja Balia",
@@ -129,18 +129,13 @@
         },
         {
           "naam": "Ibéria",
-          "mediaan": 19200,
-          "n": 37
-        },
-        {
-          "naam": "Castilla",
-          "mediaan": 15200,
-          "n": 31
+          "mediaan": 19400,
+          "n": 38
         },
         {
           "naam": "Marjane",
-          "mediaan": 12000,
-          "n": 39
+          "mediaan": 11900,
+          "n": 38
         }
       ]
     },
@@ -148,16 +143,16 @@
       "stad": "Marrakech",
       "types": {
         "appartement": {
-          "mediaan": 17700,
-          "p25": 12000,
-          "p75": 23300,
-          "n": 2966
+          "mediaan": 17800,
+          "p25": 12100,
+          "p75": 23400,
+          "n": 2979
         },
         "villa": {
-          "mediaan": 13700,
+          "mediaan": 13600,
           "p25": 8800,
-          "p75": 20000,
-          "n": 2649
+          "p75": 19900,
+          "n": 2650
         }
       },
       "wijken": [
@@ -168,28 +163,28 @@
         },
         {
           "naam": "Hivernage",
-          "mediaan": 23700,
-          "n": 116
+          "mediaan": 23800,
+          "n": 117
         },
         {
           "naam": "Agdal",
-          "mediaan": 23300,
+          "mediaan": 23700,
           "n": 98
         },
         {
           "naam": "Camp El Ghoul",
           "mediaan": 19700,
-          "n": 75
+          "n": 79
         },
         {
           "naam": "Targa",
           "mediaan": 12800,
-          "n": 56
+          "n": 55
         },
         {
           "naam": "M’hamid",
           "mediaan": 8100,
-          "n": 68
+          "n": 71
         }
       ]
     },
@@ -198,37 +193,37 @@
       "types": {
         "appartement": {
           "mediaan": 13100,
-          "p25": 10500,
-          "p75": 17200,
-          "n": 508
+          "p25": 10600,
+          "p75": 17300,
+          "n": 495
         },
         "villa": {
           "mediaan": 16700,
           "p25": 12600,
           "p75": 21400,
-          "n": 225
+          "n": 214
         }
       },
       "wijken": [
         {
           "naam": "Hay Mohammadi",
           "mediaan": 12800,
-          "n": 65
+          "n": 61
         },
         {
           "naam": "Hay Salam",
-          "mediaan": 11200,
+          "mediaan": 11600,
           "n": 35
         },
         {
           "naam": "Hay Houda",
           "mediaan": 13200,
-          "n": 35
+          "n": 34
         },
         {
           "naam": "Anza",
-          "mediaan": 11100,
-          "n": 35
+          "mediaan": 11600,
+          "n": 32
         }
       ]
     }

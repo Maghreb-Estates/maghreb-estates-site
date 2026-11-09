@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 // een echte inhoudelijke wijziging: de laatste prijsupdate (src/data/marktprijzen.json)
 // of de laatste tekstwijziging hieronder. Pas die datum aan als de tekst van de
 // verkooppagina inhoudelijk verandert.
-const verkoopTekstGewijzigd = '2026-10-27';
+const verkoopTekstGewijzigd = '2026-11-09';
 const prijzenBijgewerkt = JSON.parse(
   readFileSync(new URL('./src/data/marktprijzen.json', import.meta.url), 'utf8'),
 ).bijgewerkt;

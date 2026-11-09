@@ -1,12 +1,17 @@
 ---
 // Subtiele mobiele sticky-CTA onderaan (alleen mobiel). Link naar WhatsApp met
 // voorgevulde tekst in de taal van de bezoeker.
+//
+// Met `cta` (bv. op de verkooppagina) wordt het een hoofdknop plus een klein
+// WhatsApp-icoon. Elementen met data-verberg-sticky (knoppen in de hero, het
+// formulier, de slot-CTA) laten de balk wegvallen zolang ze in beeld zijn, zodat
+// hij nooit over dezelfde knoppen of over formuliervelden heen ligt.
 import { waLink } from '../data/site';
 import { standaardTaal, type Taal } from '../i18n/config';
 import Icon from './Icon.astro';
 
-interface Props { taal?: Taal }
-const { taal = standaardTaal } = Astro.props;
+interface Props { taal?: Taal; cta?: { label: string; href: string; wa: string } }
+const { taal = standaardTaal, cta } = Astro.props;
 
 const teksten: Record<Taal, { label: string; bericht: string }> = {
   nl: { label: 'Stel uw vraag via WhatsApp', bericht: 'Hallo Maghreb Estates, ik heb een vraag over vastgoed in Marokko.' },
@@ -16,7 +21,33 @@ const teksten: Record<Taal, { label: string; bericht: string }> = {
 };
 const { label, bericht } = teksten[taal];
 ---
-<a class="sticky-wa" href={waLink(bericht)} rel="noopener" aria-label={label}>
-  <Icon name="whatsapp" size={18} />
-  <span>{label}</span>
-</a>
+{cta ? (
+  <div class="sticky-wa sticky-wa--duo is-verborgen" data-sticky>
+    <a class="sticky-wa__cta" href={cta.href} data-cta="sticky">{cta.label}</a>
+    <a class="sticky-wa__wa" href={waLink(cta.wa)} rel="noopener" aria-label={label}><Icon name="whatsapp" size={20} /></a>
+  </div>
+) : (
+  <a class="sticky-wa" href={waLink(bericht)} rel="noopener" aria-label={label} data-sticky>
+    <Icon name="whatsapp" size={18} />
+    <span>{label}</span>
+  </a>
+)}
+
+<script is:inline>
+  (function () {
+    // De variant met eigen knop start verborgen (geen flits over de heroknoppen
+    // bij het laden); de observer laat hem pas zien als dat kan.
+    var balk = document.querySelector('[data-sticky]');
+    var doelen = document.querySelectorAll('[data-verberg-sticky]');
+    if (!balk) return;
+    if (!doelen.length || !('IntersectionObserver' in window)) { balk.classList.remove('is-verborgen'); return; }
+    var inBeeld = new Set();
+    var io = new IntersectionObserver(function (items) {
+      items.forEach(function (it) {
+        if (it.isIntersecting) inBeeld.add(it.target); else inBeeld.delete(it.target);
+      });
+      balk.classList.toggle('is-verborgen', inBeeld.size > 0);
+    });
+    doelen.forEach(function (el) { io.observe(el); });
+  })();
+</script>

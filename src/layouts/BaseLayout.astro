@@ -27,6 +27,9 @@ interface Props {
    *  paginaregister, zoals het vastgoedaanbod). Overschrijft de sleutel-logica. */
   alternates?: { lang: string; href: string }[];
   xDefault?: string;
+  /** Mobiele sticky-balk met een eigen hoofdknop (plus WhatsApp-icoon) in plaats
+   *  van alleen WhatsApp. `wa` = voorgevuld WhatsApp-bericht. */
+  stickyCta?: { label: string; href: string; wa: string };
 }
 
 const {
@@ -156,7 +159,7 @@ const allSchema = [orgSchema, ...schema];
       <slot />
     </main>
     <Footer taal={taal} />
-    {toonSticky && <StickyWhatsapp taal={taal} />}
+    {toonSticky && <StickyWhatsapp taal={taal} cta={Astro.props.stickyCta} />}
     <CookieConsent taal={taal} />
     <LeadOpslag />
   </body>

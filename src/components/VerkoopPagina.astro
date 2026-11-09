@@ -1,26 +1,28 @@
 ---
 // Verkooppagina in alle vier de talen: eigenaren melden hier hun woning aan en
-// wij nemen de verkoop volledig uit handen. Doelgroep: eigenaren in Marokko
-// zelf én Marokkanen in het buitenland. Het formulier staat bewust direct
-// onder de hero.
+// wij nemen de verkoop uit handen. Doelgroep: eigenaren in Marokko zelf én
+// Marokkanen in het buitenland.
+//
+// Opbouw (redesign november 2026): hero met twee CTA's → kort formulier →
+// waarom (4 kaarten) → werkwijze (5 stappen) → netwerk → prijzen (5 stadskaarten,
+// de volledige tabellen uitklapbaar) → FAQ → afsluitende CTA. Alle inhoud staat in
+// de HTML, ook wat dichtgeklapt is, zodat zoekmachines en AI-assistenten hem lezen.
 //
 // Tekst per taal: src/i18n/verkopen.ts. Gebruikt door
 // src/pages/huis-verkopen-marokko.astro (NL) en src/pages/[lang]/[slug].astro.
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from './Hero.astro';
 import Breadcrumbs from './Breadcrumbs.astro';
 import Icon from './Icon.astro';
 import Faq from './Faq.astro';
-import ProjectGallery from './ProjectGallery.astro';
 import VerderLezen from './VerderLezen.astro';
 import { site, waLink } from '../data/site';
-import type { ProjectFoto } from '../data/projecten';
 import { faqSchema, serviceSchema } from '../data/schema';
 import marktprijzen from '../data/marktprijzen.json';
 import heroFoto from '../assets/verkopen/hero.webp';
 import { paginas, standaardTaal, type Taal } from '../i18n/config';
 import { ui } from '../i18n/ui';
-import { verkoopTekst, verkoopcase, werkgebied, type WerkgebiedStad } from '../i18n/verkopen';
+import { verkoopTekst, werkgebied, type WerkgebiedStad } from '../i18n/verkopen';
 
 interface Props { taal?: Taal }
 const { taal = standaardTaal } = Astro.props;
@@ -42,7 +44,7 @@ const lokaal = (taal === 'fr' || taal === 'ar') && site.telefoonMA !== '';
 const tel = lokaal
   ? { nummer: site.telefoonMA, href: site.telefoonMAHref }
   : { nummer: site.telefoon, href: site.telefoonHref };
-const waBericht = waLink(t.aanmelden.waBericht);
+const waBericht = waLink(t.hero.waBericht);
 
 // Vraagprijzen per m² (scripts/marktprijzen.py → src/data/marktprijzen.json).
 const locale = { nl: 'nl-NL', en: 'en-GB', fr: 'fr-FR', ar: 'ar-MA' }[taal];
@@ -52,6 +54,7 @@ const datum = (iso: string) =>
 const m2 = (n: number) => `${getal(n)} ${p.eenheid}`;
 const wijkNaam = (naam: string) => t.wijkNamen?.[naam] ?? naam;
 const prijsSteden = marktprijzen.steden.map((s) => ({ ...s, naam: t.steden[s.stad as WerkgebiedStad] }));
+const stadKaarten = prijsSteden.flatMap((s) => (s.types.appartement ? [{ naam: s.naam, ...s.types.appartement }] : []));
 const prijsRijen = prijsSteden.flatMap((s) =>
   (['appartement', 'villa'] as const).flatMap((type) => {
     const r = s.types[type];
@@ -59,127 +62,136 @@ const prijsRijen = prijsSteden.flatMap((s) =>
   }),
 );
 const wijkRijen = prijsSteden.flatMap((s) => s.wijken.map((w) => ({ ...w, naam: wijkNaam(w.naam), stad: s.naam })));
-const vulPrijs = (s: string) => s
+const vulPrijs = (s: string) => vul(s)
   .replaceAll('{datum}', datum(marktprijzen.bijgewerkt))
   .replaceAll('{van}', datum(marktprijzen.periode.van))
   .replaceAll('{n}', getal(marktprijzen.advertenties))
   .replaceAll('{min}', getal(marktprijzen.minWijk))
   .replaceAll('{bronnen}', opsomming(marktprijzen.bronnen, t.lijst.en))
   .replaceAll('{prijzen}', opsomming(
-    prijsSteden.filter((s) => s.types.appartement).map((s) =>
-      p.inStad.replace('{prijs}', m2(s.types.appartement!.mediaan)).replace('{stad}', s.naam)),
+    stadKaarten.map((s) => p.inStad.replace('{prijs}', m2(s.mediaan)).replace('{stad}', s.naam)),
     t.lijst.en,
   ));
+const faqs = t.faqs.map((f) => ({ q: f.q, a: vulPrijs(f.a) }));
 
-// De prijsvraag staat als derde FAQ, met de actuele cijfers.
-const faqs = [...t.faqs.slice(0, 2), p.faq, ...t.faqs.slice(2)].map((f) => ({ q: f.q, a: vulPrijs(vul(f.a)) }));
+// Hero-foto als responsive webp. Op mobiel staat hij onder de knoppen.
+const foto = await getImage({
+  src: heroFoto,
+  widths: [480, 720, 960, heroFoto.width].filter((w) => w <= heroFoto.width),
+  format: 'webp',
+});
 
-// Case-foto's verschijnen vanzelf: zie src/assets/verkopen/case/LEESMIJ.md.
-// De bestandsnaam bepaalt de volgorde en de alt-tekst.
-const fotoModules = import.meta.glob<{ default: ImageMetadata }>(
-  '../assets/verkopen/case/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
-  { eager: true },
-);
-const altUitBestand = (bestand: string, i: number) => {
-  const naam = bestand.split('/').pop()!.replace(/\.[^.]+$/, '').replace(/^[\d\s._-]+/, '').replace(/[-_]+/g, ' ').trim();
-  return naam ? naam.charAt(0).toUpperCase() + naam.slice(1) : `${t.case.titel}, ${i + 1}`;
-};
-const caseFotos: ProjectFoto[] = Object.keys(fotoModules)
-  .sort()
-  .map((bestand, i) => ({ src: fotoModules[bestand].default, alt: altUitBestand(bestand, i) }));
+const privacy = t.form.privacy.split('{link}');
+const waaromIcons = ['grafiek', 'camera', 'wereld', 'sleutel'];
+
+// Kaartje "Marokko en Europa": echte coördinaten (lengte, breedte) in een
+// eenvoudige projectie. Bogen lopen van Europa naar de vijf steden.
+const punt = (lon: number, lat: number) => ({ x: Math.round(((lon + 14) * 11.1 + 20) * 10) / 10, y: Math.round(((54 - lat) * 15 + 20) * 10) / 10 });
+const kaartSteden: { stad: WerkgebiedStad; pos: { x: number; y: number }; links?: boolean }[] = [
+  { stad: 'Tanger', pos: punt(-5.80, 35.77) },
+  { stad: 'Rabat', pos: punt(-6.84, 34.02) },
+  { stad: 'Casablanca', pos: punt(-7.59, 33.57), links: true },
+  { stad: 'Marrakech', pos: punt(-7.99, 31.63) },
+  { stad: 'Agadir', pos: punt(-9.60, 30.43), links: true },
+];
+const europa = [punt(4.90, 52.37), punt(4.35, 50.85), punt(2.35, 48.86)]; // Amsterdam, Brussel, Parijs
+const bogen = europa.map((e, i) => {
+  const doel = kaartSteden[[2, 1, 0][i]].pos;
+  return `M${e.x} ${e.y} Q${Math.min(e.x, doel.x) - 70} ${(e.y + doel.y) / 2} ${doel.x} ${doel.y}`;
+});
 ---
 <BaseLayout
   title={t.meta.title}
   description={vul(t.meta.description)}
   path={pad}
   taal={taal}
+  stickyCta={{ label: t.hero.estimatie, href: '#aanmelden', wa: t.hero.waBericht }}
   schema={[
     faqSchema(faqs),
     serviceSchema({ naam: t.meta.dienst, beschrijving: vul(t.meta.dienstBeschrijving), path: pad, steden: werkgebied, type: t.meta.dienst }),
   ]}
 >
-  {/* Beide knoppen openen het formulier; het script vult "Uw vraag" in. */}
-  <Hero
-    compact
-    eyebrow={t.hero.eyebrow}
-    title={t.hero.titel}
-    sub={vul(t.hero.sub)}
-    image={heroFoto}
-    ctas={[
-      { label: t.hero.estimatie, href: '#aanmelden', primary: true },
-      { label: t.hero.aanbieden, href: '#aanmelden' },
-    ]}
-    trust={t.hero.trust}
-  />
   <Breadcrumbs
     items={[{ label: t.kruimel, href: pad }]}
     home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
   />
 
-  <!-- AANMELDEN: direct na de hero, met het werkgebied ernaast -->
-  <section class="section" id="aanmelden" style="padding-top:40px">
-    <div class="container">
-      <!-- Op mobiel: intro, dan meteen het formulier, daarna werkgebied en voordelen. -->
-      <div class="aanmeld">
-        <div class="aanmeld__kop">
-          <p class="eyebrow">{t.aanmelden.eyebrow}</p>
-          <h2>{t.aanmelden.titel}</h2>
-          <p class="section__desc">{t.aanmelden.intro}</p>
+  <!-- HERO: tekst en knoppen links, foto rechts. Op mobiel eerst tekst en knoppen. -->
+  <section class="vk-hero">
+    <div class="container vk-hero__grid">
+      <div class="vk-hero__tekst">
+        <p class="eyebrow">{t.hero.eyebrow}</p>
+        <h1 set:html={t.hero.titel} />
+        <p class="vk-hero__sub">{t.hero.sub}</p>
+        <div class="vk-acties" data-verberg-sticky>
+          <a href="#aanmelden" class="btn btn--primary" data-cta="hero">{t.hero.estimatie}</a>
+          <a href={waBericht} class="btn btn--outline btn--wa" rel="noopener" data-plek="hero"><Icon name="whatsapp" size={17} />{t.hero.whatsapp}</a>
         </div>
+        <ul class="vk-trust">
+          {t.hero.trust.map((v) => <li><Icon name="check" size={16} /><span>{v}</span></li>)}
+        </ul>
+      </div>
+      <div class="vk-hero__foto">
+        <img
+          src={foto.src}
+          srcset={foto.srcSet.attribute}
+          sizes="(max-width: 900px) calc(100vw - 32px), 540px"
+          width={heroFoto.width}
+          height={heroFoto.height}
+          alt=""
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+  </section>
 
-        <div class="aanmeld__info">
-          <div class="werkgebied">
-            <h3>{t.aanmelden.werkgebiedTitel}</h3>
-            <p>{t.aanmelden.werkgebiedTekst}</p>
-            <ul class="werkgebied__lijst">
-              {werkgebied.map((s) => (
-                <li><Icon name="afstand" size={17} /><span>{t.steden[s]}</span></li>
-              ))}
-            </ul>
-          </div>
+  <!-- AANMELDEN: kort formulier. Vier verplichte velden, de rest achter "Details toevoegen". -->
+  <section class="section section--tinted vk-aanmelden" id="aanmelden" data-verberg-sticky>
+    <div class="container vk-aanmelden__grid">
+      <div class="vk-aanmelden__kop">
+        <p class="eyebrow">{t.aanmelden.eyebrow}</p>
+        <h2>{t.aanmelden.titel}</h2>
+        <p class="section__desc">{t.aanmelden.intro}</p>
+      </div>
 
-          <ul class="checks" style="margin-bottom:22px">
-            {t.aanmelden.voordelen.map((v) => <li>{v}</li>)}
+      <div class="vk-aanmelden__info">
+        <div class="werkgebied">
+          <h3>{t.aanmelden.werkgebiedTitel}</h3>
+          <p>{t.aanmelden.werkgebiedTekst}</p>
+          <ul class="werkgebied__lijst">
+            {werkgebied.map((s) => (
+              <li><Icon name="afstand" size={17} /><span>{t.steden[s]}</span></li>
+            ))}
           </ul>
-
-          <p class="werkgebied__direct">{t.aanmelden.direct} <a href={waBericht}>{t.aanmelden.directWa}</a> {t.aanmelden.directBel} <a href={`tel:${tel.href}`} dir="ltr">{tel.nummer}</a>.</p>
-          {lokaal && (
-            <p class="werkgebied__direct">{t.aanmelden.internationaal} <a href={`tel:${site.telefoonHref}`} dir="ltr">{site.telefoon}</a></p>
-          )}
         </div>
+        <ul class="checks">
+          {t.aanmelden.voordelen.map((v) => <li>{v}</li>)}
+        </ul>
+        <p class="werkgebied__direct">{t.aanmelden.direct} <a href={waBericht} rel="noopener" data-plek="formulier">{t.aanmelden.directWa}</a> {t.aanmelden.directBel} <a href={`tel:${tel.href}`} dir="ltr" data-plek="formulier">{tel.nummer}</a>.</p>
+        {lokaal && (
+          <p class="werkgebied__direct">{t.aanmelden.internationaal} <a href={`tel:${site.telefoonHref}`} dir="ltr" data-plek="formulier">{site.telefoon}</a></p>
+        )}
+      </div>
 
-        <form class="card aanmeld__form" id="verkoopForm" novalidate>
-          <div class="veld">
-            <label for="doel">{t.form.doel}</label>
-            <select id="doel" name="doel">
-              <option value="">{t.form.kies}</option>
-              {t.form.doelen.map((o) => <option>{o}</option>)}
-            </select>
-          </div>
+      <div class="vk-aanmelden__form">
+        <form class="card vform" id="verkoopForm" novalidate>
+          <p class="vform__verplicht"><span aria-hidden="true">* </span>{t.form.verplicht}</p>
           <div class="veld">
             <label for="naam">{t.form.naam} <span aria-hidden="true">*</span></label>
-            <input type="text" id="naam" name="naam" placeholder={t.form.naamPh} required />
+            <input type="text" id="naam" name="naam" placeholder={t.form.naamPh} autocomplete="name" required />
           </div>
           <div class="veld">
             <label for="telefoon">{t.form.telefoon} <span aria-hidden="true">*</span></label>
-            <input type="tel" id="telefoon" name="telefoon" placeholder={t.form.telefoonPh} dir="ltr" required />
-          </div>
-          <div class="veld">
-            <label for="email">{t.form.email} <span class="veld__hint">{t.form.optioneel}</span></label>
-            <input type="email" id="email" name="email" placeholder={t.form.emailPh} dir="ltr" />
-          </div>
-          <div class="veld">
-            <label for="stad">{t.form.stad} <span aria-hidden="true">*</span></label>
-            <select id="stad" name="stad" required>
-              <option value="">{t.form.stadKies}</option>
-              {werkgebied.map((s) => <option value={s}>{t.form.stadOptie.replace('{stad}', t.steden[s])}</option>)}
-            </select>
-          </div>
-          <div class="veld">
-            <label for="wijk">{t.form.wijk} <span class="veld__hint">{t.form.optioneel}</span></label>
-            <input type="text" id="wijk" name="wijk" placeholder={t.form.wijkPh} />
+            <input type="tel" id="telefoon" name="telefoon" placeholder={t.form.telefoonPh} autocomplete="tel" dir="ltr" required />
           </div>
           <div class="veld-rij">
+            <div class="veld">
+              <label for="stad">{t.form.stad} <span aria-hidden="true">*</span></label>
+              <select id="stad" name="stad" required>
+                <option value="">{t.form.stadKies}</option>
+                {werkgebied.map((s) => <option value={s}>{t.form.stadOptie.replace('{stad}', t.steden[s])}</option>)}
+              </select>
+            </div>
             <div class="veld">
               <label for="type">{t.form.type} <span aria-hidden="true">*</span></label>
               <select id="type" name="type" required>
@@ -187,204 +199,93 @@ const caseFotos: ProjectFoto[] = Object.keys(fotoModules)
                 {t.form.types.map((o) => <option>{o}</option>)}
               </select>
             </div>
-            <div class="veld">
-              <label for="woonplaats">{t.form.woont} <span aria-hidden="true">*</span></label>
-              <select id="woonplaats" name="woonplaats" required>
-                <option value="">{t.form.kies}</option>
-                {t.form.woonOpties.map((o) => <option>{o}</option>)}
-              </select>
-            </div>
-          </div>
-          <div class="veld-rij">
-            <div class="veld">
-              <label for="oppervlak">{t.form.oppervlak} <span class="veld__hint">{t.form.oppervlakHint}</span></label>
-              <input type="text" id="oppervlak" name="oppervlak" inputmode="numeric" placeholder={t.form.oppervlakPh} />
-            </div>
-            <div class="veld">
-              <label for="kamers">{t.form.kamers}</label>
-              <input type="text" id="kamers" name="kamers" inputmode="numeric" placeholder={t.form.kamersPh} />
-            </div>
-          </div>
-          <div class="veld">
-            <label for="titel">{t.form.titel} <span class="veld__hint">{t.form.optioneel}</span></label>
-            <select id="titel" name="titel">
-              <option value="">{t.form.titelOnbekend}</option>
-              {t.form.titels.map((o) => <option>{o}</option>)}
-            </select>
-          </div>
-          <div class="veld">
-            <label for="prijs">{t.form.prijs} <span class="veld__hint">{t.form.optioneel}</span></label>
-            <input type="text" id="prijs" name="prijs" placeholder={t.form.prijsPh} />
-          </div>
-          <div class="veld">
-            <label for="bericht">{t.form.bericht} <span class="veld__hint">{t.form.optioneel}</span></label>
-            <textarea id="bericht" name="bericht" rows="3" placeholder={t.form.berichtPh}></textarea>
           </div>
 
-          <div class="form__acties">
-            <button type="button" id="sendWhatsapp" class="btn btn--primary">{t.form.viaWhatsapp}</button>
-            <button type="button" id="sendMail" class="btn btn--outline">{t.form.viaEmail}</button>
+          <details class="vform__meer">
+            <summary>{t.form.meer} <span class="veld__hint">{t.form.optioneel}</span></summary>
+            <div class="vform__meer-velden">
+              <div class="veld">
+                <label for="wijk">{t.form.wijk}</label>
+                <input type="text" id="wijk" name="wijk" placeholder={t.form.wijkPh} />
+              </div>
+              <div class="veld-rij">
+                <div class="veld">
+                  <label for="oppervlak">{t.form.oppervlak}</label>
+                  <input type="text" id="oppervlak" name="oppervlak" inputmode="numeric" placeholder={t.form.oppervlakPh} />
+                </div>
+                <div class="veld">
+                  <label for="prijs">{t.form.prijs}</label>
+                  <input type="text" id="prijs" name="prijs" placeholder={t.form.prijsPh} />
+                </div>
+              </div>
+              <div class="veld">
+                <label for="email">{t.form.email}</label>
+                <input type="email" id="email" name="email" placeholder={t.form.emailPh} autocomplete="email" dir="ltr" />
+              </div>
+              <div class="veld">
+                <label for="bericht">{t.form.bericht}</label>
+                <textarea id="bericht" name="bericht" rows="3" placeholder={t.form.berichtPh}></textarea>
+              </div>
+            </div>
+          </details>
+
+          <!-- Honeypot tegen spambots: onzichtbaar voor bezoekers en schermlezers. -->
+          <div class="vform__hp" aria-hidden="true">
+            <label for="vform_website">Website</label>
+            <input type="text" id="vform_website" name="website" tabindex="-1" autocomplete="off" />
           </div>
 
-          <p class="form__melding" id="bevestiging" hidden>{t.form.bevestiging}</p>
+          <p class="vform__validatie" id="vformValidatie" role="alert" hidden>{t.form.validatie}</p>
+          <button type="submit" class="btn btn--primary btn--full" id="vformKnop">{t.form.verstuur}</button>
+          <p class="vform__privacy">{privacy[0]}<a href="/privacybeleid/">{t.form.privacyLink}</a>{t.form.privacyTaal}{privacy[1]}</p>
+
+          <div class="vform__fout" id="vformFout" role="alert" hidden>
+            <p>{t.form.fout.tekst}</p>
+            <a class="btn btn--outline btn--wa" id="vformFoutWa" href={waBericht} rel="noopener" data-plek="formulier-fout"><Icon name="whatsapp" size={17} />{t.form.fout.wa}</a>
+          </div>
         </form>
+
+        <div class="card vform-bedankt" id="vformBedankt" tabindex="-1" hidden>
+          <span class="vform-bedankt__ic"><Icon name="check" size={22} /></span>
+          <h3>{t.form.bedankt.titel}</h3>
+          <p>{t.form.bedankt.tekst}</p>
+          <p><a href={waBericht} rel="noopener" data-plek="bedankt">{t.form.bedankt.wa}</a></p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- PRIJZEN: eigen marktdata als gewone HTML-tabel, zodat zoekmachines en
-       AI-assistenten de cijfers kunnen lezen en citeren. Altijd met datum,
-       steekproef, methode en het label "vraagprijs". -->
-  <section class="section section--tinted" id="prijzen">
-    <div class="container">
-      <div class="section__header" style="max-width:820px">
-        <p class="eyebrow">{p.eyebrow}</p>
-        <h2>{p.titel}</h2>
-        <p class="section__desc">{p.intro}</p>
-      </div>
-
-      <dl class="prijzen__kern">
-        <div><dt>{p.bijgewerkt}</dt><dd><time datetime={marktprijzen.bijgewerkt}>{datum(marktprijzen.bijgewerkt)}</time></dd></div>
-        <div><dt>{p.advertenties}</dt><dd>{getal(marktprijzen.advertenties)}</dd></div>
-        <div><dt>{p.bron}</dt><dd>{vulPrijs(p.bronTekst)}</dd></div>
-        <div><dt>{p.letOp}</dt><dd>{p.letOpTekst}</dd></div>
-      </dl>
-
-      <div class="compare-wrap">
-        <table class="compare prijzen-tabel">
-          <thead>
-            <tr>
-              <th scope="col">{p.kolomStad}</th>
-              <th scope="col">{p.kolomType}</th>
-              <th scope="col" class="num">{p.kolomMediaan}</th>
-              <th scope="col" class="num">{p.kolomBereik}</th>
-              <th scope="col" class="num">{p.kolomN}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {prijsRijen.map((r) => (
-              <tr>
-                <th scope="row">{r.stad}</th>
-                <td class="prijzen-tabel__type">{r.type}</td>
-                <td class="num" data-label={p.kolomMediaan}><strong>{m2(r.mediaan)}</strong></td>
-                <td class="num" data-label={p.kolomBereik}>{getal(r.p25)} – {getal(r.p75)}</td>
-                <td class="num" data-label={p.kolomN}>{getal(r.n)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <h3 class="prijzen__kop">{p.wijkenTitel}</h3>
-      <p class="prijzen__sub">{vulPrijs(p.wijkenIntro)}</p>
-      <div class="compare-wrap">
-        <table class="compare prijzen-tabel prijzen-tabel--wijken">
-          <thead>
-            <tr>
-              <th scope="col">{p.kolomWijk}</th>
-              <th scope="col">{p.kolomStad}</th>
-              <th scope="col" class="num">{p.kolomMediaan}</th>
-              <th scope="col" class="num">{p.kolomN}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {wijkRijen.map((w) => (
-              <tr>
-                <th scope="row">{w.naam}</th>
-                <td class="prijzen-tabel__type">{w.stad}</td>
-                <td class="num" data-label={p.kolomMediaan}><strong>{m2(w.mediaan)}</strong></td>
-                <td class="num" data-label={p.kolomN}>{getal(w.n)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="prijzen__methode">
-        <h3 class="prijzen__kop">{p.methodeKop}</h3>
-        {p.methode.map((regel) => <p>{vulPrijs(regel)}</p>)}
-      </div>
-      <p style="margin-top:28px"><a href="#aanmelden" class="btn btn--primary prijzen__knop" data-doel="0">{p.knop}</a></p>
-    </div>
-  </section>
-
-  <!-- WAAROM: professioneel bedrijf vs. losse tussenpersoon -->
+  <!-- WAAROM: vier kaarten -->
   <section class="section">
     <div class="container">
-      <div class="section__header" style="max-width:820px">
+      <div class="section__header">
         <p class="eyebrow">{t.waarom.eyebrow}</p>
-        <h2 set:html={t.waarom.titel} />
-        <p class="section__desc">{t.waarom.desc}</p>
+        <h2>{t.waarom.titel}</h2>
+        <p class="section__desc">{t.waarom.intro}</p>
       </div>
-      <div class="compare-wrap">
-        <table class="compare verkoop-compare">
-          <thead>
-            <tr><th scope="col"></th><th scope="col">{t.waarom.kolomAnders}</th><th scope="col">{t.waarom.kolomWij}</th></tr>
-          </thead>
-          <tbody>
-            {t.waarom.rijen.map((r) => (
-              <tr><th scope="row">{r.onderwerp}</th><td data-label={t.waarom.kolomAnders}>{r.anders}</td><td data-label={t.waarom.kolomWij}>{r.wij}</td></tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- WAT WIJ DOEN -->
-  <section class="section section--tinted">
-    <div class="container">
-      <div class="section__header" style="max-width:820px">
-        <p class="eyebrow">{t.diensten.eyebrow}</p>
-        <h2 set:html={t.diensten.titel} />
-        <p class="section__desc">{t.diensten.desc}</p>
-      </div>
-      <div class="datacards verkoop-diensten">
-        {t.diensten.items.map((d) => (
-          <div class="datacard">
-            <span class="datacard__ic"><Icon name={d.icon} size={24} /></span>
-            <h3>{d.titel}</h3>
-            <p>{d.tekst}</p>
+      <div class="vk-kaarten">
+        {t.waarom.kaarten.map((k, i) => (
+          <div class="vk-kaart">
+            <span class="vk-kaart__ic"><Icon name={waaromIcons[i]} size={22} /></span>
+            <h3>{k.titel}</h3>
+            <p>{k.tekst}</p>
           </div>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- NETWERK: kopers in Marokko én daarbuiten -->
-  <section class="section section--dark">
+  <!-- WERKWIJZE: vijf stappen als tijdlijn -->
+  <section class="section section--tinted">
     <div class="container">
-      <div class="split">
-        <div class="split__text">
-          <p class="eyebrow eyebrow--light">{t.netwerk.eyebrow}</p>
-          <h2 set:html={t.netwerk.titel} />
-          <p class="netwerk__tekst">{t.netwerk.p1}</p>
-          <p class="netwerk__tekst">{t.netwerk.p2}</p>
-        </div>
-        <div>
-          <ul class="checks netwerk__lijst">
-            {t.netwerk.punten.map((p) => <li><strong>{p.kop}</strong> {p.tekst}</li>)}
-          </ul>
-          <div class="quote-block netwerk__transparant">
-            <p><strong>{t.netwerk.transparant.kop}</strong> {t.netwerk.transparant.tekst}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WERKWIJZE -->
-  <section class="section">
-    <div class="container">
-      <div class="section__header" style="max-width:820px">
+      <div class="section__header">
         <p class="eyebrow">{t.werkwijze.eyebrow}</p>
         <h2>{t.werkwijze.titel}</h2>
-        <p class="section__desc">{t.werkwijze.desc}</p>
       </div>
-      <ol class="stappen stappen--5">
+      <ol class="vk-stappen">
         {t.werkwijze.stappen.map((s, i) => (
-          <li class="stap">
-            <span class="stap__num">{t.werkwijze.stap} {i + 1}</span>
+          <li class="vk-stap">
+            <span class="vk-stap__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
             <h3>{s.titel}</h3>
             <p>{s.tekst}</p>
           </li>
@@ -393,56 +294,120 @@ const caseFotos: ProjectFoto[] = Object.keys(fotoModules)
     </div>
   </section>
 
-  <!-- CASE -->
-  <section class="section section--tinted" id="case">
+  <!-- NETWERK: kopers in Marokko én Europa -->
+  <section class="section section--dark">
+    <div class="container vk-netwerk">
+      <div>
+        <p class="eyebrow eyebrow--light">{t.netwerk.eyebrow}</p>
+        <h2>{t.netwerk.titel}</h2>
+        <p class="vk-netwerk__tekst">{t.netwerk.tekst}</p>
+        <ul class="vk-groepen">
+          {t.netwerk.groepen.map((g) => (
+            <li><strong>{g.titel}</strong><span>{g.tekst}</span></li>
+          ))}
+        </ul>
+      </div>
+      <svg class="vk-kaartje" viewBox="0 0 260 400" role="img" aria-label={t.netwerk.kaartLabel} dir="ltr">
+        {bogen.map((d) => <path d={d} class="vk-kaartje__boog" />)}
+        {europa.map((e) => <circle cx={e.x} cy={e.y} r="4" class="vk-kaartje__eu" />)}
+        <text x={europa[1].x - 14} y={europa[1].y + 4} text-anchor="end" class="vk-kaartje__regio">{t.netwerk.europa}</text>
+        {kaartSteden.map((s) => (
+          <>
+            <circle cx={s.pos.x} cy={s.pos.y} r="4.5" class="vk-kaartje__ma" />
+            <text x={s.links ? s.pos.x - 9 : s.pos.x + 9} y={s.pos.y + 4} text-anchor={s.links ? 'end' : 'start'} class="vk-kaartje__stad">{t.steden[s.stad]}</text>
+          </>
+        ))}
+        <text x="168" y="392" text-anchor="start" class="vk-kaartje__regio">{t.netwerk.marokko}</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- PRIJZEN: vijf stadskaarten; de volledige tabellen en de methode staan in de
+       HTML, maar dichtgeklapt. Altijd met datum, bron en het label "vraagprijs". -->
+  <section class="section" id="prijzen">
     <div class="container">
-      <div class="section__header" style="max-width:820px">
-        <p class="eyebrow">{t.case.eyebrow}</p>
-        <h2>{t.case.titel}<br /><em>{t.case.em}</em></h2>
-        {verkoopcase.voorbeeld && <p class="case__label">{t.case.label}</p>}
+      <div class="section__header">
+        <p class="eyebrow">{p.eyebrow}</p>
+        <h2>{p.titel}</h2>
+        <p class="section__desc">{p.intro}</p>
       </div>
 
-      {caseFotos.length > 0 ? (
-        <ProjectGallery fotos={caseFotos} projectNaam={t.case.titel} taal={taal} lazy />
-      ) : (
-        <div class="pgallery" aria-label={t.case.galerij}>
-          <div class="pgallery__main foto-leeg"><span>{t.case.fotoVolgt} · {t.case.legeVakken[0]}</span></div>
-          <div class="pgallery__thumbs">
-            {t.case.legeVakken.slice(1).map((v) => <div class="pgallery__thumb foto-leeg"><span>{v}</span></div>)}
+      <ul class="vk-steden">
+        {stadKaarten.map((s) => (
+          <li class="vk-stadkaart">
+            <div class="vk-stadkaart__kop">
+              <h3>{s.naam}</h3>
+              <span>{p.kaartType}</span>
+            </div>
+            <p class="vk-stadkaart__prijs"><strong>{getal(s.mediaan)}</strong> {p.eenheid}</p>
+            <p class="vk-stadkaart__n">{p.kaartN.replace('{n}', getal(s.n))}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="vk-prijzen__noot"><em>{p.disclaimer}</em> <time datetime={marktprijzen.bijgewerkt}>{vulPrijs(p.bijgewerkt)}</time></p>
+
+      <details class="vk-details">
+        <summary>{p.meer}</summary>
+        <div class="vk-details__inhoud">
+          <h3 class="prijzen__kop">{p.tabelTitel}</h3>
+          <div class="compare-wrap">
+            <table class="compare prijzen-tabel">
+              <thead>
+                <tr>
+                  <th scope="col">{p.kolomStad}</th>
+                  <th scope="col">{p.kolomType}</th>
+                  <th scope="col" class="num">{p.kolomMediaan}</th>
+                  <th scope="col" class="num">{p.kolomBereik}</th>
+                  <th scope="col" class="num">{p.kolomN}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {prijsRijen.map((r) => (
+                  <tr>
+                    <th scope="row">{r.stad}</th>
+                    <td class="prijzen-tabel__type">{r.type}</td>
+                    <td class="num" data-label={p.kolomMediaan}><strong>{m2(r.mediaan)}</strong></td>
+                    <td class="num" data-label={p.kolomBereik}>{getal(r.p25)} – {getal(r.p75)}</td>
+                    <td class="num" data-label={p.kolomN}>{getal(r.n)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="prijzen__kop">{p.wijkenTitel}</h3>
+          <p class="prijzen__sub">{vulPrijs(p.wijkenIntro)}</p>
+          <div class="compare-wrap">
+            <table class="compare prijzen-tabel prijzen-tabel--wijken">
+              <thead>
+                <tr>
+                  <th scope="col">{p.kolomWijk}</th>
+                  <th scope="col">{p.kolomStad}</th>
+                  <th scope="col" class="num">{p.kolomMediaan}</th>
+                  <th scope="col" class="num">{p.kolomN}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {wijkRijen.map((w) => (
+                  <tr>
+                    <th scope="row">{w.naam}</th>
+                    <td class="prijzen-tabel__type">{w.stad}</td>
+                    <td class="num" data-label={p.kolomMediaan}><strong>{m2(w.mediaan)}</strong></td>
+                    <td class="num" data-label={p.kolomN}>{getal(w.n)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="prijzen__kop">{p.methodeKop}</h3>
+          <div class="prijzen__methode">
+            {p.methode.map((regel) => <p>{vulPrijs(regel)}</p>)}
           </div>
         </div>
-      )}
+      </details>
 
-      <div class="project__lead case__lead">
-        <div>
-          <h3 class="case__kop">{t.case.situatieKop}</h3>
-          <p class="case__tekst">{t.case.situatie}</p>
-
-          <h3 class="case__kop">{t.case.aanpakKop}</h3>
-          <ol class="case__aanpak">
-            {t.case.aanpak.map((a) => (
-              <li><strong>{a.titel}.</strong> {a.tekst}</li>
-            ))}
-          </ol>
-
-          <h3 class="case__kop">{t.case.eigenaarKop}</h3>
-          <p class="case__tekst">{t.case.eigenaar}</p>
-        </div>
-
-        <aside>
-          <dl class="project__specs">
-            <div class="project__spec"><dt>{t.case.locatie}</dt><dd>{t.case.locatieWaarde}</dd></div>
-            {t.case.specs.map((s) => (
-              <div class="project__spec"><dt>{s.label}</dt><dd>{s.waarde}</dd></div>
-            ))}
-          </dl>
-          {verkoopcase.video ? (
-            <video class="case__video" src={verkoopcase.video} controls preload="none" playsinline></video>
-          ) : (
-            <div class="case__video foto-leeg"><span>{t.case.videoVolgt}</span></div>
-          )}
-        </aside>
-      </div>
+      <p class="vk-prijzen__knop"><a href="#aanmelden" class="btn btn--primary" data-cta="prijzen">{p.knop}</a></p>
     </div>
   </section>
 
@@ -458,96 +423,111 @@ const caseFotos: ProjectFoto[] = Object.keys(fotoModules)
     ]} />
   )}
 
-  <section class="ctaband">
+  <section class="ctaband" data-verberg-sticky>
     <div class="container">
       <h2>{t.slot.titel}</h2>
       <p>{vul(t.slot.tekst)}</p>
       <div class="ctaband__actions">
-        <a href="#aanmelden" class="btn btn--light">{t.slot.knop}</a>
-        <a href={waBericht} class="btn btn--outline" style="color:var(--cream);border-color:var(--cream)">{t.slot.wa}</a>
+        <a href="#aanmelden" class="btn btn--light" data-cta="slot">{t.slot.knop}</a>
+        <a href={waBericht} class="btn btn--outline btn--wa vk-slot__wa" rel="noopener" data-plek="slot"><Icon name="whatsapp" size={17} />{t.slot.wa}</a>
       </div>
     </div>
   </section>
 
-  <script is:inline define:vars={{ whatsapp: site.whatsapp, email: site.email, validatie: t.form.validatie, b: t.bericht }}>
+  <script is:inline define:vars={{ whatsapp: site.whatsapp, f: t.form, b: t.bericht }}>
     (function () {
-      function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+      var form = document.getElementById('verkoopForm');
+      var knop = document.getElementById('vformKnop');
+      var validatie = document.getElementById('vformValidatie');
+      var fout = document.getElementById('vformFout');
+      var foutWa = document.getElementById('vformFoutWa');
+      var bedankt = document.getElementById('vformBedankt');
+      var verplicht = ['naam', 'telefoon', 'stad', 'type'];
+      var bezig = false;
+      var gestart = false;
 
-      // Knoppen naar het formulier vullen "Uw vraag" alvast in: in de hero de eerste
-      // knop een waardebepaling en de tweede verkopen, elders via data-doel.
-      function kiesDoel(i) { var s = document.getElementById('doel'); if (s) s.selectedIndex = i + 1; }
-      document.querySelectorAll('.hero__actions a').forEach(function (a, i) {
-        a.addEventListener('click', function () { kiesDoel(i); });
-      });
-      document.querySelectorAll('a[data-doel]').forEach(function (a) {
-        a.addEventListener('click', function () { kiesDoel(Number(a.getAttribute('data-doel'))); });
+      function veld(id) { return document.getElementById(id); }
+      function val(id) { var el = veld(id); return el ? el.value.trim() : ''; }
+      function meet(naam, params) { if (window.meTrack) window.meTrack(naam, params); }
+
+      // Knoppen naar het formulier (hero, prijzen, slot, sticky): welke werkt het best?
+      document.querySelectorAll('a[data-cta]').forEach(function (a) {
+        a.addEventListener('click', function () { meet('cta_click', { form: 'verkoop', location: a.getAttribute('data-cta') }); });
       });
 
-      function build() {
-        // Telefoon verplicht, e-mail bewust niet: de meeste verkopers reageren
-        // het liefst via WhatsApp.
-        if (!val('naam') || !val('telefoon') || !val('stad') || !val('type') || !val('woonplaats')) {
-          alert(validatie);
-          return null;
-        }
+      // Eén keer per bezoek: iemand begint aan het formulier.
+      form.addEventListener('focusin', function () {
+        if (gestart) return;
+        gestart = true;
+        meet('form_start', { form: 'verkoop' });
+      });
+
+      form.addEventListener('input', function (e) {
+        if (e.target.getAttribute('aria-invalid') === 'true' && e.target.value.trim()) e.target.removeAttribute('aria-invalid');
+      });
+
+      // Reservebericht voor WhatsApp als opslaan mislukt: niets van wat de bezoeker
+      // invulde gaat verloren.
+      function bericht() {
         var regels = [b.kop, ''];
-        function voegToe(label, waarde) { if (waarde) regels.push(label + ': ' + waarde); }
-        voegToe(b.doel, val('doel'));
-        voegToe(b.naam, val('naam'));
-        voegToe(b.telefoon, val('telefoon'));
-        voegToe(b.email, val('email'));
-        voegToe(b.woont, val('woonplaats'));
-        regels.push('');
-        voegToe(b.type, val('type'));
-        voegToe(b.stad, val('stad'));
-        voegToe(b.wijk, val('wijk'));
-        voegToe(b.oppervlak, val('oppervlak'));
-        voegToe(b.kamers, val('kamers'));
-        voegToe(b.titel, val('titel'));
-        voegToe(b.prijs, val('prijs'));
+        function voegToe(label, id) { if (val(id)) regels.push(label + ': ' + val(id)); }
+        voegToe(b.naam, 'naam');
+        voegToe(b.telefoon, 'telefoon');
+        voegToe(b.email, 'email');
+        voegToe(b.type, 'type');
+        voegToe(b.stad, 'stad');
+        voegToe(b.wijk, 'wijk');
+        voegToe(b.oppervlak, 'oppervlak');
+        voegToe(b.prijs, 'prijs');
         if (val('bericht')) regels.push('', b.toelichting + ':', val('bericht'));
         return regels.join('\n');
       }
 
-      // Elke aanmelding ook opslaan als lead in de CRM (zie LeadOpslag.astro). Blokkeert
-      // nooit: de belofte is na hooguit 1 seconde klaar, ook als Supabase niet reageert.
-      function bewaar(kanaal) {
-        return window.meLead
-          ? window.meLead('verkoop', document.getElementById('verkoopForm'), { kanaal: kanaal }, 1000)
+      function toonBedankt() {
+        form.hidden = true;
+        bedankt.hidden = false;
+        bedankt.focus({ preventScroll: true });
+        bedankt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (bezig) return;
+        fout.hidden = true;
+
+        // Honeypot gevuld: een bot. Doe alsof het gelukt is en sla niets op.
+        if (val('vform_website')) { toonBedankt(); return; }
+
+        var leeg = verplicht.filter(function (id) { return !val(id); });
+        verplicht.forEach(function (id) {
+          if (leeg.indexOf(id) > -1) veld(id).setAttribute('aria-invalid', 'true');
+          else veld(id).removeAttribute('aria-invalid');
+        });
+        validatie.hidden = leeg.length === 0;
+        if (leeg.length) { veld(leeg[0]).focus(); return; }
+
+        bezig = true;
+        knop.disabled = true;
+        knop.textContent = f.bezig;
+
+        // Opslaan in de CRM (LeadOpslag.astro); de mailnotificatie loopt server-side.
+        // Pas een bevestigde opslag geeft de bedankmelding.
+        var opslaan = window.meLead
+          ? window.meLead('verkoop', form, { kanaal: 'formulier' }, 10000)
           : Promise.resolve(false);
-      }
-
-      // Taalonafhankelijk voor GA4: waardebepaling of verkoop.
-      function doelCode() {
-        var i = document.getElementById('doel').selectedIndex;
-        return i === 1 ? 'estimatie' : i === 2 ? 'verkoop' : 'onbekend';
-      }
-
-      function toonBevestiging() {
-        var el = document.getElementById('bevestiging');
-        el.hidden = false;
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      document.getElementById('sendWhatsapp').addEventListener('click', function () {
-        var msg = build(); if (!msg) return;
-        window.meTrack && window.meTrack('generate_lead', { form: 'verkoop', method: 'whatsapp', doel: doelCode() });
-        bewaar('whatsapp');
-        window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
-        toonBevestiging();
-      });
-
-      document.getElementById('sendMail').addEventListener('click', function () {
-        var msg = build(); if (!msg) return;
-        window.meTrack && window.meTrack('generate_lead', { form: 'verkoop', method: 'email', doel: doelCode() });
-        var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
-        var mailto = 'mailto:' + email
-          + '?subject=' + encodeURIComponent(b.kop)
-          + cc + '&body=' + encodeURIComponent(msg);
-        // Eerst (kort) opslaan: sommige browsers breken een lopend verzoek af zodra
-        // de mailapp opent.
-        bewaar('email').then(function () { window.location.href = mailto; });
-        toonBevestiging();
+        opslaan.then(function (ok) {
+          bezig = false;
+          knop.disabled = false;
+          knop.textContent = f.verstuur;
+          if (ok) {
+            meet('generate_lead', { form: 'verkoop', method: 'formulier' });
+            toonBedankt();
+          } else {
+            meet('form_error', { form: 'verkoop' });
+            foutWa.href = 'https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(bericht());
+            fout.hidden = false;
+          }
+        });
       });
     })();
   </script>
