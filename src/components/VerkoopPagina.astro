@@ -4,9 +4,8 @@
 // Marokkanen in het buitenland.
 //
 // Opbouw (redesign november 2026): hero met twee CTA's → kort formulier →
-// waarom (4 kaarten) → werkwijze (5 stappen) → netwerk → prijzen (5 stadskaarten,
-// de volledige tabellen uitklapbaar) → FAQ → afsluitende CTA. Alle inhoud staat in
-// de HTML, ook wat dichtgeklapt is, zodat zoekmachines en AI-assistenten hem lezen.
+// waarom (4 kaarten) → werkwijze (5 stappen) → netwerk met kaartje → prijzen (5
+// stadskaarten + link naar de marktprijzenpagina) → FAQ → afsluitende CTA.
 //
 // Tekst per taal: src/i18n/verkopen.ts. Gebruikt door
 // src/pages/huis-verkopen-marokko.astro (NL) en src/pages/[lang]/[slug].astro.
@@ -18,7 +17,8 @@ import Faq from './Faq.astro';
 import VerderLezen from './VerderLezen.astro';
 import { site, waLink } from '../data/site';
 import { faqSchema, serviceSchema } from '../data/schema';
-import marktprijzen from '../data/marktprijzen.json';
+import { prijsOpmaak } from '../data/prijsOpmaak';
+import kaart from '../data/kaartNetwerk.json';
 import heroFoto from '../assets/verkopen/hero.webp';
 import { paginas, standaardTaal, type Taal } from '../i18n/config';
 import { ui } from '../i18n/ui';
@@ -38,41 +38,13 @@ const steden = opsomming(stadNamen, t.lijst.en);
 const stedenOf = opsomming(stadNamen, t.lijst.of);
 const vul = (s: string) => s.replaceAll('{steden}', steden).replaceAll('{stedenOf}', stedenOf);
 
-// Op de Franse en Arabische pagina is het +212-nummer (site.ts) het belnummer:
-// daar zitten de verkopers in Marokko zelf. WhatsApp blijft het NL-nummer.
-const lokaal = (taal === 'fr' || taal === 'ar') && site.telefoonMA !== '';
-const tel = lokaal
-  ? { nummer: site.telefoonMA, href: site.telefoonMAHref }
-  : { nummer: site.telefoon, href: site.telefoonHref };
+// Bellen via het Marokkaanse nummer, WhatsApp via het Nederlandse (site.ts).
 const waBericht = waLink(t.hero.waBericht);
 
-// Vraagprijzen per m² (scripts/marktprijzen.py → src/data/marktprijzen.json).
-const locale = { nl: 'nl-NL', en: 'en-GB', fr: 'fr-FR', ar: 'ar-MA' }[taal];
-const getal = (n: number) => new Intl.NumberFormat(locale).format(n);
-const datum = (iso: string) =>
-  new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
-const m2 = (n: number) => `${getal(n)} ${p.eenheid}`;
-const wijkNaam = (naam: string) => t.wijkNamen?.[naam] ?? naam;
-const prijsSteden = marktprijzen.steden.map((s) => ({ ...s, naam: t.steden[s.stad as WerkgebiedStad] }));
-const stadKaarten = prijsSteden.flatMap((s) => (s.types.appartement ? [{ naam: s.naam, ...s.types.appartement }] : []));
-const prijsRijen = prijsSteden.flatMap((s) =>
-  (['appartement', 'villa'] as const).flatMap((type) => {
-    const r = s.types[type];
-    return r ? [{ stad: s.naam, type: p.types[type], ...r }] : [];
-  }),
-);
-const wijkRijen = prijsSteden.flatMap((s) => s.wijken.map((w) => ({ ...w, naam: wijkNaam(w.naam), stad: s.naam })));
-const vulPrijs = (s: string) => vul(s)
-  .replaceAll('{datum}', datum(marktprijzen.bijgewerkt))
-  .replaceAll('{van}', datum(marktprijzen.periode.van))
-  .replaceAll('{n}', getal(marktprijzen.advertenties))
-  .replaceAll('{min}', getal(marktprijzen.minWijk))
-  .replaceAll('{bronnen}', opsomming(marktprijzen.bronnen, t.lijst.en))
-  .replaceAll('{prijzen}', opsomming(
-    stadKaarten.map((s) => p.inStad.replace('{prijs}', m2(s.mediaan)).replace('{stad}', s.naam)),
-    t.lijst.en,
-  ));
-const faqs = t.faqs.map((f) => ({ q: f.q, a: vulPrijs(f.a) }));
+// Vraagprijzen per m² (scripts/marktprijzen.py → src/data/marktprijzen.json): hier
+// vijf stadskaarten, de volledige tabellen op de marktprijzenpagina.
+const { data: marktprijzen, getal, stadKaarten, vul: vulPrijs } = prijsOpmaak(taal, { eenheid: p.eenheid, inStad: p.inStad });
+const faqs = t.faqs.map((f) => ({ q: f.q, a: vul(vulPrijs(f.a)) }));
 
 // Hero-foto als responsive webp. Op mobiel staat hij onder de knoppen.
 const foto = await getImage({
@@ -84,9 +56,14 @@ const foto = await getImage({
 const privacy = t.form.privacy.split('{link}');
 const waaromIcons = ['grafiek', 'camera', 'wereld', 'sleutel'];
 
-// Kaartje "Marokko en Europa": echte coördinaten (lengte, breedte) in een
-// eenvoudige projectie. Bogen lopen van Europa naar de vijf steden.
-const punt = (lon: number, lat: number) => ({ x: Math.round(((lon + 14) * 11.1 + 20) * 10) / 10, y: Math.round(((54 - lat) * 15 + 20) * 10) / 10 });
+// Kaartje "Marokko en Europa": landsgrenzen uit Natural Earth
+// (scripts/kaart-netwerk.mjs → src/data/kaartNetwerk.json) en de steden in
+// dezelfde projectie. Bogen lopen van Europa naar Marokko.
+const { kader } = kaart;
+const punt = (lon: number, lat: number) => ({
+  x: Math.round((lon - kader.lonMin) * kader.kx * 10) / 10,
+  y: Math.round((kader.latMax - lat) * kader.ky * 10) / 10,
+});
 const kaartSteden: { stad: WerkgebiedStad; pos: { x: number; y: number }; links?: boolean }[] = [
   { stad: 'Tanger', pos: punt(-5.80, 35.77) },
   { stad: 'Rabat', pos: punt(-6.84, 34.02) },
@@ -167,10 +144,7 @@ const bogen = europa.map((e, i) => {
         <ul class="checks">
           {t.aanmelden.voordelen.map((v) => <li>{v}</li>)}
         </ul>
-        <p class="werkgebied__direct">{t.aanmelden.direct} <a href={waBericht} rel="noopener" data-plek="formulier">{t.aanmelden.directWa}</a> {t.aanmelden.directBel} <a href={`tel:${tel.href}`} dir="ltr" data-plek="formulier">{tel.nummer}</a>.</p>
-        {lokaal && (
-          <p class="werkgebied__direct">{t.aanmelden.internationaal} <a href={`tel:${site.telefoonHref}`} dir="ltr" data-plek="formulier">{site.telefoon}</a></p>
-        )}
+        <p class="werkgebied__direct">{t.aanmelden.direct} <a href={waBericht} rel="noopener" data-plek="formulier">{t.aanmelden.directWa}</a> {t.aanmelden.directBel} <a href={`tel:${site.telefoonHref}`} dir="ltr" data-plek="formulier">{site.telefoon}</a>.</p>
       </div>
 
       <div class="vk-aanmelden__form">
@@ -307,23 +281,26 @@ const bogen = europa.map((e, i) => {
           ))}
         </ul>
       </div>
-      <svg class="vk-kaartje" viewBox="0 0 260 400" role="img" aria-label={t.netwerk.kaartLabel} dir="ltr">
+      <svg class="vk-kaartje" viewBox={`0 0 ${kader.breedte} ${kader.hoogte}`} role="img" aria-label={t.netwerk.kaartLabel} dir="ltr">
+        <path d={kaart.overig} class="vk-kaartje__land" />
+        <path d={kaart.diaspora} class="vk-kaartje__land vk-kaartje__land--eu" />
+        <path d={kaart.marokko} class="vk-kaartje__land vk-kaartje__land--ma" />
         {bogen.map((d) => <path d={d} class="vk-kaartje__boog" />)}
         {europa.map((e) => <circle cx={e.x} cy={e.y} r="4" class="vk-kaartje__eu" />)}
-        <text x={europa[1].x - 14} y={europa[1].y + 4} text-anchor="end" class="vk-kaartje__regio">{t.netwerk.europa}</text>
+        <text x={europa[1].x + 12} y={europa[1].y + 4} text-anchor="start" class="vk-kaartje__regio">{t.netwerk.europa}</text>
         {kaartSteden.map((s) => (
           <>
             <circle cx={s.pos.x} cy={s.pos.y} r="4.5" class="vk-kaartje__ma" />
             <text x={s.links ? s.pos.x - 9 : s.pos.x + 9} y={s.pos.y + 4} text-anchor={s.links ? 'end' : 'start'} class="vk-kaartje__stad">{t.steden[s.stad]}</text>
           </>
         ))}
-        <text x="168" y="392" text-anchor="start" class="vk-kaartje__regio">{t.netwerk.marokko}</text>
+        <text x="150" y="388" text-anchor="start" class="vk-kaartje__regio">{t.netwerk.marokko}</text>
       </svg>
     </div>
   </section>
 
-  <!-- PRIJZEN: vijf stadskaarten; de volledige tabellen en de methode staan in de
-       HTML, maar dichtgeklapt. Altijd met datum, bron en het label "vraagprijs". -->
+  <!-- PRIJZEN: vijf stadskaarten met datum en het label "vraagprijs". De volledige
+       tabellen, de wijken en de methode staan op de marktprijzenpagina. -->
   <section class="section" id="prijzen">
     <div class="container">
       <div class="section__header">
@@ -346,68 +323,10 @@ const bogen = europa.map((e, i) => {
       </ul>
       <p class="vk-prijzen__noot"><em>{p.disclaimer}</em> <time datetime={marktprijzen.bijgewerkt}>{vulPrijs(p.bijgewerkt)}</time></p>
 
-      <details class="vk-details">
-        <summary>{p.meer}</summary>
-        <div class="vk-details__inhoud">
-          <h3 class="prijzen__kop">{p.tabelTitel}</h3>
-          <div class="compare-wrap">
-            <table class="compare prijzen-tabel">
-              <thead>
-                <tr>
-                  <th scope="col">{p.kolomStad}</th>
-                  <th scope="col">{p.kolomType}</th>
-                  <th scope="col" class="num">{p.kolomMediaan}</th>
-                  <th scope="col" class="num">{p.kolomBereik}</th>
-                  <th scope="col" class="num">{p.kolomN}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prijsRijen.map((r) => (
-                  <tr>
-                    <th scope="row">{r.stad}</th>
-                    <td class="prijzen-tabel__type">{r.type}</td>
-                    <td class="num" data-label={p.kolomMediaan}><strong>{m2(r.mediaan)}</strong></td>
-                    <td class="num" data-label={p.kolomBereik}>{getal(r.p25)} – {getal(r.p75)}</td>
-                    <td class="num" data-label={p.kolomN}>{getal(r.n)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <h3 class="prijzen__kop">{p.wijkenTitel}</h3>
-          <p class="prijzen__sub">{vulPrijs(p.wijkenIntro)}</p>
-          <div class="compare-wrap">
-            <table class="compare prijzen-tabel prijzen-tabel--wijken">
-              <thead>
-                <tr>
-                  <th scope="col">{p.kolomWijk}</th>
-                  <th scope="col">{p.kolomStad}</th>
-                  <th scope="col" class="num">{p.kolomMediaan}</th>
-                  <th scope="col" class="num">{p.kolomN}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {wijkRijen.map((w) => (
-                  <tr>
-                    <th scope="row">{w.naam}</th>
-                    <td class="prijzen-tabel__type">{w.stad}</td>
-                    <td class="num" data-label={p.kolomMediaan}><strong>{m2(w.mediaan)}</strong></td>
-                    <td class="num" data-label={p.kolomN}>{getal(w.n)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <h3 class="prijzen__kop">{p.methodeKop}</h3>
-          <div class="prijzen__methode">
-            {p.methode.map((regel) => <p>{vulPrijs(regel)}</p>)}
-          </div>
-        </div>
-      </details>
-
-      <p class="vk-prijzen__knop"><a href="#aanmelden" class="btn btn--primary" data-cta="prijzen">{p.knop}</a></p>
+      <div class="vk-prijzen__acties">
+        <a href="#aanmelden" class="btn btn--primary" data-cta="prijzen">{p.knop}</a>
+        <a href={paginas.prijzen[taal]} class="vk-prijzen__link">{p.analyse}{'\u00a0'}<span aria-hidden="true">{taal === 'ar' ? '←' : '→'}</span></a>
+      </div>
     </div>
   </section>
 

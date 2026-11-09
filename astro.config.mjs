@@ -15,6 +15,11 @@ const verkoopPaginas = new Set(
   ['/huis-verkopen-marokko/', '/en/sell-your-property/', '/fr/vendre-votre-bien/', '/ar/sell-your-property/']
     .map((p) => new URL(p, 'https://maghreb-estates.com').href),
 );
+// De marktprijzenpagina's veranderen alleen als de cijfers veranderen.
+const prijsPaginas = new Set(
+  ['/vastgoedprijzen-marokko/', '/en/property-prices-morocco/', '/fr/prix-immobilier-maroc/', '/ar/property-prices-morocco/']
+    .map((p) => new URL(p, 'https://maghreb-estates.com').href),
+);
 
 // Live domein — bepaalt absolute URL's in sitemap, canonicals en structured data.
 
@@ -67,7 +72,9 @@ export default defineConfig({
       lastmod: new Date(),
       filter: (page) => !sitemapUitsluiten.has(page),
       serialize: (item) =>
-        verkoopPaginas.has(item.url) ? { ...item, lastmod: new Date(verkoopLastmod).toISOString() } : item,
+        verkoopPaginas.has(item.url) ? { ...item, lastmod: new Date(verkoopLastmod).toISOString() }
+          : prijsPaginas.has(item.url) ? { ...item, lastmod: new Date(prijzenBijgewerkt).toISOString() }
+          : item,
     }),
   ],
 });

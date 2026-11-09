@@ -9,8 +9,9 @@
 // formuliercomponent. Dat moet ook: Astro staat maar één dynamische route per
 // mapniveau toe, en de adviesgesprek-slug verschilt per taal
 // (consultation / rendez-vous-conseil), dus een vast bestand volstaat niet.
-// Om dezelfde reden loopt de verkooppagina hier doorheen, met een eigen
-// opmaak en tekst (VerkoopPagina.astro + src/i18n/verkopen.ts).
+// Om dezelfde reden lopen de verkooppagina en de marktprijzenpagina hier doorheen,
+// elk met een eigen opmaak en tekst (VerkoopPagina.astro + src/i18n/verkopen.ts,
+// MarktprijzenPagina.astro + src/i18n/marktprijzen.ts).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
@@ -18,6 +19,7 @@ import ContentBlok from '../../components/ContentBlok.astro';
 import ContactFormulier from '../../components/ContactFormulier.astro';
 import BookingFormulier from '../../components/BookingFormulier.astro';
 import VerkoopPagina from '../../components/VerkoopPagina.astro';
+import MarktprijzenPagina from '../../components/MarktprijzenPagina.astro';
 import Faq from '../../components/Faq.astro';
 import { paginas, vertaalTalen, type Taal } from '../../i18n/config';
 import { ui } from '../../i18n/ui';
@@ -29,7 +31,7 @@ export function getStaticPaths() {
   // Alle vertaalde pagina's behalve de homepage, die een eigen bestand heeft.
   const sleutels = [
     'aankoopbegeleiding', 'investeren', 'nieuwbouw', 'kopen', 'kosten', 'overOns',
-    'contact', 'adviesgesprek', 'verkopen',
+    'contact', 'adviesgesprek', 'verkopen', 'prijzen',
   ] as const;
 
   return vertaalTalen.flatMap((taal) =>
@@ -38,7 +40,7 @@ export function getStaticPaths() {
       const slug = pad.split('/').filter(Boolean)[1];  // -> purchase-costs
       return {
         params: { lang: taal, slug },
-        props: { taal, sleutel, pagina: sleutel === 'verkopen' ? null : content[taal][sleutel] },
+        props: { taal, sleutel, pagina: sleutel === 'verkopen' || sleutel === 'prijzen' ? null : content[taal][sleutel] },
       };
     }),
   );
@@ -60,7 +62,7 @@ const heroCtas = (inhoud?.heroCtas ?? ['advies']).map((soort, i) => ({
   primary: i === 0,
 }));
 ---
-{sleutel === 'verkopen' ? <VerkoopPagina taal={taal} /> : (
+{sleutel === 'verkopen' ? <VerkoopPagina taal={taal} /> : sleutel === 'prijzen' ? <MarktprijzenPagina taal={taal} /> : (
 <BaseLayout
   title={pagina.title}
   description={pagina.description}

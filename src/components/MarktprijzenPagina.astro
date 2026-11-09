@@ -1,0 +1,147 @@
+---
+// Marktprijzenpagina in alle vier de talen: mediane vraagprijs per m² per stad,
+// per type en per wijk, met de methode. Gewone HTML-tabellen, zodat zoekmachines
+// en AI-assistenten de cijfers kunnen lezen en citeren.
+//
+// De verkooppagina toont een samenvatting (vijf stadskaarten) en linkt hierheen.
+// Tekst per taal: src/i18n/marktprijzen.ts. Gebruikt door
+// src/pages/vastgoedprijzen-marokko.astro (NL) en src/pages/[lang]/[slug].astro.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Faq from './Faq.astro';
+import { site } from '../data/site';
+import { faqSchema } from '../data/schema';
+import { prijsOpmaak } from '../data/prijsOpmaak';
+import { paginas, standaardTaal, type Taal } from '../i18n/config';
+import { ui } from '../i18n/ui';
+import { marktprijzenTekst } from '../i18n/marktprijzen';
+import { werkgebied } from '../i18n/verkopen';
+
+interface Props { taal?: Taal }
+const { taal = standaardTaal } = Astro.props;
+const t = marktprijzenTekst[taal];
+const pad = paginas.prijzen[taal];
+const { data, getal, datum, m2, steden, wijken, vul } = prijsOpmaak(taal, { eenheid: t.eenheid, inStad: t.inStad, wijkNamen: t.wijkNamen });
+
+const rijen = steden.flatMap((s) =>
+  (['appartement', 'villa'] as const).flatMap((type) => {
+    const r = s.types[type];
+    return r ? [{ stad: s.naam, type: t.types[type], ...r }] : [];
+  }),
+);
+const faqs = t.faqs.map((f) => ({ q: f.q, a: vul(f.a) }));
+
+// Dataset-schema: beschrijft precies wat in de tabellen staat.
+const dataset = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: t.dataset.naam,
+  description: vul(t.meta.description),
+  url: new URL(pad, site.url).href,
+  creator: { '@id': `${site.url}/#organization` },
+  dateModified: data.bijgewerkt,
+  temporalCoverage: `${data.periode.van}/${data.periode.tot}`,
+  spatialCoverage: werkgebied.map((stad) => ({
+    '@type': 'Place', name: stad, containedInPlace: { '@type': 'Country', name: 'Morocco' },
+  })),
+  variableMeasured: t.dataset.variabele,
+  isAccessibleForFree: true,
+};
+---
+<BaseLayout
+  title={t.meta.title}
+  description={vul(t.meta.description)}
+  path={pad}
+  taal={taal}
+  schema={[faqSchema(faqs), dataset]}
+>
+  <Breadcrumbs
+    items={[{ label: t.kruimel, href: pad }]}
+    home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
+  />
+
+  <section class="section mp-kop">
+    <div class="container">
+      <div class="section__header">
+        <p class="eyebrow">{t.eyebrow}</p>
+        <h1>{t.titel}</h1>
+        <p class="section__desc">{vul(t.intro)}</p>
+      </div>
+
+      <dl class="mp-kern">
+        <div><dt>{t.kern.bijgewerkt}</dt><dd><time datetime={data.bijgewerkt}>{datum(data.bijgewerkt)}</time></dd></div>
+        <div><dt>{t.kern.advertenties}</dt><dd>{getal(data.advertenties)}</dd></div>
+        <div><dt>{t.kern.letOp}</dt><dd>{t.kern.letOpTekst}</dd></div>
+      </dl>
+
+      <h2 class="mp-kop2">{t.tabelTitel}</h2>
+      <div class="compare-wrap">
+        <table class="compare prijzen-tabel">
+          <thead>
+            <tr>
+              <th scope="col">{t.kolomStad}</th>
+              <th scope="col">{t.kolomType}</th>
+              <th scope="col" class="num">{t.kolomMediaan}</th>
+              <th scope="col" class="num">{t.kolomBereik}</th>
+              <th scope="col" class="num">{t.kolomN}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rijen.map((r) => (
+              <tr>
+                <th scope="row">{r.stad}</th>
+                <td class="prijzen-tabel__type">{r.type}</td>
+                <td class="num" data-label={t.kolomMediaan}><strong>{m2(r.mediaan)}</strong></td>
+                <td class="num" data-label={t.kolomBereik}>{getal(r.p25)} – {getal(r.p75)}</td>
+                <td class="num" data-label={t.kolomN}>{getal(r.n)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="mp-kop2">{t.wijkenTitel}</h2>
+      <p class="prijzen__sub">{vul(t.wijkenIntro)}</p>
+      <div class="compare-wrap">
+        <table class="compare prijzen-tabel prijzen-tabel--wijken">
+          <thead>
+            <tr>
+              <th scope="col">{t.kolomWijk}</th>
+              <th scope="col">{t.kolomStad}</th>
+              <th scope="col" class="num">{t.kolomMediaan}</th>
+              <th scope="col" class="num">{t.kolomN}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {wijken.map((w) => (
+              <tr>
+                <th scope="row">{w.naam}</th>
+                <td class="prijzen-tabel__type">{w.stad}</td>
+                <td class="num" data-label={t.kolomMediaan}><strong>{m2(w.mediaan)}</strong></td>
+                <td class="num" data-label={t.kolomN}>{getal(w.n)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="mp-kop2">{t.methodeKop}</h2>
+      <div class="prijzen__methode">
+        {t.methode.map((regel) => <p>{vul(regel)}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <Faq items={faqs} title={t.faqTitel} />
+
+  <section class="ctaband">
+    <div class="container">
+      <h2>{t.cta.titel}</h2>
+      <p>{t.cta.tekst}</p>
+      <div class="ctaband__actions">
+        <a href={`${paginas.verkopen[taal]}#aanmelden`} class="btn btn--light">{t.cta.verkopen}</a>
+        <a href={paginas.adviesgesprek[taal]} class="btn btn--outline vk-slot__wa">{t.cta.kopen}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

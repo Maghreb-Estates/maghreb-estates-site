@@ -119,6 +119,13 @@ export const paginas = {
     fr: '/fr/vendre-votre-bien/',
     ar: '/ar/sell-your-property/',
   },
+  // Vraagprijzen per m² per stad en wijk (src/components/MarktprijzenPagina.astro).
+  prijzen: {
+    nl: '/vastgoedprijzen-marokko/',
+    en: '/en/property-prices-morocco/',
+    fr: '/fr/prix-immobilier-maroc/',
+    ar: '/ar/property-prices-morocco/',
+  },
 } as const;
 
 export type PaginaSleutel = keyof typeof paginas;

@@ -3,14 +3,12 @@ export const site = {
   naam: 'Maghreb Estates',
   url: 'https://maghreb-estates.com',
   tagline: 'International real estate advisory in Morocco — buying, investment, management and sales.',
-  telefoon: '+31 6 83 49 87 15',
-  telefoonHref: '+31683498715',
-  // Marokkaans nummer, alleen om te bellen: WhatsApp loopt altijd via het NL-nummer
-  // (whatsapp hieronder). Op de Franse en Arabische verkooppagina is dit het
-  // belnummer en blijft +31 daar het internationale nummer. Gebruik overal (Google-
-  // bedrijfsprofiel, bedrijvengidsen) exact dezelfde schrijfwijze.
-  telefoonMA: '+212 6 69 72 53 95',
-  telefoonMAHref: '+212669725395',
+  // Twee nummers, elk met één taak (november 2026): bellen gaat overal via het
+  // Marokkaanse nummer, WhatsApp altijd via het Nederlandse (whatsapp hieronder;
+  // het +212-nummer heeft geen WhatsApp). Gebruik in het Google-bedrijfsprofiel
+  // en de bedrijvengidsen exact dezelfde schrijfwijze.
+  telefoon: '+212 6 69 72 53 95',
+  telefoonHref: '+212669725395',
   email: 'a.douider@maghreb-estates.com',
   whatsapp: '31683498715',
   land: 'NL',
@@ -59,8 +57,8 @@ export const team = [
     naam: 'Ayoub Douider',
     rol: 'Founder & Real Estate Advisor',
     foto: '/images/ayoub.jpg',
-    telefoon: '+31 6 83 49 87 15',
-    telefoonHref: '+31683498715',
+    telefoon: '+212 6 69 72 53 95',
+    telefoonHref: '+212669725395',
     whatsapp: '31683498715',
     email: 'a.douider@maghreb-estates.com',
     linkedin: '',

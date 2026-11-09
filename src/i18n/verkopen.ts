@@ -4,12 +4,13 @@
 //
 // Placeholders: {steden} = "Rabat, Casablanca, … en Agadir", {stedenOf} = "… of
 // Agadir", {stad} = één stad (keuzelijst in het formulier). In het prijsblok en de
-// FAQ: {datum}, {van}, {n}, {bronnen}, {min}, {prijzen} (zie VerkoopPagina.astro).
+// FAQ: {datum}, {n}, {prijzen} (zie VerkoopPagina.astro).
 //
 // Opbouw (redesign november 2026, documenten/analyses/verkooppagina-redesign-2026-11/):
-// hero → kort formulier → waarom → werkwijze → netwerk → prijzen (compact, details
-// uitklapbaar) → FAQ → afsluitende CTA. Kort en conversiegericht; de uitgebreide
-// marktcijfers blijven in de HTML staan, maar achter "Voir les données détaillées".
+// hero → kort formulier → waarom → werkwijze → netwerk → prijzen (vijf stadskaarten
+// en een link naar de marktprijzenpagina) → FAQ → afsluitende CTA. De volledige
+// tabellen staan op die aparte pagina (src/i18n/marktprijzen.ts). Bronnamen
+// (portals) staan nergens op de pagina.
 //
 // SEO-afspraak (documenten/analyses/seo-verkooppagina-marokko-2026-10/): verkopen
 // is een nevendienst. "Agence immobilière" alleen in de lopende tekst, niet in de
@@ -40,8 +41,6 @@ export interface VerkoopTekst {
     werkgebiedTitel: string; werkgebiedTekst: string;
     voordelen: string[];
     direct: string; directWa: string; directBel: string;
-    /** Label voor het +31-nummer op de fr/ar-pagina, waar +212 het belnummer is. */
-    internationaal: string;
   };
   /** Kort formulier: vier verplichte velden, de rest achter "Details toevoegen". */
   form: {
@@ -72,23 +71,19 @@ export interface VerkoopTekst {
     /** Toegankelijke naam en labels van het kaartje Marokko–Europa. */
     kaartLabel: string; marokko: string; europa: string;
   };
-  /** Vraagprijzen per m² uit src/data/marktprijzen.json: vijf stadskaarten, de
-   *  volledige tabellen en de methode in een uitklapblok. */
+  /** Vraagprijzen per m² uit src/data/marktprijzen.json: vijf stadskaarten. De
+   *  volledige tabellen staan op de marktprijzenpagina (src/i18n/marktprijzen.ts).
+   *  Geen bronnamen (portals) op de pagina. */
   prijzen: {
     eyebrow: string; titel: string; intro: string;
     kaartType: string; kaartN: string; eenheid: string;
     disclaimer: string; bijgewerkt: string;
-    meer: string; tabelTitel: string;
-    kolomStad: string; kolomType: string; kolomMediaan: string; kolomBereik: string; kolomN: string;
-    types: { appartement: string; villa: string };
-    wijkenTitel: string; wijkenIntro: string; kolomWijk: string;
-    methodeKop: string; methode: string[];
+    /** Link naar de marktprijzenpagina. */
+    analyse: string;
     knop: string;
     /** Eén stad in de FAQ-opsomming, bv. "{prijs} à {stad}". */
     inStad: string;
   };
-  /** Wijknamen in eigen schrift (alleen Arabisch); anders de Latijnse naam. */
-  wijkNamen?: Record<string, string>;
   /** Eén subtiele regel op de homepage, onderaan. Niet in de hero. */
   homeBlok: { vraag: string; link: string };
   faqTitel: string;
@@ -131,7 +126,6 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       direct: 'Liever direct contact?',
       directWa: 'WhatsApp ons',
       directBel: 'of bel',
-      internationaal: 'Vanuit het buitenland:',
     },
     form: {
       naam: 'Naam', naamPh: 'Uw naam',
@@ -203,21 +197,8 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       intro: 'De prijs van een woning hangt af van veel factoren: de stad, de wijk, de ligging, de oppervlakte en de staat van de woning. Wij gebruiken marktdata om u te helpen een realistische verkoopprijs te bepalen.',
       kaartType: 'Appartement · mediane vraagprijs', kaartN: '{n} advertenties', eenheid: 'MAD/m²',
       disclaimer: 'Indicatieve prijzen uit vastgoedadvertenties, geen definitieve verkoopprijzen.',
-      bijgewerkt: 'Bijgewerkt: {datum} · {n} verkoopadvertenties geanalyseerd op {bronnen}.',
-      meer: 'Bekijk de gedetailleerde cijfers',
-      tabelTitel: 'Mediane vraagprijs per stad en type woning',
-      kolomStad: 'Stad', kolomType: 'Type', kolomMediaan: 'Mediane vraagprijs', kolomBereik: 'Middelste helft van de advertenties', kolomN: 'Advertenties',
-      types: { appartement: 'Appartement', villa: 'Villa / huis' },
-      wijkenTitel: 'Appartementen per wijk',
-      wijkenIntro: 'Alleen wijken met minstens {min} advertenties.',
-      kolomWijk: 'Wijk',
-      methodeKop: 'Methode',
-      methode: [
-        'Deze cijfers zijn vraagprijzen uit advertenties, niet de definitieve verkoopprijzen bij de notaris. De prijs waarvoor een woning echt verkocht wordt, ligt vaak lager.',
-        'Bron: openbare vastgoedadvertenties op {bronnen}. Maghreb Estates verzamelt elke week de advertenties van de grote Marokkaanse portals, voor koop en huur en in heel Marokko. Voor deze cijfers tellen alleen koopadvertenties in dirham van appartementen, villa’s en huizen in {steden} die tussen {van} en {datum} online stonden. Dubbele advertenties tellen één keer. Advertenties zonder oppervlakte of met een onwaarschijnlijke prijs per m² (onder 500 of boven 150.000 MAD) tellen niet mee.',
-        'Steekproef: {n} advertenties. De mediaan is de middelste waarde: de helft van de advertenties vraagt meer, de helft minder. De oppervlakte is die uit de advertentie; bij een villa kan dat ook het perceel zijn.',
-        'Wij werken deze cijfers regelmatig bij op basis van die verzameling. De datum bovenaan is altijd die van de getoonde cijfers.',
-      ],
+      bijgewerkt: 'Bijgewerkt: {datum} · {n} verkoopadvertenties geanalyseerd.',
+      analyse: 'Bekijk onze analyse van de vastgoedmarkt',
       knop: 'Laat mijn woning waarderen',
       inStad: '{prijs} in {stad}',
     },
@@ -275,7 +256,6 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       direct: 'Prefer to talk directly?',
       directWa: 'WhatsApp us',
       directBel: 'or call',
-      internationaal: 'From abroad:',
     },
     form: {
       naam: 'Name', naamPh: 'Your name',
@@ -347,21 +327,8 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       intro: 'The price of a property depends on many factors: the city, the neighbourhood, the location, the floor area and the condition of the home. We use market data to help you set a consistent asking price.',
       kaartType: 'Apartment · median asking price', kaartN: '{n} listings', eenheid: 'MAD/m²',
       disclaimer: 'Indicative prices from property listings, not final sale prices.',
-      bijgewerkt: 'Updated: {datum} · {n} sale listings analysed on {bronnen}.',
-      meer: 'View the detailed data',
-      tabelTitel: 'Median asking price by city and property type',
-      kolomStad: 'City', kolomType: 'Type', kolomMediaan: 'Median asking price', kolomBereik: 'Middle half of listings', kolomN: 'Listings',
-      types: { appartement: 'Apartment', villa: 'Villa / house' },
-      wijkenTitel: 'Apartments by neighbourhood',
-      wijkenIntro: 'Only neighbourhoods with at least {min} listings.',
-      kolomWijk: 'Neighbourhood',
-      methodeKop: 'Method',
-      methode: [
-        'These figures are asking prices from listings, not final sale prices at the notary. The price a property actually sells for is often lower.',
-        'Source: public property listings on {bronnen}. Every week, Maghreb Estates collects the listings of the major Moroccan portals, for sale and for rent, across Morocco. For these figures we only count sale listings in dirhams for apartments, villas and houses in {steden} that were online between {van} and {datum}. Duplicate listings count once. Listings without a floor area or with an implausible price per m² (below 500 or above 150,000 MAD) are left out.',
-        'Sample: {n} listings. The median is the middle value: half of the listings ask more, half ask less. The floor area is the one stated in the listing; for a villa, it may include the plot.',
-        'We update these figures regularly from that collection. The date above is always the date of the figures shown.',
-      ],
+      bijgewerkt: 'Updated: {datum} · {n} sale listings analysed.',
+      analyse: 'View our property market analysis',
       knop: 'Get my property valued',
       inStad: '{prijs} in {stad}',
     },
@@ -419,7 +386,6 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       direct: 'Vous préférez en parler directement ?',
       directWa: 'Écrivez-nous sur WhatsApp',
       directBel: 'ou appelez le',
-      internationaal: 'Depuis l’étranger :',
     },
     form: {
       naam: 'Nom', naamPh: 'Votre nom',
@@ -491,21 +457,8 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       intro: 'Le prix d’un bien immobilier dépend de nombreux facteurs : la ville, le quartier, l’emplacement, la superficie et l’état du logement. Nous utilisons des données de marché pour vous aider à définir un prix de vente cohérent.',
       kaartType: 'Appartement · prix médian demandé', kaartN: '{n} annonces', eenheid: 'MAD/m²',
       disclaimer: 'Prix indicatifs issus d’annonces immobilières, et non des prix de vente définitifs.',
-      bijgewerkt: 'Mise à jour : {datum} · {n} annonces de vente analysées sur {bronnen}.',
-      meer: 'Voir les données détaillées',
-      tabelTitel: 'Prix médian demandé par ville et type de bien',
-      kolomStad: 'Ville', kolomType: 'Type', kolomMediaan: 'Prix médian demandé', kolomBereik: 'La moitié des annonces entre', kolomN: 'Annonces',
-      types: { appartement: 'Appartement', villa: 'Villa / maison' },
-      wijkenTitel: 'Appartements par quartier',
-      wijkenIntro: 'Uniquement les quartiers comptant au moins {min} annonces.',
-      kolomWijk: 'Quartier',
-      methodeKop: 'Méthodologie',
-      methode: [
-        'Ces chiffres sont des prix demandés dans les annonces, et non les prix de vente définitifs chez le notaire. Le prix auquel un bien se vend réellement est souvent plus bas.',
-        'Source : annonces immobilières publiques sur {bronnen}. Maghreb Estates collecte chaque semaine les annonces des grands portails marocains, à la vente comme à la location et dans tout le pays. Pour ces chiffres, nous retenons uniquement les annonces de vente en dirhams d’appartements, de villas et de maisons à {steden}, en ligne entre le {van} et le {datum}. Les doublons ne comptent qu’une fois. Les annonces sans surface ou avec un prix au m² invraisemblable (moins de 500 ou plus de 150 000 MAD) sont écartées.',
-        'Échantillon : {n} annonces. La médiane est la valeur centrale : la moitié des annonces demande plus, l’autre moitié moins. La surface est celle indiquée dans l’annonce ; pour une villa, elle peut inclure le terrain.',
-        'Nous actualisons ces chiffres régulièrement à partir de cette collecte. La date indiquée est toujours celle des données affichées.',
-      ],
+      bijgewerkt: 'Mise à jour : {datum} · {n} annonces de vente analysées.',
+      analyse: 'Consulter notre analyse du marché immobilier',
       knop: 'Faire estimer mon bien',
       inStad: '{prijs} à {stad}',
     },
@@ -563,7 +516,6 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       direct: 'تفضل التواصل المباشر؟',
       directWa: 'راسلنا على واتساب',
       directBel: 'أو اتصل على',
-      internationaal: 'من خارج المغرب:',
     },
     form: {
       naam: 'الاسم', naamPh: 'اسمك',
@@ -635,31 +587,10 @@ export const verkoopTekst: Record<Taal, VerkoopTekst> = {
       intro: 'يتوقف سعر العقار على عوامل كثيرة: المدينة، والحي، والموقع، والمساحة، وحالة المسكن. نعتمد على بيانات السوق لنساعدك على تحديد سعر بيع منطقي.',
       kaartType: 'شقة · السعر الوسيط المطلوب', kaartN: '{n} إعلاناً', eenheid: 'درهم/م²',
       disclaimer: 'أسعار تقريبية مأخوذة من إعلانات عقارية، وليست أسعار بيع نهائية.',
-      bijgewerkt: 'آخر تحديث: {datum} · {n} إعلان بيع محلَّل على {bronnen}.',
-      meer: 'عرض البيانات التفصيلية',
-      tabelTitel: 'السعر الوسيط المطلوب حسب المدينة ونوع العقار',
-      kolomStad: 'المدينة', kolomType: 'النوع', kolomMediaan: 'السعر الوسيط المطلوب', kolomBereik: 'نصف الإعلانات بين', kolomN: 'الإعلانات',
-      types: { appartement: 'شقة', villa: 'فيلا / منزل' },
-      wijkenTitel: 'الشقق حسب الحي',
-      wijkenIntro: 'فقط الأحياء التي تضم {min} إعلاناً على الأقل.',
-      kolomWijk: 'الحي',
-      methodeKop: 'المنهجية',
-      methode: [
-        'هذه الأرقام أسعار مطلوبة في الإعلانات، وليست أسعار البيع النهائية لدى الموثق. وغالباً ما يكون السعر الذي يُباع به العقار فعلاً أقل.',
-        'المصدر: إعلانات عقارية عامة على {bronnen}. تجمع Maghreb Estates كل أسبوع إعلانات أكبر المنصات المغربية، للبيع والكراء وفي كل أنحاء المغرب. ولهذه الأرقام نحتسب فقط إعلانات بيع الشقق والفيلات والمنازل بالدرهم في {steden} التي كانت منشورة بين {van} و{datum}. تُحتسب الإعلانات المكررة مرة واحدة، وتُستبعد الإعلانات التي لا تذكر المساحة أو التي يكون فيها سعر المتر غير معقول (أقل من 500 أو أكثر من 150.000 درهم).',
-        'العينة: {n} إعلاناً. الوسيط هو القيمة الوسطى: نصف الإعلانات يطلب أكثر والنصف الآخر أقل. المساحة هي المذكورة في الإعلان، وفي حالة الفيلا قد تشمل الأرض.',
-        'نحدّث هذه الأرقام بانتظام انطلاقاً من هذه الإعلانات. والتاريخ المذكور هو دائماً تاريخ البيانات المعروضة.',
-      ],
+      bijgewerkt: 'آخر تحديث: {datum} · {n} إعلان بيع محلَّل.',
+      analyse: 'اطّلع على تحليلنا لسوق العقار',
       knop: 'اطلب تقييم عقاري',
       inStad: '{prijs} في {stad}',
-    },
-    wijkNamen: {
-      'Agdal': 'أكدال', 'Hay Riad': 'حي الرياض', 'Souissi': 'السويسي',
-      'Maârif': 'المعاريف', 'Gauthier': 'غوتييه', 'Racine': 'راسين', 'Aïn Diab': 'عين الذئاب',
-      'Les Hôpitaux': 'حي المستشفيات', 'Belvédère': 'بلفيدير', 'Oulfa': 'الألفة',
-      'Malabata': 'مالاباطا', 'Tanja Balia': 'طنجة البالية', 'Ibéria': 'إيبيريا', 'Castilla': 'كاستيا', 'Marjane': 'مرجان',
-      'Guéliz': 'جليز', 'Hivernage': 'الحي الشتوي', 'Camp El Ghoul': 'كامب الغول', 'Targa': 'تاركة', 'M’hamid': 'المحاميد',
-      'Hay Mohammadi': 'الحي المحمدي', 'Hay Salam': 'حي السلام', 'Hay Houda': 'حي الهدى', 'Anza': 'أنزا',
     },
     homeBlok: { vraag: 'هل أنت مالك وترغب في بيع عقارك؟', link: 'اكتشف خدمة مرافقة البيع' },
     faqTitel: 'أسئلة شائعة حول البيع',
