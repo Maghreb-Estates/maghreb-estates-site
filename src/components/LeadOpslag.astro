@@ -1,0 +1,130 @@
+---
+// Bewaart elke formulierinzending als lead in Supabase (tabel crm_leads), naast de
+// bestaande verzending via WhatsApp of mailto. De formulierscripts roepen
+// window.meLead(formulier, formEl, extra, maxWacht) aan. Dat blokkeert de bezoeker
+// nooit: lukt opslaan niet (offline, Supabase plat, app-wissel naar WhatsApp), dan
+// blijft de lead in localStorage staan en gaat hij opnieuw bij terugkeer naar het
+// tabblad of bij het volgende paginabezoek.
+//
+// Elke lead krijgt in de browser een vast id. Een herhaalde poging met hetzelfde id
+// wordt in de database genegeerd, dus opnieuw versturen geeft nooit een dubbele lead.
+//
+// De mailnotificatie (Resend) loopt server-side via een databasetrigger: er staat
+// geen Resend-sleutel in de site. Zie crm/supabase/site_formulieren.sql.
+import { site } from '../data/site';
+---
+<script is:inline define:vars={{ url: site.supabase.url, sleutel: site.supabase.publishableKey }}>
+  (function () {
+    var WACHTRIJ = 'meLeadWachtrij';
+    var MAX_LEEFTIJD = 7 * 864e5;
+    var bezig = {};
+    var laatste = {};
+
+    function lees() {
+      try { return JSON.parse(localStorage.getItem(WACHTRIJ) || '[]'); } catch (e) { return []; }
+    }
+    function schrijf(rij) {
+      try { localStorage.setItem(WACHTRIJ, JSON.stringify(rij)); } catch (e) { /* privémodus */ }
+    }
+    function verwijder(id) {
+      schrijf(lees().filter(function (x) { return x.lead.id !== id; }));
+    }
+
+    function nieuwId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 3 | 8)).toString(16);
+      });
+    }
+
+    function verstuur(lead) {
+      if (bezig[lead.id]) return bezig[lead.id];
+      bezig[lead.id] = fetch(url + '/rest/v1/crm_leads', {
+        method: 'POST',
+        headers: {
+          apikey: sleutel,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(lead),
+      }).then(function (res) {
+        if (res.ok) return true;
+        // 409 op de primary key = dit id staat er al (eerdere poging kwam wel aan).
+        if (res.status !== 409) return false;
+        return res.text().then(function (t) { return t.indexOf('crm_leads_pkey') > -1; });
+      }).then(function (ok) {
+        // Alleen een geslaagde opslag haalt de lead uit de wachtrij. Ook een 4xx kan
+        // tijdelijk zijn (bijv. een kolom die nog niet bestaat), en de wachtrij is
+        // begrensd op 10 leads en 7 dagen.
+        if (ok) verwijder(lead.id);
+        return ok;
+      }).catch(function () {
+        return false;
+      }).then(function (ok) {
+        delete bezig[lead.id];
+        return ok;
+      });
+      return bezig[lead.id];
+    }
+
+    function spoel() {
+      lees().forEach(function (x) {
+        if (Date.now() - x.t < MAX_LEEFTIJD) verstuur(x.lead);
+        else verwijder(x.lead.id);
+      });
+    }
+
+    window.meLead = function (formulier, form, extra, maxWacht) {
+      var velden = {};
+      new FormData(form).forEach(function (v, k) {
+        v = String(v).trim();
+        if (v) velden[k] = v.slice(0, 5000);
+      });
+      Object.keys(extra || {}).forEach(function (k) {
+        if (extra[k]) velden[k] = String(extra[k]);
+      });
+
+      // Dezelfde inhoud via de tweede knop (eerst WhatsApp, dan e-mail) is één lead.
+      var inhoud = JSON.stringify(Object.keys(velden).sort().filter(function (k) {
+        return k !== 'kanaal';
+      }).map(function (k) { return [k, velden[k]]; }));
+      var lead = laatste[formulier] && laatste[formulier].inhoud === inhoud
+        ? laatste[formulier].lead
+        : null;
+
+      if (!lead) {
+        lead = {
+          id: nieuwId(),
+          bron: 'form',
+          formulier: formulier,
+          taal: (document.documentElement.lang || 'nl').slice(0, 2),
+          pagina: (location.pathname + location.search).slice(0, 500),
+          naam: (velden.naam || '').slice(0, 200),
+          telefoon: (velden.telefoon || '').slice(0, 60) || null,
+          email: (velden.email || '').slice(0, 200) || null,
+          gegevens: velden,
+        };
+        laatste[formulier] = { inhoud: inhoud, lead: lead };
+        var rij = lees().filter(function (x) { return Date.now() - x.t < MAX_LEEFTIJD; });
+        rij.push({ t: Date.now(), lead: lead });
+        schrijf(rij.slice(-10));
+      }
+
+      var opgeslagen = verstuur(lead);
+      if (!maxWacht) return opgeslagen;
+      return Promise.race([
+        opgeslagen,
+        new Promise(function (klaar) { setTimeout(function () { klaar(false); }, maxWacht); }),
+      ]);
+    };
+
+    // Wachtrij legen: kort na het laden, bij terugkeer naar het tabblad (bijv. na
+    // WhatsApp) en zodra de verbinding terug is.
+    setTimeout(spoel, 1500);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') spoel();
+    });
+    window.addEventListener('online', spoel);
+  })();
+</script>

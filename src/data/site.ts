@@ -3,13 +3,19 @@ export const site = {
   naam: 'Maghreb Estates',
   url: 'https://maghreb-estates.com',
   tagline: 'International real estate advisory in Morocco — buying, investment, management and sales.',
-  telefoon: '+31 6 83 49 87 15',
-  telefoonHref: '+31683498715',
+  // Twee nummers, elk met één taak (november 2026): bellen gaat overal via het
+  // Marokkaanse nummer, WhatsApp altijd via het Nederlandse (whatsapp hieronder;
+  // het +212-nummer heeft geen WhatsApp). Gebruik in het Google-bedrijfsprofiel
+  // en de bedrijvengidsen exact dezelfde schrijfwijze.
+  telefoon: '+212 6 69 72 53 95',
+  telefoonHref: '+212669725395',
   email: 'a.douider@maghreb-estates.com',
   whatsapp: '31683498715',
   land: 'NL',
   // Transparant logo: groen voor lichte achtergronden, crème voor donkere (footer).
   logo: '/images/logo.png',
+  // Zelfde logo als webp op 360px breed (12 KB i.p.v. 61 KB) voor de navigatie.
+  logoNav: '/images/logo.webp',
   logoLicht: '/images/logo-licht.png',
   ogImage: '/images/villa5.jpg',
   // Entity SEO: vul social-/profiel-URL's aan zodra beschikbaar (Instagram, LinkedIn,
@@ -29,6 +35,13 @@ export const site = {
   gaId: 'G-4DY7YZK059',
   // Microsoft Clarity (heatmaps + opnames) — idem, pas na toestemming.
   clarityId: 'z07kb3h2jq',
+  // Supabase (live project): formulieren bewaren hier elke lead in crm_leads. De
+  // publishable key is bedoeld om publiek te staan; RLS laat er alleen invoegen mee
+  // toe (zie crm/supabase/site_formulieren.sql). Nooit de service key hier zetten.
+  supabase: {
+    url: 'https://pkkdjnxiperugvothjtn.supabase.co',
+    publishableKey: 'sb_publishable_JJTYSoXQjhK2gECPczzwgQ_HyzxjnDB',
+  },
 };
 
 // WhatsApp-linkhelper (optioneel voorgevuld bericht).
@@ -44,8 +57,8 @@ export const team = [
     naam: 'Ayoub Douider',
     rol: 'Founder & Real Estate Advisor',
     foto: '/images/ayoub.jpg',
-    telefoon: '+31 6 83 49 87 15',
-    telefoonHref: '+31683498715',
+    telefoon: '+212 6 69 72 53 95',
+    telefoonHref: '+212669725395',
     whatsapp: '31683498715',
     email: 'a.douider@maghreb-estates.com',
     linkedin: '',

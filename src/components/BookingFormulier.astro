@@ -1,13 +1,13 @@
 ---
 // Bookingformulier voor de vertaalde adviesgesprek-pagina's: datumkeuze,
-// tijdslot en dezelfde WhatsApp/mailto-verzending als de Nederlandse versie.
-// TODO: koppel aan een externe agenda zodra beschikbaar; vervang dan het
-// slots-blok door de embed en laat de rest staan.
+// tijdslot (TijdslotKiezer) en dezelfde WhatsApp/mailto-verzending als de
+// Nederlandse versie.
 import { site, waLink } from '../data/site';
 import { type Taal } from '../i18n/config';
 import { ui } from '../i18n/ui';
 import type { FormulierPagina } from '../i18n/content/types';
 import Icon from './Icon.astro';
+import TijdslotKiezer from './TijdslotKiezer.astro';
 
 interface Props {
   taal: Exclude<Taal, 'nl'>;
@@ -17,8 +17,6 @@ const { taal, pagina } = Astro.props;
 const t = ui[taal];
 const f = t.formulier;
 const b = t.booking;
-
-const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 ---
 <section class="section" style="padding-top:32px">
   <div class="container">
@@ -53,17 +51,7 @@ const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00
         <h2 style="font-size:24px;margin-bottom:6px">{b.kiesMoment}</h2>
         <p style="color:var(--text-muted);font-size:15px;margin-bottom:22px">{b.kiesMomentSub}</p>
 
-        <div class="veld">
-          <label for="datum">{b.datum} <span aria-hidden="true">*</span></label>
-          <input type="date" id="datum" name="datum" dir="ltr" required />
-        </div>
-
-        <p class="booking__label" id="slotLabel">{b.tijdslot} <span aria-hidden="true">*</span></p>
-        <div class="slots" role="group" aria-labelledby="slotLabel" dir="ltr">
-          {tijdsloten.map((x) => (
-            <button type="button" class="slot" data-slot={x} aria-pressed="false">{x}</button>
-          ))}
-        </div>
+        <TijdslotKiezer b={b} />
 
         <div class="veld">
           <label for="naam">{f.naam} <span aria-hidden="true">*</span></label>
@@ -124,30 +112,17 @@ const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00
   }}
 >
   (function () {
-    var slotGekozen = '';
-    var knoppen = Array.prototype.slice.call(document.querySelectorAll('.slot'));
-    knoppen.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        knoppen.forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
-        btn.setAttribute('aria-pressed', 'true');
-        slotGekozen = btn.dataset.slot;
-      });
-    });
-
-    var datum = document.getElementById('datum');
-    datum.min = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-
     function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
     function build() {
-      if (!val('datum') || !slotGekozen || !val('naam') || !val('telefoon') || !val('doel')) {
+      if (!val('datum') || !val('tijdslot') || !val('naam') || !val('telefoon') || !val('doel')) {
         alert(bookingLabels.validatie);
         return null;
       }
       var regels = ['Maghreb Estates — ' + bookingLabels.kiesMoment, ''];
       function voegToe(label, waarde) { if (waarde) regels.push(label + ': ' + waarde); }
       voegToe(bookingLabels.datum, val('datum'));
-      voegToe(bookingLabels.tijdslot, slotGekozen);
+      voegToe(bookingLabels.tijdslot, val('tijdslot'));
       voegToe(labels.naam, val('naam'));
       voegToe(labels.telefoon, val('telefoon'));
       voegToe(labels.email, val('email'));
@@ -156,6 +131,15 @@ const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00
       voegToe(labels.link, val('woninglink'));
       if (val('bericht')) regels.push('', labels.bericht + ':', val('bericht'));
       return regels.join('\n');
+    }
+
+    // Elke inzending ook opslaan als lead in de CRM (zie LeadOpslag.astro). Blokkeert
+    // nooit: de belofte is na hooguit 1 seconde klaar, ook als Supabase niet reageert.
+    function bewaar(kanaal) {
+      return window.meLead
+        ? window.meLead('adviesgesprek', document.getElementById('bookingForm'),
+          { kanaal: kanaal }, 1000)
+        : Promise.resolve(false);
     }
 
     function toonBevestiging() {
@@ -167,6 +151,7 @@ const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00
     document.getElementById('sendWhatsapp').addEventListener('click', function () {
       var msg = build(); if (!msg) return;
       window.meTrack && window.meTrack('generate_lead', { form: 'adviesgesprek', method: 'whatsapp' });
+      bewaar('whatsapp');
       window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
       toonBevestiging();
     });
@@ -176,9 +161,12 @@ const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00
       window.meTrack && window.meTrack('generate_lead', { form: 'adviesgesprek', method: 'email' });
       var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
       var kopie = val('email') ? '\n\n---\n' + kopieTekst : '';
-      window.location.href = 'mailto:' + email
+      var mailto = 'mailto:' + email
         + '?subject=' + encodeURIComponent('Maghreb Estates — ' + bookingLabels.kiesMoment)
         + cc + '&body=' + encodeURIComponent(msg + kopie);
+      // Eerst (kort) opslaan: sommige browsers breken een lopend verzoek af zodra
+      // de mailapp opent.
+      bewaar('email').then(function () { window.location.href = mailto; });
       toonBevestiging();
     });
   })();

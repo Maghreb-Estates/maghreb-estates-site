@@ -10,7 +10,7 @@ export interface UiStrings {
   footer: {
     tagline: string; contact: string; services: string; insights: string; markets: string;
     aankoop: string; investering: string; nieuwbouw: string; verkoop: string;
-    kosten: string; juridisch: string; kennisbank: string; alleMarkten: string;
+    kosten: string; juridisch: string; kennisbank: string; alleMarkten: string; prijzen: string;
     rechten: string; whatsapp: string; cookies: string;
     // Verwijst naar de Nederlandstalige gidsen; expliciet gelabeld zodat een
     // anderstalige bezoeker weet dat hij naar Nederlandse inhoud klikt.
@@ -32,6 +32,7 @@ export interface UiStrings {
   };
   booking: {
     datum: string; tijdslot: string; kiesMoment: string; kiesMomentSub: string;
+    kiesEerstDatum: string; vrij: string; bezet: string;
     doelGesprek: string; validatie: string;
   };
   breadcrumb: { home: string };
@@ -47,7 +48,7 @@ export const ui: Record<Taal, UiStrings> = {
       tagline: 'International real estate advisory in Morocco.',
       contact: 'Contact', services: 'Services', insights: 'Insights', markets: 'Markets',
       aankoop: 'Aankoopbegeleiding', investering: 'Investeringsadvies', nieuwbouw: 'Nieuwbouw & off-plan', verkoop: 'Verkoopbegeleiding',
-      kosten: 'Kosten bij aankoop', juridisch: 'Juridische documenten', kennisbank: 'Kennisbank', alleMarkten: 'Alle markten',
+      kosten: 'Kosten bij aankoop', juridisch: 'Juridische documenten', kennisbank: 'Kennisbank', alleMarkten: 'Alle markten', prijzen: 'Vastgoedprijzen per m²',
       rechten: 'Alle rechten voorbehouden.', whatsapp: 'WhatsApp', cookies: 'Cookie-instellingen', nlLabel: '',
     },
     formulier: {
@@ -66,7 +67,8 @@ export const ui: Record<Taal, UiStrings> = {
     },
     booking: {
       datum: 'Gewenste datum', tijdslot: 'Gewenst tijdslot',
-      kiesMoment: 'Kies een moment', kiesMomentSub: 'Selecteer een datum en tijdslot. Wij bevestigen uw afspraak zo snel mogelijk via WhatsApp of telefoon.',
+      kiesMoment: 'Kies een moment', kiesMomentSub: 'Kies een datum en uw gewenste tijdslot. Dit is een voorkeur, nog geen vaste afspraak: wij bevestigen altijd persoonlijk via WhatsApp of telefoon of het moment past, of stellen in overleg een ander moment voor.',
+      kiesEerstDatum: 'Kies eerst een datum. Daarna ziet u welke tijdsloten nog vrij zijn.', vrij: 'Vrij', bezet: 'Bezet',
       doelGesprek: 'Doel van gesprek',
       validatie: 'Kies een datum en tijdslot en vul uw naam, telefoonnummer en het doel van het gesprek in.',
     },
@@ -82,7 +84,7 @@ export const ui: Record<Taal, UiStrings> = {
       tagline: 'International real estate advisory in Morocco.',
       contact: 'Contact', services: 'Services', insights: 'Insights', markets: 'Markets',
       aankoop: 'Buying guidance', investering: 'Investment advice', nieuwbouw: 'New-build & off-plan', verkoop: 'Selling guidance',
-      kosten: 'Purchase costs', juridisch: 'Legal documents', kennisbank: 'Knowledge base', alleMarkten: 'All markets',
+      kosten: 'Purchase costs', juridisch: 'Legal documents', kennisbank: 'Knowledge base', alleMarkten: 'All markets', prijzen: 'Property prices per m²',
       rechten: 'All rights reserved.', whatsapp: 'WhatsApp', cookies: 'Cookie settings', nlLabel: ' (in Dutch)',
     },
     formulier: {
@@ -101,7 +103,8 @@ export const ui: Record<Taal, UiStrings> = {
     },
     booking: {
       datum: 'Preferred date', tijdslot: 'Preferred time slot',
-      kiesMoment: 'Choose a time', kiesMomentSub: 'Select a date and time slot. We will confirm your appointment as soon as possible via WhatsApp or phone.',
+      kiesMoment: 'Choose a time', kiesMomentSub: 'Choose a date and your preferred time slot. This is a preference, not yet a fixed appointment: we always confirm personally via WhatsApp or phone whether the time works, or agree on another time with you.',
+      kiesEerstDatum: 'Choose a date first to see which time slots are still available.', vrij: 'Available', bezet: 'Booked',
       doelGesprek: 'Purpose of the call',
       validatie: 'Please choose a date and time slot and enter your name, phone number and the purpose of the call.',
     },
@@ -117,7 +120,7 @@ export const ui: Record<Taal, UiStrings> = {
       tagline: 'International real estate advisory in Morocco.',
       contact: 'Contact', services: 'Services', insights: 'Ressources', markets: 'Marchés',
       aankoop: 'Accompagnement à l’achat', investering: 'Conseil en investissement', nieuwbouw: 'Neuf & VEFA', verkoop: 'Accompagnement à la vente',
-      kosten: 'Frais d’acquisition', juridisch: 'Documents juridiques', kennisbank: 'Base de connaissances', alleMarkten: 'Tous les marchés',
+      kosten: 'Frais d’acquisition', juridisch: 'Documents juridiques', kennisbank: 'Base de connaissances', alleMarkten: 'Tous les marchés', prijzen: 'Prix immobiliers au m²',
       rechten: 'Tous droits réservés.', whatsapp: 'WhatsApp', cookies: 'Paramètres des cookies', nlLabel: ' (en néerlandais)',
     },
     formulier: {
@@ -136,7 +139,8 @@ export const ui: Record<Taal, UiStrings> = {
     },
     booking: {
       datum: 'Date souhaitée', tijdslot: 'Créneau souhaité',
-      kiesMoment: 'Choisissez un créneau', kiesMomentSub: 'Sélectionnez une date et un créneau. Nous confirmons votre rendez-vous dans les meilleurs délais par WhatsApp ou par téléphone.',
+      kiesMoment: 'Choisissez un créneau', kiesMomentSub: 'Choisissez une date et votre créneau souhaité. Il s’agit d’une préférence, pas encore d’un rendez-vous fixe : nous confirmons toujours personnellement par WhatsApp ou par téléphone si le créneau convient, ou nous convenons ensemble d’un autre moment.',
+      kiesEerstDatum: 'Choisissez d’abord une date pour voir les créneaux encore disponibles.', vrij: 'Disponible', bezet: 'Réservé',
       doelGesprek: 'Objet de l’entretien',
       validatie: 'Merci de choisir une date et un créneau, et d’indiquer votre nom, téléphone et l’objet de l’entretien.',
     },
@@ -152,7 +156,7 @@ export const ui: Record<Taal, UiStrings> = {
       tagline: 'استشارات عقارية دولية في المغرب.',
       contact: 'اتصل بنا', services: 'خدماتنا', insights: 'موارد', markets: 'الأسواق',
       aankoop: 'مرافقة الشراء', investering: 'استشارات الاستثمار', nieuwbouw: 'مشاريع جديدة', verkoop: 'مرافقة البيع',
-      kosten: 'تكاليف الشراء', juridisch: 'الوثائق القانونية', kennisbank: 'قاعدة المعرفة', alleMarkten: 'جميع الأسواق',
+      kosten: 'تكاليف الشراء', juridisch: 'الوثائق القانونية', kennisbank: 'قاعدة المعرفة', alleMarkten: 'جميع الأسواق', prijzen: 'أسعار العقار للمتر المربع',
       rechten: 'جميع الحقوق محفوظة.', whatsapp: 'واتساب', cookies: 'إعدادات ملفات تعريف الارتباط', nlLabel: ' (بالهولندية)',
     },
     formulier: {
@@ -171,7 +175,8 @@ export const ui: Record<Taal, UiStrings> = {
     },
     booking: {
       datum: 'التاريخ المفضل', tijdslot: 'الوقت المفضل',
-      kiesMoment: 'اختر موعداً', kiesMomentSub: 'اختر تاريخاً ووقتاً. سنؤكد موعدك في أقرب وقت عبر واتساب أو الهاتف.',
+      kiesMoment: 'اختر موعداً', kiesMomentSub: 'اختر تاريخاً والوقت الذي يناسبك. هذا اختيار مبدئي وليس موعداً نهائياً: نؤكد دائماً بأنفسنا عبر واتساب أو الهاتف إن كان الوقت مناسباً، أو نتفق معك على موعد آخر.',
+      kiesEerstDatum: 'اختر التاريخ أولاً لترى الأوقات المتاحة.', vrij: 'متاح', bezet: 'محجوز',
       doelGesprek: 'موضوع الاستشارة',
       validatie: 'يرجى اختيار تاريخ ووقت وإدخال الاسم ورقم الهاتف وموضوع الاستشارة.',
     },

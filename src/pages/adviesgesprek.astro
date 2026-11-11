@@ -2,16 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Icon from '../components/Icon.astro';
+import TijdslotKiezer from '../components/TijdslotKiezer.astro';
 import { site, waLink } from '../data/site';
+import { ui } from '../i18n/ui';
 
 const path = '/adviesgesprek/';
 
-// Bookingpagina. De kalender is nu een zelfstandige placeholder-component:
-// datumkiezer + vaste tijdsloten, verzending via WhatsApp of e-mail, precies
-// zoals het contactformulier. De aanvraag wordt daarna handmatig bevestigd.
-// TODO: koppel aan een externe agenda (Cal.com / Google Calendar) zodra
-// beschikbaar; vervang dan het slots-blok door de embed en laat de rest staan.
-const tijdsloten = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+// Bookingpagina: datumkiezer + tijdsloten (TijdslotKiezer), verzending via
+// WhatsApp of e-mail, precies zoals het contactformulier. Het gekozen slot is
+// een voorkeur en wordt daarna altijd handmatig bevestigd.
 
 const besproken = [
   'Uw doel: kopen, investeren, verkopen of objectanalyse.',
@@ -60,19 +59,9 @@ const besproken = [
 
         <form class="card" id="bookingForm" novalidate>
           <h2 style="font-size:24px;margin-bottom:6px">Kies een moment</h2>
-          <p style="color:var(--text-muted);font-size:15px;margin-bottom:22px">Selecteer een datum en tijdslot. Wij bevestigen uw afspraak zo snel mogelijk via WhatsApp of telefoon.</p>
+          <p style="color:var(--text-muted);font-size:15px;margin-bottom:22px">{ui.nl.booking.kiesMomentSub}</p>
 
-          <div class="veld">
-            <label for="datum">Gewenste datum <span aria-hidden="true">*</span></label>
-            <input type="date" id="datum" name="datum" required />
-          </div>
-
-          <p class="booking__label" id="slotLabel">Gewenst tijdslot <span aria-hidden="true">*</span></p>
-          <div class="slots" role="group" aria-labelledby="slotLabel">
-            {tijdsloten.map((t) => (
-              <button type="button" class="slot" data-slot={t} aria-pressed="false">{t}</button>
-            ))}
-          </div>
+          <TijdslotKiezer b={ui.nl.booking} />
 
           <div class="veld">
             <label for="naam">Naam <span aria-hidden="true">*</span></label>
@@ -117,7 +106,7 @@ const besproken = [
           </div>
 
           <p class="form__melding" id="bevestiging" hidden>
-            Bedankt. Uw aanvraag voor een adviesgesprek is ontvangen. Wij bevestigen het tijdslot zo snel mogelijk via WhatsApp of telefoon.
+            Bedankt. Uw aanvraag voor een adviesgesprek is ontvangen. Wij nemen zo snel mogelijk contact met u op via WhatsApp of telefoon om uw gewenste tijdslot te bevestigen. Past het niet, dan zoeken we samen een ander moment.
           </p>
         </form>
       </div>
@@ -126,25 +115,10 @@ const besproken = [
 
   <script is:inline define:vars={{ whatsapp: site.whatsapp, email: site.email }}>
     (function () {
-      var slotGekozen = '';
-      var knoppen = Array.prototype.slice.call(document.querySelectorAll('.slot'));
-      knoppen.forEach(function (b) {
-        b.addEventListener('click', function () {
-          knoppen.forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
-          b.setAttribute('aria-pressed', 'true');
-          slotGekozen = b.dataset.slot;
-        });
-      });
-
-      // Geen data in het verleden: de datumkiezer start morgen.
-      var datum = document.getElementById('datum');
-      var morgen = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-      datum.min = morgen;
-
       function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
       function build() {
-        if (!val('datum') || !slotGekozen || !val('naam') || !val('telefoon') || !val('doel')) {
+        if (!val('datum') || !val('tijdslot') || !val('naam') || !val('telefoon') || !val('doel')) {
           alert('Kies een datum en tijdslot en vul uw naam, telefoonnummer en het doel van het gesprek in.');
           return null;
         }
@@ -153,7 +127,7 @@ const besproken = [
         var regels = ['Aanvraag adviesgesprek via maghreb-estates.com', ''];
         function voegToe(label, waarde) { if (waarde) regels.push(label + ': ' + waarde); }
         voegToe('Gewenste datum', val('datum'));
-        voegToe('Gewenst tijdslot', slotGekozen + ' (max. 60 minuten)');
+        voegToe('Gewenst tijdslot', val('tijdslot') + ' (max. 60 minuten)');
         voegToe('Naam', val('naam'));
         voegToe('Telefoon / WhatsApp', val('telefoon'));
         voegToe('E-mail', val('email'));
@@ -162,6 +136,15 @@ const besproken = [
         voegToe('Woning-/projectlink', val('woninglink'));
         if (val('bericht')) regels.push('', 'Bericht:', val('bericht'));
         return regels.join('\n');
+      }
+
+      // Elke inzending ook opslaan als lead in de CRM (zie LeadOpslag.astro). Blokkeert
+      // nooit: de belofte is na hooguit 1 seconde klaar, ook als Supabase niet reageert.
+      function bewaar(kanaal) {
+        return window.meLead
+          ? window.meLead('adviesgesprek', document.getElementById('bookingForm'),
+            { kanaal: kanaal }, 1000)
+          : Promise.resolve(false);
       }
 
       function toonBevestiging() {
@@ -173,6 +156,7 @@ const besproken = [
       document.getElementById('sendWhatsapp').addEventListener('click', function () {
         var msg = build(); if (!msg) return;
         window.meTrack && window.meTrack('generate_lead', { form: 'adviesgesprek', method: 'whatsapp' });
+        bewaar('whatsapp');
         // De klant ziet de volledige aanvraag zelf terug in zijn WhatsApp-gesprek.
         window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
         toonBevestiging();
@@ -184,11 +168,14 @@ const besproken = [
         // Kopie naar de klant zelf, alleen als er een e-mailadres is ingevuld.
         var cc = val('email') ? '&cc=' + encodeURIComponent(val('email')) : '';
         var kopie = val('email')
-          ? '\n\n---\nBedankt voor uw aanvraag bij Maghreb Estates. Wij hebben uw aanvraag voor een adviesgesprek ontvangen en bevestigen het tijdslot zo snel mogelijk via WhatsApp of telefoon.'
+          ? '\n\n---\nBedankt voor uw aanvraag bij Maghreb Estates. Wij hebben uw aanvraag voor een adviesgesprek ontvangen. Uw gekozen tijdslot is een voorkeur: wij bevestigen zo snel mogelijk via WhatsApp of telefoon of het past, of stellen in overleg een ander moment voor.'
           : '';
-        window.location.href = 'mailto:' + email
+        var mailto = 'mailto:' + email
           + '?subject=' + encodeURIComponent('Aanvraag adviesgesprek via maghreb-estates.com')
           + cc + '&body=' + encodeURIComponent(msg + kopie);
+        // Eerst (kort) opslaan: sommige browsers breken een lopend verzoek af zodra
+        // de mailapp opent.
+        bewaar('email').then(function () { window.location.href = mailto; });
         toonBevestiging();
       });
     })();

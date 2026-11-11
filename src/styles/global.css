@@ -1,3 +1,13 @@
+/* ===== FALLBACK-LETTERTYPES =====
+   Georgia en Arial, geschaald naar de maten van Cormorant Garamond en Jost
+   (size-adjust = breedteverhouding, gemeten op een Franse/Nederlandse/Engelse
+   voorbeeldtekst). Zolang de webfonts laden, breekt de tekst dan al bijna op
+   dezelfde plek af, zodat de pagina niet verspringt als ze binnenkomen (CLS). */
+@font-face { font-family: 'Cormorant Fallback'; src: local('Georgia'); font-style: normal; size-adjust: 87.35%; ascent-override: 105.3%; descent-override: 33.2%; line-gap-override: 0%; }
+@font-face { font-family: 'Cormorant Fallback'; src: local('Georgia Italic'), local('Georgia-Italic'); font-style: italic; size-adjust: 77.8%; ascent-override: 118.3%; descent-override: 37.3%; line-gap-override: 0%; }
+@font-face { font-family: 'Jost Fallback'; src: local('Arial'), local('ArialMT'); font-weight: 300; size-adjust: 93.02%; ascent-override: 115%; descent-override: 40.9%; line-gap-override: 0%; }
+@font-face { font-family: 'Jost Fallback'; src: local('Arial'), local('ArialMT'); font-weight: 400; size-adjust: 95.56%; ascent-override: 112%; descent-override: 39.8%; line-gap-override: 0%; }
+
 /* ===== DESIGN TOKENS — overgenomen uit bestaande stijlgids ===== */
 :root {
   --green:       #1C2E1D;
@@ -12,8 +22,8 @@
   --accent:      #C4622D; /* terracotta — accenten/highlights (uit stijlgids) */
   --gold:        #C9A84C; /* goud — highlights (uit stijlgids) */
 
-  --font-serif:  'Cormorant Garamond', Georgia, serif;
-  --font-sans:   'Jost', system-ui, sans-serif;
+  --font-serif:  'Cormorant Garamond', 'Cormorant Fallback', Georgia, serif;
+  --font-sans:   'Jost', 'Jost Fallback', system-ui, sans-serif;
 
   --section-pad: 100px;
   --container:   1160px;
@@ -133,7 +143,8 @@ em { font-style: italic; color: var(--green-mid); }
 }
 
 /* ===== HERO ===== */
-.hero { position: relative; min-height: 78vh; display: flex; align-items: center; background-size: cover; background-position: center; }
+.hero { position: relative; min-height: 78vh; display: flex; align-items: center; }
+.hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero--compact { min-height: 52vh; }
 /* De overlay moet de tekstkolom donker genoeg houden op élke foto — ook op een
    lichte compositie met veel gras of een witte gevel. Daarom blijft het
@@ -185,7 +196,7 @@ em { font-style: italic; color: var(--green-mid); }
 .stap p { font-size: 15px; color: var(--text-muted); margin: 0; }
 
 /* ===== BREADCRUMBS ===== */
-.crumbs { padding: 18px 0; font-size: 13px; color: var(--text-muted); }
+.crumbs { padding-block: 18px; font-size: 13px; color: var(--text-muted); } /* alleen boven/onder: de zijmarge komt van .container */
 .crumbs a:hover { color: var(--green-mid); text-decoration: underline; }
 .crumbs span { margin: 0 8px; opacity: 0.5; }
 
@@ -237,6 +248,26 @@ details.faq__item summary::-webkit-details-marker { display: none; }
   }
   .sticky-wa svg { color: var(--gold); }
   .has-sticky-cta { padding-bottom: 72px; }
+
+  /* Variant met eigen hoofdknop plus WhatsApp-icoon (verkooppagina). */
+  .sticky-wa--duo { align-items: stretch; gap: 8px; padding: 0; background: none; border: 0; box-shadow: none; }
+  .sticky-wa__cta {
+    flex: 1; display: flex; align-items: center; justify-content: center; min-height: 50px;
+    padding: 12px 16px; border-radius: 6px; background: var(--green); color: var(--cream);
+    box-shadow: 0 6px 24px rgba(28,46,29,0.28);
+    font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; text-align: center;
+  }
+  .sticky-wa__wa {
+    flex: 0 0 52px; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; background: var(--cream); border: 1px solid var(--border);
+    box-shadow: 0 6px 24px rgba(28,46,29,0.18);
+  }
+  .sticky-wa--duo svg { color: var(--green-mid); }
+  .rtl .sticky-wa__cta { letter-spacing: 0; }
+
+  /* Weg zolang dezelfde knoppen of het formulier in beeld zijn. */
+  .sticky-wa { transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; }
+  .sticky-wa.is-verborgen { opacity: 0; transform: translateY(12px); visibility: hidden; pointer-events: none; }
 }
 
 /* ===== SPEC-LIJST (voorbeeldblokken) ===== */
@@ -508,6 +539,12 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
 .slot:hover { border-color: var(--green-mid); }
 .slot[aria-pressed='true'] { background: var(--green); border-color: var(--green); color: var(--cream); }
 .slot:disabled { opacity: 0.4; cursor: not-allowed; }
+.slot--bezet, .slot--bezet:hover { background: var(--cream-dark); border-color: var(--border); color: var(--text-muted); text-decoration: line-through; opacity: 0.7; }
+.slots[hidden], .slots__hint[hidden], .slots__legenda[hidden] { display: none; }
+.slots__hint { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+.slots__legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin: -8px 0 22px; }
+.slots__stip { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--border); background: var(--white); }
+.slots__stip--bezet { background: var(--cream-dark); opacity: 0.7; margin-inline-start: 10px; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 940px) {
@@ -576,6 +613,10 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
    maken, maar dan zou de hele stylesheet herschreven moeten worden. */
 .rtl { font-family: 'Noto Sans Arabic', var(--font-sans); }
 .rtl h1, .rtl h2, .rtl h3, .rtl h4 { font-family: 'Amiri', var(--font-serif); letter-spacing: 0; }
+/* Geen letterspatiëring in knoppen en kopjes: die trekt de verbonden Arabische
+   letters uit elkaar. Iets groter, want Arabisch op 11–13px leest slecht. */
+.rtl .btn { letter-spacing: 0; font-size: 14.5px; }
+.rtl .eyebrow { letter-spacing: 0; font-size: 13px; }
 /* Arabisch schrift heeft meer regelhoogte nodig dan Latijns schrift. */
 .rtl body, .rtl p, .rtl li { line-height: 1.9; }
 .rtl h1, .rtl h2, .rtl h3 { line-height: 1.45; }
@@ -808,3 +849,227 @@ table.compare tr:last-child td, table.compare tr:last-child th { border-bottom: 
 .pgallery .binnenkort-waas__label { font-size: .9rem; padding: .7rem 1.4rem; }
 [dir="rtl"] .binnenkort-waas__label { letter-spacing: 0; }
 .lightbox.is-binnenkort .lightbox__img { filter: grayscale(.85) brightness(.92); }
+
+/* ============================================================================
+   WONING VERKOPEN (/huis-verkopen-marokko/ en /{lang}/…) — VerkoopPagina.astro.
+   Hero in twee kolommen, kort formulier, kaarten, tijdlijn, netwerk en prijzen.
+   Prefix vk- voor de pagina, vform voor het formulier. Logische eigenschappen
+   (inline-start/-end), zodat het Arabisch (RTL) vanzelf spiegelt.
+   ========================================================================== */
+#aanmelden, #prijzen { scroll-margin-top: 84px; }
+
+/* Hero: donkergroen, zodat hij duidelijk loskomt van de crème menubalk (zelfde
+   kleur als het netwerkblok, de slot-CTA en de footer). Tekst links, foto rechts. */
+.vk-hero { padding: 0 0 72px; background: var(--green); color: var(--cream); }
+.vk-hero > .crumbs, .mp-kop > .crumbs { padding-bottom: 6px; color: rgba(245,241,232,0.6); }
+.vk-hero > .crumbs a, .mp-kop > .crumbs a { color: rgba(245,241,232,0.75); }
+.vk-hero > .crumbs a:hover, .mp-kop > .crumbs a:hover { color: var(--cream); }
+.vk-hero > .crumbs strong, .mp-kop > .crumbs strong { color: var(--cream); font-weight: 400; }
+.vk-hero__grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.vk-hero h1 { font-size: clamp(36px, 4.4vw, 58px); line-height: 1.08; margin: 14px 0 20px; overflow-wrap: break-word; }
+.vk-hero h1 { color: var(--cream); }
+.vk-hero h1 em { color: var(--gold); }
+.vk-hero__sub { font-size: 19px; color: rgba(245,241,232,0.85); max-width: 34em; margin-bottom: 30px; }
+.vk-hero .btn--outline { color: var(--cream); border-color: rgba(245,241,232,0.55); }
+.vk-hero .btn--outline:hover { background: var(--cream); color: var(--green); border-color: var(--cream); }
+.vk-acties { display: flex; flex-wrap: wrap; gap: 12px; }
+.vk-acties .btn { padding-inline: 24px; }
+.btn--wa { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+.btn--wa svg { flex-shrink: 0; }
+.vk-trust { list-style: none; margin: 30px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; }
+.vk-trust li { display: flex; align-items: flex-start; gap: 9px; font-size: 15px; line-height: 1.4; color: rgba(245,241,232,0.9); }
+.vk-trust svg { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+.vk-hero__foto img { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; }
+
+/* Aanmelden: intro en werkgebied links, formulier rechts. Op mobiel staat het
+   formulier direct onder de intro. */
+.vk-aanmelden__grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); grid-template-areas: "kop form" "info form"; gap: 0 64px; align-items: start; }
+.vk-aanmelden__kop { grid-area: kop; margin-bottom: 28px; }
+.vk-aanmelden__info { grid-area: info; }
+.vk-aanmelden__form { grid-area: form; }
+
+.werkgebied { background: var(--white); border: 1px solid var(--border); border-inline-start: 3px solid var(--green-mid); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 24px; }
+.werkgebied h3 { font-size: 21px; margin-bottom: 6px; }
+.werkgebied > p { font-size: 15px; color: var(--text-muted); margin-bottom: 14px; }
+.werkgebied__lijst { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.werkgebied__lijst li { display: inline-flex; align-items: center; gap: 7px; padding-block: 6px; padding-inline: 11px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--cream); }
+.werkgebied__lijst svg { color: var(--green-mid); flex-shrink: 0; }
+.werkgebied__lijst span { font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--green); line-height: 1.2; }
+.rtl .werkgebied__lijst span { font-family: 'Amiri', var(--font-serif); }
+.werkgebied__direct { font-size: 15px; color: var(--text-muted); }
+.werkgebied__direct a { color: var(--green-mid); border-bottom: 1px solid rgba(52,82,46,0.3); }
+.werkgebied__direct a:hover { color: var(--green); border-bottom-color: var(--green); }
+
+/* Formulier: vier verplichte velden, de rest achter "Details toevoegen". */
+.veld-rij { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.vform, .vform-bedankt { padding: 30px 28px; }
+.vform:hover, .vform-bedankt:hover { transform: none; box-shadow: none; }
+.vform__verplicht { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+.vform .veld input, .vform .veld select, .vform .veld textarea { font-size: 16px; min-height: 48px; }
+.vform .veld input:focus-visible, .vform .veld select:focus-visible, .vform .veld textarea:focus-visible { box-shadow: 0 0 0 3px rgba(52,82,46,0.18); }
+.vform [aria-invalid='true'] { border-color: #b4532a; background-color: #fdf6f2; }
+.vform__meer { margin: 2px 0 18px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.vform__meer summary { position: relative; display: flex; align-items: center; gap: 6px; min-height: 48px; padding-block: 12px; padding-inline-end: 30px; cursor: pointer; list-style: none; font-size: 15px; font-weight: 500; color: var(--green-mid); }
+.vform__meer summary::-webkit-details-marker { display: none; }
+.vform__meer summary::after { content: '+'; position: absolute; inset-inline-end: 4px; top: 50%; transform: translateY(-50%); font-size: 22px; font-weight: 300; }
+.vform__meer[open] summary::after { content: '−'; }
+.vform__meer-velden { padding: 4px 0 6px; }
+/* Honeypot: geknipt in plaats van ver weg geschoven (left: -9999px wordt in RTL scrollbaar). */
+.vform__hp { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.vform__validatie { margin: 0 0 12px; font-size: 14.5px; color: #9a3d14; }
+.vform__validatie[hidden], .vform__fout[hidden], .vform[hidden], .vform-bedankt[hidden] { display: none; }
+.vform button[disabled] { opacity: 0.7; cursor: progress; transform: none; }
+.vform__privacy { margin: 14px 0 0; font-size: 13px; line-height: 1.55; color: var(--text-muted); }
+.vform__privacy a { text-decoration: underline; text-underline-offset: 2px; }
+.vform__fout { margin-top: 18px; padding: 16px 18px; border-radius: var(--radius); background: #fdf3ee; border: 1px solid #ecc9b6; }
+.vform__fout p { margin: 0 0 12px; font-size: 15px; color: var(--text); }
+.vform__fout .btn { width: 100%; white-space: normal; text-align: center; }
+.vform-bedankt { text-align: center; }
+.vform-bedankt:focus { outline: none; }
+.vform-bedankt__ic { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; margin-bottom: 16px; border-radius: 50%; background: var(--green-light); color: var(--green-mid); }
+.vform-bedankt h3 { margin-bottom: 10px; }
+.vform-bedankt p { margin-bottom: 10px; }
+.vform-bedankt a { color: var(--green-mid); border-bottom: 1px solid rgba(52,82,46,0.3); }
+
+/* Waarom: vier kaarten. */
+.vk-kaarten { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.vk-kaart { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 28px 24px; }
+.vk-kaart__ic { display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; margin-bottom: 18px; border-radius: 50%; background: var(--green-light); color: var(--green-mid); }
+.vk-kaart h3 { font-size: 21px; margin-bottom: 8px; }
+.vk-kaart p { margin: 0; font-size: 15.5px; color: var(--text-muted); }
+
+/* Werkwijze: tijdlijn met genummerde stappen (op mobiel verticaal). */
+.vk-stappen { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px; }
+.vk-stap { position: relative; padding-top: 66px; }
+.vk-stap::before { content: ''; position: absolute; top: 24px; inset-inline-start: 56px; inset-inline-end: -20px; height: 1px; background: var(--border); }
+.vk-stap:last-child::before { display: none; }
+.vk-stap__num { position: absolute; top: 0; inset-inline-start: 0; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: var(--white); border: 1px solid var(--border); font-family: var(--font-serif); font-size: 19px; font-weight: 600; color: var(--green); }
+.vk-stap h3 { font-size: 20px; margin-bottom: 6px; }
+.vk-stap p { margin: 0; font-size: 15px; color: var(--text-muted); }
+
+/* Netwerk: tekst en drie groepen links, kaartje rechts. */
+.vk-netwerk { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 64px; align-items: center; }
+.vk-netwerk__tekst { max-width: 36em; margin: 20px 0 30px; font-size: 18px; color: rgba(245,241,232,0.85); }
+.vk-groepen { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.vk-groepen li { padding-inline-start: 20px; border-inline-start: 2px solid var(--gold); }
+.vk-groepen strong { display: block; font-family: var(--font-serif); font-size: 21px; font-weight: 500; color: var(--cream); }
+.rtl .vk-groepen strong { font-family: 'Amiri', var(--font-serif); }
+.vk-groepen span { font-size: 15px; color: rgba(245,241,232,0.75); }
+.vk-kaartje { justify-self: center; width: 100%; max-width: 400px; height: auto; }
+.vk-kaartje__land { fill: rgba(245,241,232,0.07); stroke: rgba(245,241,232,0.16); stroke-width: 0.6; stroke-linejoin: round; }
+.vk-kaartje__land--eu { fill: rgba(245,241,232,0.15); }
+.vk-kaartje__land--ma { fill: rgba(201,168,76,0.24); stroke: rgba(201,168,76,0.55); }
+.vk-kaartje__boog { fill: none; stroke: rgba(245,241,232,0.55); stroke-width: 1; stroke-dasharray: 3 4; }
+.vk-kaartje__eu { fill: var(--cream); }
+.vk-kaartje__ma { fill: var(--gold); }
+.vk-kaartje__stad { fill: rgba(245,241,232,0.9); font-family: var(--font-sans); font-size: 11px; }
+.vk-kaartje__regio { fill: var(--gold); font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+.rtl .vk-kaartje__regio { letter-spacing: 0; }
+
+/* Prijzen: vijf stadskaarten, de tabellen en de methode uitklapbaar. */
+.vk-steden { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.vk-stadkaart { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 20px 18px; }
+.vk-stadkaart__kop h3 { margin: 0; font-size: 22px; }
+.vk-stadkaart__kop span { display: block; margin-top: 2px; font-size: 12.5px; line-height: 1.4; color: var(--text-muted); }
+.vk-stadkaart__prijs { margin: 14px 0 2px; font-size: 14px; color: var(--text-muted); }
+.vk-stadkaart__prijs strong { font-family: var(--font-serif); font-size: 30px; font-weight: 600; line-height: 1; color: var(--green); font-variant-numeric: tabular-nums; }
+.vk-stadkaart__n { margin: 0; font-size: 13px; color: var(--text-muted); }
+.vk-prijzen__noot { margin: 16px 0 0; font-size: 14px; color: var(--text-muted); }
+.vk-prijzen__noot time { display: block; margin-top: 2px; }
+.vk-prijzen__acties { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; margin-top: 32px; }
+.vk-prijzen__link { font-size: 16px; font-weight: 500; color: var(--green-mid); text-decoration: underline; text-decoration-color: rgba(52,82,46,0.35); text-underline-offset: 5px; }
+.vk-prijzen__link:hover { color: var(--green); text-decoration-color: var(--green); }
+.prijzen-tabel .num { text-align: end; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.prijzen-tabel td strong { color: var(--green); font-weight: 500; }
+.prijzen-tabel tbody th { font-family: var(--font-serif); font-size: 17px; color: var(--green); }
+.prijzen__kop { font-size: 23px; margin-top: 40px; margin-bottom: 8px; }
+.prijzen__sub { margin: 0 0 8px; font-size: 15px; color: var(--text-muted); }
+.prijzen__methode { max-width: 820px; }
+.prijzen__methode p { margin-bottom: 10px; font-size: 15px; color: var(--text-muted); }
+
+/* Marktprijzenpagina (MarktprijzenPagina.astro): donkergroene kop, dan kerncijfers,
+   tabellen en methode. */
+.mp-kop { padding-bottom: 64px; background: var(--green); color: var(--cream); }
+.mp-kop .container > .eyebrow { margin-top: 18px; }
+.mp-kop h1 { max-width: 24ch; margin-bottom: 20px; font-size: clamp(34px, 4.4vw, 52px); line-height: 1.12; color: var(--cream); }
+.mp-kop__intro { max-width: 46em; margin: 0; font-size: 18px; color: rgba(245,241,232,0.85); }
+.mp-inhoud { padding-top: 48px; }
+.mp-kern { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0 0 8px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.mp-kern > div { background: var(--white); padding: 16px 18px; }
+.mp-kern dt { margin-bottom: 4px; font-size: 11.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.rtl .mp-kern dt { letter-spacing: 0; font-size: 13px; }
+.mp-kern dd { margin: 0; font-family: var(--font-serif); font-size: 21px; line-height: 1.3; color: var(--green); }
+.mp-kop2 { margin: 48px 0 12px; font-size: clamp(24px, 2.8vw, 32px); }
+
+/* Afsluitende CTA: WhatsApp-knop in crème op groen. */
+.vk-slot__wa { color: var(--cream); border-color: var(--cream); }
+.vk-slot__wa:hover { background: var(--cream); color: var(--green); }
+
+/* Homepage: één rustige verkoopregel onder het team (VerkoopHint.astro). */
+.verkoop-hint { padding-bottom: 56px; }
+.verkoop-hint p { margin: 0; padding-top: 22px; border-top: 1px solid var(--border); font-size: 15.5px; color: var(--text-muted); }
+.verkoop-hint a { color: var(--green-mid); border-bottom: 1px solid rgba(52,82,46,0.3); }
+.verkoop-hint a:hover { color: var(--green); border-bottom-color: var(--green); }
+
+@media (max-width: 1100px) {
+  .vk-kaarten { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 980px) {
+  .vk-hero { padding-bottom: 56px; }
+  .vk-hero__grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .vk-hero__foto img { aspect-ratio: 16 / 9; }
+  .vk-aanmelden__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "kop" "form" "info"; }
+  .vk-aanmelden__kop { margin-bottom: 24px; }
+  .vk-aanmelden__form { margin-bottom: 36px; }
+  .vk-stappen { grid-template-columns: 1fr; gap: 0; }
+  .vk-stap { min-height: 48px; padding-top: 0; padding-bottom: 26px; padding-inline-start: 70px; }
+  .vk-stap:last-child { padding-bottom: 0; }
+  .vk-stap::before { top: 52px; bottom: 4px; inset-inline-start: 24px; inset-inline-end: auto; width: 1px; height: auto; }
+  .vk-stap:last-child::before { display: none; }
+  .vk-stap h3 { padding-top: 10px; }
+  .vk-netwerk { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .vk-steden { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .vk-kaartje { display: none; }
+}
+@media (max-width: 600px) {
+  .vk-hero { padding-bottom: 44px; }
+  .vk-hero h1 { font-size: clamp(31px, 8.6vw, 40px); margin-top: 10px; }
+  .vk-hero__sub { font-size: 17px; margin-bottom: 24px; }
+  .vk-acties .btn, .vk-prijzen__acties .btn, .ctaband__actions .btn { width: 100%; white-space: normal; text-align: center; }
+  .vk-trust { margin-top: 24px; gap: 8px 14px; }
+  .vk-trust li { font-size: 14px; }
+  .vk-kaarten { grid-template-columns: 1fr; gap: 14px; }
+  .vk-kaart { padding: 22px 20px; }
+  .vk-kaart p, .vk-stap p, .vk-groepen span { font-size: 16px; }
+  .vform, .vform-bedankt { padding: 24px 18px; }
+  .veld-rij { grid-template-columns: 1fr; }
+  .mp-kern { grid-template-columns: 1fr; }
+
+  /* Stadskaarten als compacte lijst: stad links, prijs rechts. */
+  .vk-steden { grid-template-columns: 1fr; gap: 0; background: var(--white); border: 1px solid var(--border); border-radius: 6px; }
+  .vk-stadkaart { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; padding: 14px 16px; background: none; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; }
+  .vk-stadkaart:last-child { border-bottom: 0; }
+  .vk-stadkaart__kop { grid-column: 1; grid-row: 1 / 3; }
+  .vk-stadkaart__kop h3 { font-size: 20px; }
+  .vk-stadkaart__prijs { grid-column: 2; grid-row: 1; margin: 0; text-align: end; }
+  .vk-stadkaart__prijs strong { font-size: 24px; }
+  .vk-stadkaart__n { grid-column: 2; grid-row: 2; text-align: end; }
+
+  /* Prijstabellen als kaartjes: kop "Rabat · Appartement", daaronder de cijfers
+     met hun label, zonder horizontaal scrollen. */
+  table.prijzen-tabel { min-width: 0; }
+  .prijzen-tabel thead { display: none; }
+  .prijzen-tabel tbody, .prijzen-tabel tr { display: block; }
+  .prijzen-tabel tr { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .prijzen-tabel tr:last-child { border-bottom: none; }
+  table.prijzen-tabel tbody th, table.prijzen-tabel tbody td { display: inline; padding: 0; border: none; background: none; }
+  table.prijzen-tabel .prijzen-tabel__type { color: var(--text-muted); }
+  table.prijzen-tabel .prijzen-tabel__type::before { content: ' · '; }
+  table.prijzen-tabel tbody td.num { display: flex; justify-content: space-between; gap: 12px; margin-top: 4px; font-size: 14.5px; }
+  table.prijzen-tabel td.num::before { content: attr(data-label); color: var(--text-muted); white-space: normal; text-align: start; }
+}
+@media (max-width: 380px) {
+  .vk-trust { grid-template-columns: 1fr; }
+}

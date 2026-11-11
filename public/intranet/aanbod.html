@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Aanbod en Brochures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .bar { display: flex; gap: 10px; margin: 26px 0 14px; flex-wrap: wrap; }
+  .bar input { flex: 1; min-width: 220px; }
+  .bar select { width: auto; }
+  .list { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; margin-bottom: 64px; }
+  table.t { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
+  .t th { text-align: left; font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .t td { padding: 14px; border-bottom: 1px solid var(--cream-dark); vertical-align: middle; }
+  .t tr:hover td { background: #faf8f3; }
+  .t .nm { font-family: var(--serif); font-size: 19px; font-weight: 500; color: var(--green); }
+  .t .sm { font-size: 12px; color: var(--muted); }
+  .t .acts { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+  .st { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); white-space: nowrap; }
+  .st::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .st.soon { background: var(--gold-soft); color: #8a6d1f; }
+  .lang { font-size: 11px; font-weight: 600; padding: 2px 6px; border: 1px solid var(--border); border-radius: 3px; text-decoration: none; color: var(--green); }
+  .lang:hover { background: var(--cream-dark); }
+  .cnt { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Aanbod en brochures</h1><p>Onze projecten op maghreb-estates.com, met de links om te delen in vier talen</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+<main class="wrap">
+  <div class="bar">
+    <input type="text" id="q" placeholder="Zoek op project, stad, wijk of ontwikkelaar">
+    <select id="fStad"><option value="">Alle steden</option></select>
+    <select id="fType"><option value="">Alle typen</option></select>
+  </div>
+  <div class="cnt" id="cnt"></div>
+  <div class="list"><table class="t"><thead><tr><th>Project</th><th>Type</th><th>Locatie</th><th>Ontwikkelaar</th><th>Vanaf prijs</th><th>Status</th><th>Delen</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+</main>
+<script>
+const { fmt, esc } = ME;
+const $ = id => document.getElementById(id);
+// Bron: code/site/src/data/projecten.ts. Nieuw project op de site? Voeg het hier ook toe.
+const P = [
+  { slug: 'domaine-achakar', naam: "Le Domaine d'Achakar", stad: 'tanger', stadNaam: 'Tanger', wijk: 'Achakar', dev: '', type: 'Bouwgrond', prijs: 'Op aanvraag', kort: '39.051 m² getitelde grond, zone A2, 17.180 m² bebouwbaar' },
+  { slug: 'nest', naam: 'Nest', stad: 'tanger', stadNaam: 'Tanger', wijk: 'Route de Rabat', dev: '', type: 'Appartementen', prijs: 'ca. 11.000 MAD/m²', kort: '2 slaapkamers, 68 tot 82 m², zwembad en parking' },
+  { slug: 'projet-or', naam: 'Projet Or', stad: 'marrakech', stadNaam: 'Marrakech', wijk: 'Agdal', dev: '', type: 'Appartementen', prijs: 'MAD 1.400.000', kort: '348 appartementen, twee zwembaden, spa en fitness' },
+  { slug: 'golf-city', naam: 'Marrakech Golf City', stad: 'marrakech', stadNaam: 'Marrakech', wijk: 'Avenue Mohammed VI', dev: 'Prestigia', type: "Appartementen, villa's", prijs: 'Op aanvraag', kort: 'Golfresort rond de 18-holes Montgomerie-baan' },
+];
+const base = 'https://maghreb-estates.com';
+const url = (p, l) => l === 'nl' ? `${base}/aanbod/${p.stad}/${p.slug}/` : `${base}/${l}/properties/${p.stad}/${p.slug}/`;
+[...new Set(P.map(p => p.stadNaam))].forEach(s => $('fStad').insertAdjacentHTML('beforeend', `<option>${s}</option>`));
+[...new Set(P.flatMap(p => p.type.split(', ')))].forEach(s => $('fType').insertAdjacentHTML('beforeend', `<option>${s}</option>`));
+function draw() {
+  const q = $('q').value.toLowerCase(), st = $('fStad').value, ty = $('fType').value;
+  const list = P.filter(p => (!q || [p.naam, p.stadNaam, p.wijk, p.dev, p.type].join(' ').toLowerCase().includes(q)) && (!st || p.stadNaam === st) && (!ty || p.type.includes(ty)));
+  $('cnt').textContent = `${list.length} ${list.length === 1 ? 'project' : 'projecten'}`;
+  $('rows').innerHTML = list.map((p, i) => `<tr>
+    <td><div class="nm">${esc(p.naam)}</div><div class="sm">${esc(p.kort)}</div></td>
+    <td><span class="pill">${esc(p.type)}</span></td>
+    <td>${esc(p.wijk)}<div class="sm">${esc(p.stadNaam)}</div></td>
+    <td>${esc(p.dev || '–')}</td>
+    <td class="mono" style="white-space:nowrap">${esc(p.prijs)}</td>
+    <td><span class="st">Beschikbaar</span></td>
+    <td style="white-space:nowrap">${['nl', 'en', 'fr', 'ar'].map(l => `<a class="lang" href="${url(p, l)}" target="_blank" rel="noopener">${l.toUpperCase()}</a>`).join(' ')}</td>
+    <td><div class="acts"><button class="btn sm outline" data-cp="${p.slug}">Kopieer link</button><button class="btn sm accent" data-wa="${p.slug}">WhatsApp</button></div></td>
+  </tr>`).join('') || '<tr><td colspan="8" class="empty">Geen projecten gevonden</td></tr>';
+  document.querySelectorAll('[data-cp]').forEach(b => b.onclick = () => ME.copy(url(P.find(p => p.slug === b.dataset.cp), 'nl')));
+  document.querySelectorAll('[data-wa]').forEach(b => b.onclick = () => {
+    const p = P.find(x => x.slug === b.dataset.wa);
+    ME.wa(`Hierbij de informatie over ${p.naam} in ${p.stadNaam} (${p.wijk}): ${url(p, 'nl')}\n\nZullen we het samen doornemen? Groet, Maghreb Estates`);
+  });
+}
+['q', 'fStad', 'fType'].forEach(id => $(id).addEventListener('input', draw));
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Kosten Koper Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Kosten koper calculator</h1><p>Overzicht van de aankoopkosten in Marokko</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+
+<main class="wrap tool">
+  <div>
+    <div class="card">
+      <h3>Aankoop</h3><div class="sub">Vul de koopsom in. Alle tarieven kun je hieronder aanpassen.</div>
+      <div class="field"><label>Koopsom</label><div class="affix big"><span>MAD</span><input type="text" id="prijs" value="1.500.000"></div><div class="hint" id="prijsEur"></div></div>
+      <div class="field"><label>Soort aankoop</label>
+        <div class="seg" id="soort"><button data-v="bestaand" class="on">Bestaande woning</button><button data-v="nieuw">Nieuwbouw (ontwikkelaar)</button><button data-v="grond">Grond</button></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Project of woning <em>optioneel</em></label><input type="text" id="project" placeholder="Bijv. Nest, 2 slaapkamers, Tanger"></div>
+        <div class="field"><label>Koper <em>optioneel</em></label><input type="text" id="koper" placeholder="Naam koper"></div>
+      </div>
+      <div class="field"><label>Opgesteld door <em>optioneel</em></label><input type="text" id="door" placeholder="Naam adviseur"></div>
+      <label class="check"><input type="checkbox" id="makelaar"><div><b>Makelaarscourtage meenemen</b><span>Gebruikelijk 2,5% van de koopsom plus 20% btw. Bij nieuwbouw via de ontwikkelaar meestal niet van toepassing.</span></div></label>
+      <label class="check"><input type="checkbox" id="hyp"><div><b>Hypotheek meenemen</b><span>Inschrijving van de hypotheek bij de conservation foncière (1,5%) en notariskosten van de hypotheekakte.</span></div></label>
+      <div id="hypBox" style="display:none;padding-top:8px"><div class="field"><label>Hypotheekbedrag</label><div class="affix"><span>MAD</span><input type="text" id="hypBedrag" value="900.000"></div></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Tarieven</h3><div class="sub">Standaardwaarden volgens de gangbare Marokkaanse tarieven (2026). Controleer bij twijfel met de notaris.</div>
+      <div class="grid2">
+        <div class="field"><label>Registratierechten <em>droits d’enregistrement</em></label><div class="affix"><input type="text" id="tReg" value="4"><span>%</span></div></div>
+        <div class="field"><label>Conservation foncière <em>ANCFCC</em></label><div class="affix"><input type="text" id="tCF" value="1,5"><span>%</span></div><div class="hint">Plus vast 200 MAD voor certificaat en zegels.</div></div>
+        <div class="field"><label>Notarishonorarium</label><div class="affix"><input type="text" id="tNot" value="1"><span>%</span></div><div class="hint">Excl. 10% btw, minimaal 5.000 MAD.</div></div>
+        <div class="field"><label>Diverse kosten <em>zegels, kopieën, dossier</em></label><div class="affix"><span>MAD</span><input type="text" id="tDiv" value="1.500"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Overige kosten</h3><div class="sub">Bijvoorbeeld vertaling van stukken, volmacht bij het consulaat of een advocaat.</div>
+      <div id="extra"></div>
+      <button class="btn outline sm" id="addExtra" type="button">+ Kostenpost toevoegen</button>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="sheet" id="sheet">
+      <div class="sheet-head"><div><h3>Kosten koper</h3><p>Overzicht van de aankoopkosten in Marokko</p></div><img src="assets/logo-licht.png" alt=""></div>
+      <div class="sheet-body">
+        <div class="small muted" style="margin-bottom:10px" id="meta"></div>
+        <div class="big-figure"><div><div class="k">Koopsom</div><div class="v" id="oPrijs">–</div></div><div class="e" id="oPrijsE"></div></div>
+        <table class="rows"><thead><tr><th>Kostenpost</th><th class="r">MAD</th><th class="r">EUR</th></tr></thead><tbody id="rows"></tbody></table>
+        <p class="note" id="pctNote"></p>
+        <p class="note">Indicatief overzicht. Bedragen kunnen per notaris en per dossier afwijken. Omrekening tegen <span id="fxNote"></span>. Betaal via een rekening in convertibele dirhams, zodat het geld bij verkoop terug naar Europa kan.</p>
+      </div>
+      <div class="sheet-foot"><span>Maghreb Estates</span><span>a.douider@maghreb-estates.com · maghreb-estates.com</span></div>
+    </div>
+    <div class="btns noprint">
+      <button class="btn" id="pdf">Download PDF</button>
+      <button class="btn outline" id="png">Download afbeelding</button>
+      <button class="btn accent" id="wa">Deel via WhatsApp</button>
+      <button class="btn outline" id="cp">Kopieer tekst</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const { fmt, num, money, mad, eur, pct, fxReady, esc, today } = ME;
+const $ = id => document.getElementById(id);
+['prijs', 'tDiv', 'hypBedrag'].forEach(id => money($(id)));
+let soort = 'bestaand', extras = [];
+
+document.querySelectorAll('#soort button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#soort button').forEach(x => x.classList.toggle('on', x === b));
+  soort = b.dataset.v;
+  if (soort === 'nieuw') $('makelaar').checked = false;
+  calc();
+});
+$('hyp').onchange = () => { $('hypBox').style.display = $('hyp').checked ? 'block' : 'none'; calc(); };
+$('addExtra').onclick = () => { extras.push({ naam: '', bedrag: '' }); drawExtras(); };
+function drawExtras() {
+  $('extra').innerHTML = extras.map((x, i) => `
+    <div class="grid2" style="grid-template-columns:1fr 160px auto;align-items:end">
+      <div class="field"><label>Omschrijving</label><input type="text" data-i="${i}" data-k="naam" value="${esc(x.naam)}" placeholder="Bijv. beëdigde vertaling"></div>
+      <div class="field"><label>Bedrag</label><div class="affix"><span>MAD</span><input type="text" data-i="${i}" data-k="bedrag" value="${esc(x.bedrag)}"></div></div>
+      <div class="field"><button class="btn ghost" data-del="${i}" type="button">Verwijder</button></div>
+    </div>`).join('');
+  $('extra').querySelectorAll('input').forEach(inp => {
+    if (inp.dataset.k === 'bedrag') money(inp);
+    inp.addEventListener('input', () => { extras[inp.dataset.i][inp.dataset.k] = inp.value; calc(); });
+  });
+  $('extra').querySelectorAll('[data-del]').forEach(b => b.onclick = () => { extras.splice(+b.dataset.del, 1); drawExtras(); calc(); });
+}
+
+let lines = [], total = 0;
+function calc() {
+  const fx = ME.fx, P = num($('prijs').value);
+  const reg = P * num($('tReg').value) / 100;
+  const cf = P * num($('tCF').value) / 100 + 200;
+  const notH = Math.max(5000, P * num($('tNot').value) / 100);
+  const not = notH * 1.10;
+  lines = [
+    ['Registratierechten (' + pct(num($('tReg').value)) + ')', reg],
+    ['Conservation foncière (' + pct(num($('tCF').value)) + ' + 200 MAD)', cf],
+    ['Notaris, honorarium incl. 10% btw', not],
+    ['Diverse kosten en zegels', num($('tDiv').value)],
+  ];
+  if ($('makelaar').checked) lines.push(['Makelaar (2,5% + 20% btw)', P * 0.025 * 1.2]);
+  if ($('hyp').checked) {
+    const H = num($('hypBedrag').value);
+    lines.push(['Inschrijving hypotheek (1,5% + 200 MAD)', H * 0.015 + 200]);
+    lines.push(['Notaris hypotheekakte (ca. 0,5% incl. btw)', Math.max(3000, H * 0.005 * 1.1)]);
+  }
+  extras.forEach(x => { if (num(x.bedrag)) lines.push([x.naam || 'Overige kosten', num(x.bedrag)]); });
+  total = lines.reduce((s, l) => s + l[1], 0);
+
+  $('prijsEur').textContent = P ? `Ongeveer € ${fmt(P / fx)} tegen 1 euro = ${fx.toLocaleString('nl-NL', { maximumFractionDigits: 2 })} MAD` : '';
+  $('oPrijs').textContent = mad(P);
+  $('oPrijsE').textContent = eur(P / fx);
+  $('rows').innerHTML = lines.map(l => `<tr><td>${esc(l[0])}</td><td class="r">${fmt(l[1])}</td><td class="r">${fmt(l[1] / fx)}</td></tr>`).join('') +
+    `<tr class="total"><td>Totale kosten koper</td><td class="r">${fmt(total)}</td><td class="r">${fmt(total / fx)}</td></tr>` +
+    `<tr class="grand"><td>Totaal inclusief koopsom</td><td class="r">${fmt(P + total)}</td><td class="r">${fmt((P + total) / fx)}</td></tr>`;
+  $('pctNote').innerHTML = P ? `De kosten koper zijn <b>${pct(total / P * 100, 2)}</b> van de koopsom.` : '';
+  $('fxNote').textContent = `1 EUR = ${fx.toLocaleString('nl-NL', { maximumFractionDigits: 2 })} MAD`;
+  const bits = [today(), $('project').value, $('koper').value && 'voor ' + $('koper').value, $('door').value && 'door ' + $('door').value].filter(Boolean);
+  $('meta').textContent = bits.join(' · ');
+}
+function text() {
+  const P = num($('prijs').value), fx = ME.fx;
+  return `Kosten koper${$('project').value ? ' ' + $('project').value : ''}\nKoopsom: ${mad(P)} (${eur(P / fx)})\n` +
+    lines.map(l => `- ${l[0]}: ${mad(l[1])}`).join('\n') +
+    `\nTotaal kosten koper: ${mad(total)} (${eur(total / fx)}), ${pct(total / P * 100)} van de koopsom\nTotaal incl. koopsom: ${mad(P + total)}\n\nIndicatief, Maghreb Estates`;
+}
+document.querySelectorAll('input').forEach(i => i.addEventListener('input', calc));
+document.querySelectorAll('input[type=checkbox]').forEach(i => i.addEventListener('change', calc));
+$('pdf').onclick = () => ME.printEl($('sheet'));
+$('png').onclick = () => ME.pngEl($('sheet'), 'kosten-koper');
+$('wa').onclick = () => ME.wa(text());
+$('cp').onclick = () => ME.copy(text());
+calc(); fxReady.then(calc);
+</script>
+</body>
+</html>

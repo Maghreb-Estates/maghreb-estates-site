@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Mail Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .blk { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--white); margin-bottom: 8px; cursor: pointer; }
+  .blk.on { border-color: var(--green); background: var(--green-light); }
+  .blk input { margin-top: 4px; accent-color: var(--green); }
+  .blk b { font-weight: 500; font-size: 14px; display: block; }
+  .blk span { font-size: 12.5px; color: var(--muted); }
+  .out { white-space: pre-wrap; font-size: 14.5px; line-height: 1.65; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; min-height: 300px; }
+  .subj { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .subj b { color: var(--green); font-weight: 500; }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Mail maker</h1><p>Stel snel een mail of WhatsApp samen uit vaste tekstblokken</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+<main class="wrap tool">
+  <div>
+    <div class="card">
+      <h3>Ontvanger</h3>
+      <div class="field" style="margin-top:10px"><div class="seg" id="lang"><button data-v="nl" class="on">Nederlands</button><button data-v="fr">Français</button><button data-v="en">English</button></div></div>
+      <div class="grid2">
+        <div class="field"><label>Aanhef</label><select id="aanhef"></select></div>
+        <div class="field"><label>Naam</label><input type="text" id="naam" placeholder="Bijv. El Amrani"></div>
+        <div class="field"><label>Project of object <em>optioneel</em></label><input type="text" id="obj" placeholder="Bijv. Nest in Tanger"></div>
+        <div class="field"><label>Link <em>optioneel</em></label><input type="text" id="link" placeholder="https://maghreb-estates.com/aanbod/..."></div>
+      </div>
+    </div>
+    <div class="card"><h3>Tekstblokken</h3><div class="sub">Kies de blokken in de volgorde waarin je ze wilt. Je kunt de tekst rechts daarna nog aanpassen.</div><div id="blocks"></div></div>
+    <div class="card">
+      <h3>Afzender</h3><div class="sub">Wordt op dit apparaat onthouden.</div>
+      <div class="grid2">
+        <div class="field"><label>Naam</label><input type="text" id="sNaam" value="Ayoub Douider"></div>
+        <div class="field"><label>Functie</label><input type="text" id="sFunc" value="Founder"></div>
+        <div class="field"><label>Telefoon</label><input type="text" id="sTel" value="+31 6 83 49 87 15"></div>
+        <div class="field"><label>Mail</label><input type="text" id="sMail" value="a.douider@maghreb-estates.com"></div>
+      </div>
+    </div>
+  </div>
+  <div class="result">
+    <h3 style="margin-bottom:10px">Resultaat</h3>
+    <div class="subj">Onderwerp: <b id="subj"></b></div>
+    <div class="out" id="out" contenteditable="true"></div>
+    <div class="btns">
+      <button class="btn" id="cp">Kopieer tekst</button>
+      <button class="btn outline" id="mail">Open in mail</button>
+      <button class="btn accent" id="wa" style="grid-column:1/-1">Deel via WhatsApp</button>
+    </div>
+    <p class="note">De knop “Open in mail” opent je eigen mailprogramma. Er wordt niets automatisch verstuurd.</p>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const T = {
+  nl: {
+    aanhef: ['Beste', 'Geachte heer', 'Geachte mevrouw', 'Hoi', 'Salam'],
+    groet: 'Met vriendelijke groet,',
+    subj: { intro: 'Kennismaking Maghreb Estates', obj: 'Informatie over {obj}', dd: 'Hoe wij een woning controleren', follow: 'Even bijpraten over uw zoektocht', bez: 'Bezichtiging {obj}', kosten: 'De kosten bij aankoop in Marokko', def: 'Uw vastgoed in Marokko' },
+    b: [
+      ['intro', 'Kennismaking', 'Wie we zijn en wat we doen', 'Dank voor uw bericht. Mijn naam is {sNaam} van Maghreb Estates. Wij begeleiden Nederlandstalige kopers en investeerders bij vastgoed in Marokko: van zoeken en beoordelen tot de overdracht bij de notaris, en desgewenst het beheer daarna.'],
+      ['wens', 'Wensen uitvragen', 'Vragen naar budget, stad, doel', 'Om u goed te kunnen helpen, hoor ik graag wat u zoekt. In welke stad kijkt u, wat is uw budget, en is de woning voor eigen gebruik, voor verhuur of allebei? Zoekt u nieuwbouw of een bestaande woning?'],
+      ['obj', 'Objectvoorstel', 'Een project of woning aanbieden', 'Op basis van uw wensen denk ik dat {obj} interessant voor u kan zijn. {link}Ik loop het graag met u door, inclusief de prijs per m² ten opzichte van vergelijkbare woningen in de wijk.'],
+      ['dd', 'Onze controle', 'Uitleg over due diligence', 'Voordat u iets tekent, controleren wij de eigendomstitel (titre foncier) bij het kadaster, de vergunningen, eventuele lasten op de woning en het koopcontract. Bij nieuwbouw kijken we ook naar de ontwikkelaar en de bankgarantie. U ontvangt van ons een helder overzicht.'],
+      ['kosten', 'Kosten koper', 'Indicatie van de aankoopkosten', 'Reken bij aankoop in Marokko op ongeveer 6 tot 7% kosten bovenop de koopsom: 4% registratierechten, 1,5% inschrijving bij het kadaster en het honorarium van de notaris. Ik stuur u graag een berekening voor een concrete woning.'],
+      ['rol', 'Transparant over onze rol', 'Vergoeding en rol benoemen', 'Voor de duidelijkheid over onze rol: {rol}'],
+      ['bez', 'Bezichtiging', 'Afspraak ter plaatse of via video', 'Wij kunnen een bezichtiging voor u regelen, ter plaatse of via een videogesprek als u nog in Nederland bent. Welke dagen komen u goed uit?'],
+      ['follow', 'Opvolging', 'Na een eerder gesprek', 'Ik wilde even horen hoe het met uw zoektocht gaat. Zijn er nieuwe vragen opgekomen, of zal ik een paar nieuwe opties voor u op een rij zetten?'],
+      ['afspraak', 'Afspraak voorstellen', 'Bel- of videogesprek', 'Zullen we een kort gesprek van een half uur plannen? Ik ben bereikbaar via telefoon en WhatsApp op {sTel}.'],
+    ],
+    rol: 'bij dit project ontvangen wij een vergoeding van de ontwikkelaar. Dat verandert niets aan onze controle: wij beoordelen het project op dezelfde manier als elk ander, en zeggen het u als iets niet klopt.',
+  },
+  fr: {
+    aanhef: ['Bonjour', 'Monsieur', 'Madame', 'Cher', 'Salam'],
+    groet: 'Bien cordialement,',
+    subj: { intro: 'Présentation de Maghreb Estates', obj: 'Informations sur {obj}', dd: 'Notre vérification du bien', follow: 'Suivi de votre recherche', bez: 'Visite de {obj}', kosten: 'Les frais d’acquisition au Maroc', def: 'Votre bien immobilier au Maroc' },
+    b: [
+      ['intro', 'Présentation', '', 'Merci pour votre message. Je suis {sNaam} de Maghreb Estates. Nous accompagnons les acheteurs et investisseurs européens dans leurs projets immobiliers au Maroc, de la recherche jusqu’à la signature chez le notaire, et la gestion par la suite.'],
+      ['wens', 'Vos critères', '', 'Afin de bien vous accompagner, pourriez-vous me préciser la ville, votre budget et l’usage prévu : résidence personnelle, location ou les deux ? Cherchez-vous du neuf ou de l’ancien ?'],
+      ['obj', 'Proposition de bien', '', 'Selon vos critères, {obj} pourrait vous intéresser. {link}Je serai ravi de le passer en revue avec vous, y compris le prix au m² par rapport aux biens comparables du quartier.'],
+      ['dd', 'Notre vérification', '', 'Avant toute signature, nous vérifions le titre foncier auprès de la Conservation Foncière, les autorisations, les éventuelles charges sur le bien et le contrat. Pour un projet neuf, nous vérifions également le promoteur et la garantie bancaire.'],
+      ['kosten', 'Frais d’acquisition', '', 'Comptez environ 6 à 7 % de frais en plus du prix : 4 % de droits d’enregistrement, 1,5 % de conservation foncière et les honoraires du notaire.'],
+      ['rol', 'Notre rôle', '', 'Pour être transparents sur notre rôle : {rol}'],
+      ['bez', 'Visite', '', 'Nous pouvons organiser une visite sur place ou par appel vidéo. Quels jours vous conviennent ?'],
+      ['follow', 'Suivi', '', 'Je reviens vers vous pour savoir où en est votre recherche. Souhaitez-vous que je vous propose de nouvelles options ?'],
+      ['afspraak', 'Rendez-vous', '', 'Pouvons-nous prévoir un court échange d’une demi-heure ? Je suis joignable par téléphone et WhatsApp au {sTel}.'],
+    ],
+    rol: 'pour ce projet, nous sommes rémunérés par le promoteur. Cela ne change rien à notre vérification : nous l’évaluons comme tout autre projet.',
+  },
+  en: {
+    aanhef: ['Dear', 'Dear Mr', 'Dear Ms', 'Hi', 'Salam'],
+    groet: 'Kind regards,',
+    subj: { intro: 'Introduction Maghreb Estates', obj: 'Information about {obj}', dd: 'How we check a property', follow: 'Following up on your search', bez: 'Viewing {obj}', kosten: 'Buying costs in Morocco', def: 'Your property in Morocco' },
+    b: [
+      ['intro', 'Introduction', '', 'Thank you for your message. I am {sNaam} from Maghreb Estates. We guide European buyers and investors through property in Morocco: from search and assessment to the transfer at the notary, and property management afterwards.'],
+      ['wens', 'Your wishes', '', 'To help you well, could you tell me which city you are looking at, your budget, and whether the property is for your own use, for rental or both? New build or existing?'],
+      ['obj', 'Property proposal', '', 'Based on your wishes, {obj} could be of interest. {link}I would be happy to walk you through it, including the price per m² compared to similar homes in the area.'],
+      ['dd', 'Our checks', '', 'Before you sign anything, we check the title deed (titre foncier) at the land registry, the permits, any charges on the property and the purchase contract. For new builds we also check the developer and the bank guarantee.'],
+      ['kosten', 'Buying costs', '', 'Expect about 6 to 7% in costs on top of the price: 4% registration duty, 1.5% land registry and the notary fee.'],
+      ['rol', 'Our role', '', 'To be transparent about our role: {rol}'],
+      ['bez', 'Viewing', '', 'We can arrange a viewing on site or by video call. Which days suit you?'],
+      ['follow', 'Follow up', '', 'I wanted to check in on your search. Shall I put together a few new options for you?'],
+      ['afspraak', 'Schedule a call', '', 'Shall we plan a short call of half an hour? You can reach me by phone and WhatsApp at {sTel}.'],
+    ],
+    rol: 'for this project we receive a fee from the developer. That does not change our checks: we assess it like any other project.',
+  },
+};
+let lang = 'nl';
+let sel = ['intro', 'wens', 'afspraak'];
+const snd = ME.keep.get('afzender', null);
+if (snd) ['sNaam', 'sFunc', 'sTel', 'sMail'].forEach(k => snd[k] && ($(k).value = snd[k]));
+function drawUI() {
+  const L = T[lang];
+  $('aanhef').innerHTML = L.aanhef.map(a => `<option>${a}</option>`).join('');
+  $('blocks').innerHTML = L.b.map(b => `<label class="blk ${sel.includes(b[0]) ? 'on' : ''}"><input type="checkbox" data-k="${b[0]}" ${sel.includes(b[0]) ? 'checked' : ''}><div><b>${b[1]}</b>${b[2] ? `<span>${b[2]}</span>` : ''}</div></label>`).join('');
+  $('blocks').querySelectorAll('input').forEach(i => i.onchange = () => {
+    if (i.checked) sel.push(i.dataset.k); else sel = sel.filter(x => x !== i.dataset.k);
+    i.closest('.blk').classList.toggle('on', i.checked); build();
+  });
+  build();
+}
+let subject = '';
+function build() {
+  const L = T[lang], v = k => $(k).value.trim();
+  const fill = s => s.replace('{sNaam}', v('sNaam')).replace('{sTel}', v('sTel')).replace('{obj}', v('obj') || (lang === 'nl' ? 'dit project' : lang === 'fr' ? 'ce projet' : 'this project'))
+    .replace('{link}', v('link') ? v('link') + '\n\n' : '').replace('{rol}', L.rol);
+  const order = L.b.map(b => b[0]).filter(k => sel.includes(k));
+  const body = order.map(k => fill(L.b.find(b => b[0] === k)[3])).join('\n\n');
+  const first = order.find(k => L.subj[k]) || 'def';
+  subject = fill(L.subj[first] || L.subj.def);
+  $('subj').textContent = subject;
+  $('out').textContent = `${v('aanhef') || L.aanhef[0]} ${v('naam')}`.trim() + ',\n\n' + body + `\n\n${L.groet}\n\n${v('sNaam')}\n${v('sFunc')}, Maghreb Estates\n${v('sTel')} · ${v('sMail')}\nmaghreb-estates.com`;
+  ME.keep.set('afzender', { sNaam: v('sNaam'), sFunc: v('sFunc'), sTel: v('sTel'), sMail: v('sMail') });
+}
+document.querySelectorAll('#lang button').forEach(b => b.onclick = () => { document.querySelectorAll('#lang button').forEach(x => x.classList.toggle('on', x === b)); lang = b.dataset.v; drawUI(); });
+['aanhef', 'naam', 'obj', 'link', 'sNaam', 'sFunc', 'sTel', 'sMail'].forEach(k => { $(k).addEventListener('input', build); $(k).addEventListener('change', build); });
+$('cp').onclick = () => ME.copy($('out').innerText);
+$('wa').onclick = () => ME.wa($('out').innerText);
+$('mail').onclick = () => { location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent($('out').innerText)}`; };
+drawUI();
+</script>
+</body>
+</html>

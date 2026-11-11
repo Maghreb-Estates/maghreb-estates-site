@@ -78,6 +78,11 @@
     .section-btn:hover { color:var(--text); }
     .section-btn.active { color:var(--green); border-bottom-color:var(--accent); }
 
+    /* ── Melding: bron liep achter bij de laatste scrape ── */
+    .bron-melding { background:#f7ecd6; border-bottom:1.5px solid var(--gold); padding:10px 48px; font-size:12px; line-height:1.5; color:var(--text); }
+    .bron-melding strong { font-weight:600; }
+    @media (max-width:900px) { .bron-melding { padding-left:20px; padding-right:20px; } }
+
     /* ── Objecten sectie ── */
     #s-obj { padding:24px 48px 60px; }
     #s-obj .obj-filters { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:18px 20px; display:flex; flex-wrap:wrap; gap:16px 20px; align-items:flex-end; margin-bottom:18px; }
@@ -378,6 +383,7 @@
     <button class="section-btn" data-sec="airbnb">Airbnb</button>
     <button class="section-btn" data-sec="obj">Objecten</button>
   </div>
+  <div id="bron-melding" class="bron-melding" hidden></div>
 
   <div id="loading">
     <div class="spinner"></div>
@@ -1440,43 +1446,76 @@ const bsc = { grid:{color:'#d8d1c4'}, ticks:{font:{family:MONO,size:10},color:'#
 // na drie gemiste volle runs op 'inactive', en verschuift geen statussen na een
 // halve crawl, dus is_active/last_seen_at-lapmiddelen zijn niet meer nodig.
 const ACTIEVE_STATUS = ['active','possibly_inactive'];
+// Levert een bron bij de laatste run niets op (storing bij de bron, blokkade), dan
+// verschuift de scraper zijn statussen niet: zijn laatste stand blijft in het
+// aanbod, en een melding onder het menu noemt de bron en de datum van die stand.
+// Is een bron langer dan BRON_MAX_OUD_DAGEN stil, dan laten we hem alsnog los.
+const BRONNEN = ['mubawab','sarouty','agenz'];
+const BRON_ACHTER_DAGEN = 2;    // zoveel ouder dan de nieuwste run = bron miste die run
+const BRON_MAX_OUD_DAGEN = 45;
+const LISTING_KOLOMMEN = 'city,neighborhood,price,price_currency,price_period,surface_m2,land_area_m2,transaction_type,property_type,status,last_seen_at,url,title,source,bedrooms,bathrooms';
+let bronAchter = [];            // [{ bron, laatst, n }] voor de melding onder het menu
 let _sb = null;
 const sbClient = () => _sb || (_sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON));
 
-async function loadData() {
-  const sb = sbClient();
+// Supabase geeft max. 1000 rijen per request terug: pagineer in stappen van 1000
+// tot de laatste (kortere) pagina binnen is.
+async function haalListings(sb, filter, voortgang) {
   const rows = []; let from = 0;
   while (true) {
-    const { data, error } = await sb.from('listings')
-      .select('city,neighborhood,price,price_currency,price_period,surface_m2,land_area_m2,transaction_type,property_type,status,last_seen_at,url,title,source,bedrooms,bathrooms')
-      .in('status', ACTIEVE_STATUS).not('price','is',null)
+    const { data, error } = await filter(sb.from('listings').select(LISTING_KOLOMMEN).not('price','is',null))
       .order('id',{ascending:true}).range(from, from+999);
-    if (error) {
-      const migratie = /status|land_area_m2/.test(error.message)
-        ? ' De databasemigraties van 2026-10-21 (backend) zijn nog niet gedraaid.' : '';
-      document.getElementById('loading').innerHTML =
-        `<div style="color:var(--danger);font-family:var(--font-mono);padding:40px">Fout: ${kwEsc(error.message)}.${migratie}</div>`;
-      return null;
-    }
-    rows.push(...data.map(prepRow));
-    document.getElementById('load-progress').textContent = `${rows.length.toLocaleString('nl-NL')} listings geladen…`;
-    // Supabase geeft standaard max. 1000 rijen per request terug — pagineer in
-    // stappen van 1000 tot de laatste (kortere) pagina binnen is.
+    if (error) throw error;
+    rows.push(...data);
+    if (voortgang) voortgang(rows.length);
     if (data.length < 1000) break;
     from += 1000;
   }
   return rows;
 }
 
-// Versheid per bron: de laatste geslaagde run in scrape_runs. Ouder dan 8 dagen
-// kleurt rood, want de scrape draait elke maandag.
+async function loadData() {
+  const DAG = 86400000;
+  const prog = document.getElementById('load-progress');
+  try {
+    const rows = (await haalListings(sbClient(), q => q.in('status', ACTIEVE_STATUS),
+      n => { prog.textContent = `${n.toLocaleString('nl-NL')} listings geladen…`; })).map(prepRow);
+
+    // Per bron de laatste keer dat hij iets opleverde, en de nieuwste run overall.
+    const laatst = {}; let nieuwste = 0;
+    for (const r of rows) {
+      const t = Date.parse(r.last_seen_at);
+      if (t > (laatst[r.source] || 0)) laatst[r.source] = t;
+      if (t > nieuwste) nieuwste = t;
+    }
+    bronAchter = [];
+    const losgelaten = new Set();
+    for (const bron of BRONNEN) {
+      if (!laatst[bron] || laatst[bron] >= nieuwste - BRON_ACHTER_DAGEN * DAG) continue;
+      if (laatst[bron] < Date.now() - BRON_MAX_OUD_DAGEN * DAG) { losgelaten.add(bron); continue; }
+      bronAchter.push({ bron, laatst: laatst[bron], n: rows.filter(r => r.source === bron).length });
+    }
+    return losgelaten.size ? rows.filter(r => !losgelaten.has(r.source)) : rows;
+  } catch (error) {
+    const melding = String((error && error.message) || error);
+    const migratie = /status|land_area_m2/.test(melding)
+      ? ' De databasemigraties van 2026-10-21 (backend) zijn nog niet gedraaid.' : '';
+    document.getElementById('loading').innerHTML =
+      `<div style="color:var(--danger);font-family:var(--font-mono);padding:40px">Fout: ${kwEsc(melding)}.${migratie}</div>`;
+    return null;
+  }
+}
+
+// Versheid per bron: de laatste run in scrape_runs die ook iets opleverde (een run
+// die "slaagt" met 0 objecten, zoals Sarouty sinds 9 november, telt niet). Ouder
+// dan 8 dagen kleurt rood, want de scrape draait elke maandag.
 async function loadVersheid() {
   const { data, error } = await sbClient().from('scrape_runs')
     .select('source,started_at,listings_scraped,status')
     .order('started_at', { ascending:false }).limit(40);
   if (error || !data) return;
   const laatste = {};
-  data.forEach(r => { if (r.status === 'success' && !laatste[r.source]) laatste[r.source] = r; });
+  data.forEach(r => { if (r.status === 'success' && r.listings_scraped > 0 && !laatste[r.source]) laatste[r.source] = r; });
   const delen = Object.values(laatste).sort((a,b) => a.source.localeCompare(b.source)).map(r => {
     const d = new Date(r.started_at), oud = Date.now() - d.getTime() > 8 * 86400000;
     const ds = d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
@@ -1484,6 +1523,18 @@ async function loadVersheid() {
       `${kwEsc(r.source)} ${ds}${oud ? ' ⚠' : ''}</span>`;
   });
   document.getElementById('footer-versheid').innerHTML = delen.length ? 'Laatste scrape: ' + delen.join(' · ') : '—';
+}
+
+function toonBronMelding() {
+  const el = document.getElementById('bron-melding');
+  if (!bronAchter.length) { el.hidden = true; return; }
+  const naam = b => b.charAt(0).toUpperCase() + b.slice(1);
+  const datum = t => new Date(t).toLocaleDateString('nl-NL', { day:'numeric', month:'long' });
+  el.innerHTML = bronAchter.map(b =>
+    `<strong>${naam(b.bron)}: stand van ${datum(b.laatst)}.</strong> ` +
+    `De bron leverde bij de laatste scrape niets op. De laatst bekende ${fmt(b.n)} objecten tellen mee ` +
+    `tot de bron terug is (maximaal ${BRON_MAX_OUD_DAGEN} dagen).`).join('<br>');
+  el.hidden = false;
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -1517,6 +1568,7 @@ async function init() {
   vulStadSelect('yield-stad');
 
   document.getElementById('loading').style.display = 'none';
+  toonBronMelding();
   buildCityTabs();
   // Klikte je tijdens het laden al op een andere sectie, laat die dan staan.
   const actief = document.querySelector('.section-btn.active');

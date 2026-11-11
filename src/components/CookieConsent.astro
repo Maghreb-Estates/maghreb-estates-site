@@ -11,6 +11,8 @@
 //   contact_click  — klik op een WhatsApp-, telefoon- of e-maillink (method, location)
 //   generate_lead  — een formulier is verzonden (form, method); aangeroepen vanuit
 //                    de formulierscripts via window.meTrack(...)
+//   Verkooppagina daarnaast: cta_click (location: hero/prijzen/slot/sticky),
+//   form_start (eerste klik in het formulier) en form_error (opslaan mislukt).
 import { site } from '../data/site';
 import { standaardTaal, type Taal } from '../i18n/config';
 
@@ -129,7 +131,12 @@ const t = teksten[taal];
 
     var keuze = leesKeuze();
     if (keuze === 'granted') { laadAnalytics(); laadClarity(); }
-    else if (keuze === null) bar.hidden = false;
+    // Pas tonen als de webfonts binnen zijn. De melding staat onderaan vast: wisselt
+    // het lettertype terwijl hij al zichtbaar is, dan verandert zijn hoogte en
+    // verspringt hij (layout shift, CLS).
+    else if (keuze === null) {
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { bar.hidden = false; });
+    }
 
     document.addEventListener('click', function (e) {
       var knop = e.target.closest('[data-cookie]');
@@ -150,7 +157,9 @@ const t = teksten[taal];
         : href.indexOf('mailto:') === 0 ? 'email'
         : null;
       if (!methode) return;
-      var plek = a.closest('.sticky-wa') ? 'sticky'
+      // data-plek op de link wint (bv. "hero" of "slot" op de verkooppagina).
+      var plek = a.getAttribute('data-plek') ? a.getAttribute('data-plek')
+        : a.closest('.sticky-wa') ? 'sticky'
         : a.closest('footer') ? 'footer'
         : a.closest('nav, header') ? 'navigatie'
         : 'pagina';

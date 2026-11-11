@@ -1,0 +1,16 @@
+---
+// Eén subtiele verkoopregel onderaan de homepage, nooit in de hero. Verkopen is
+// een nevendienst: de homepage blijft gericht op kopen en investeren. Tekst per
+// taal in src/i18n/verkopen.ts (homeBlok).
+import { paginas, standaardTaal, type Taal } from '../i18n/config';
+import { verkoopTekst } from '../i18n/verkopen';
+
+interface Props { taal?: Taal }
+const { taal = standaardTaal } = Astro.props;
+const t = verkoopTekst[taal].homeBlok;
+---
+<section class="verkoop-hint">
+  <div class="container">
+    <p>{t.vraag} <a href={paginas.verkopen[taal]}>{t.link}{'\u00a0'}<span aria-hidden="true">{taal === 'ar' ? '←' : '→'}</span></a></p>
+  </div>
+</section>

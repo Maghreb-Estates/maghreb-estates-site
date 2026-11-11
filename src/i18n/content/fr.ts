@@ -428,7 +428,7 @@ export const fr: TaalContent = {
       'L’étape suivante la plus logique.',
     ],
     punten: [],
-    bevestiging: 'Merci. Votre demande de rendez-vous a bien été reçue. Nous confirmerons le créneau dans les meilleurs délais par WhatsApp ou par téléphone.',
-    kopie: 'Merci pour votre demande auprès de Maghreb Estates. Nous avons bien reçu votre demande de rendez-vous et confirmerons le créneau dans les meilleurs délais par WhatsApp ou par téléphone.',
+    bevestiging: 'Merci. Votre demande de rendez-vous a bien été reçue. Nous vous contacterons dans les meilleurs délais par WhatsApp ou par téléphone pour confirmer votre créneau. S’il ne convient pas, nous conviendrons ensemble d’un autre moment.',
+    kopie: 'Merci pour votre demande auprès de Maghreb Estates. Nous avons bien reçu votre demande de rendez-vous. Le créneau choisi est une préférence : nous confirmerons dans les meilleurs délais par WhatsApp ou par téléphone s’il convient, ou nous conviendrons ensemble d’un autre moment.',
   },
 };

@@ -1,0 +1,453 @@
+---
+// Verkooppagina in alle vier de talen: eigenaren melden hier hun woning aan en
+// wij nemen de verkoop uit handen. Doelgroep: eigenaren in Marokko zelf én
+// Marokkanen in het buitenland.
+//
+// Opbouw (redesign november 2026): hero met twee CTA's → kort formulier →
+// waarom (4 kaarten) → werkwijze (5 stappen) → netwerk met kaartje → prijzen (5
+// stadskaarten + link naar de marktprijzenpagina) → FAQ → afsluitende CTA.
+//
+// Tekst per taal: src/i18n/verkopen.ts. Gebruikt door
+// src/pages/huis-verkopen-marokko.astro (NL) en src/pages/[lang]/[slug].astro.
+import { getImage } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Icon from './Icon.astro';
+import Faq from './Faq.astro';
+import VerderLezen from './VerderLezen.astro';
+import { site, waLink } from '../data/site';
+import { faqSchema, serviceSchema } from '../data/schema';
+import { prijsOpmaak } from '../data/prijsOpmaak';
+import kaart from '../data/kaartNetwerk.json';
+import heroFoto from '../assets/verkopen/hero.webp';
+import { paginas, standaardTaal, type Taal } from '../i18n/config';
+import { ui } from '../i18n/ui';
+import { verkoopTekst, werkgebied, type WerkgebiedStad } from '../i18n/verkopen';
+
+interface Props { taal?: Taal }
+const { taal = standaardTaal } = Astro.props;
+const t = verkoopTekst[taal];
+const p = t.prijzen;
+const pad = paginas.verkopen[taal];
+const isNl = taal === standaardTaal;
+
+const opsomming = (namen: string[], voegwoord: string) =>
+  `${namen.slice(0, -1).join(t.lijst.komma)}${voegwoord}${namen[namen.length - 1]}`;
+const stadNamen = werkgebied.map((s) => t.steden[s]);
+const steden = opsomming(stadNamen, t.lijst.en);
+const stedenOf = opsomming(stadNamen, t.lijst.of);
+const vul = (s: string) => s.replaceAll('{steden}', steden).replaceAll('{stedenOf}', stedenOf);
+
+// Bellen via het Marokkaanse nummer, WhatsApp via het Nederlandse (site.ts).
+const waBericht = waLink(t.hero.waBericht);
+
+// Vraagprijzen per m² (scripts/marktprijzen.py → src/data/marktprijzen.json): hier
+// vijf stadskaarten, de volledige tabellen op de marktprijzenpagina.
+const { data: marktprijzen, getal, stadKaarten, vul: vulPrijs } = prijsOpmaak(taal, { eenheid: p.eenheid, inStad: p.inStad });
+const faqs = t.faqs.map((f) => ({ q: f.q, a: vul(vulPrijs(f.a)) }));
+
+// Hero-foto als responsive webp. Op mobiel staat hij onder de knoppen.
+const foto = await getImage({
+  src: heroFoto,
+  widths: [480, 720, 960, heroFoto.width].filter((w) => w <= heroFoto.width),
+  format: 'webp',
+});
+
+const privacy = t.form.privacy.split('{link}');
+const waaromIcons = ['grafiek', 'camera', 'wereld', 'sleutel'];
+
+// Kaartje "Marokko en Europa": landsgrenzen uit Natural Earth
+// (scripts/kaart-netwerk.mjs → src/data/kaartNetwerk.json) en de steden in
+// dezelfde projectie. Bogen lopen van Europa naar Marokko.
+const { kader } = kaart;
+const punt = (lon: number, lat: number) => ({
+  x: Math.round((lon - kader.lonMin) * kader.kx * 10) / 10,
+  y: Math.round((kader.latMax - lat) * kader.ky * 10) / 10,
+});
+const kaartSteden: { stad: WerkgebiedStad; pos: { x: number; y: number }; links?: boolean }[] = [
+  { stad: 'Tanger', pos: punt(-5.80, 35.77) },
+  { stad: 'Rabat', pos: punt(-6.84, 34.02) },
+  { stad: 'Casablanca', pos: punt(-7.59, 33.57), links: true },
+  { stad: 'Marrakech', pos: punt(-7.99, 31.63) },
+  { stad: 'Agadir', pos: punt(-9.60, 30.43), links: true },
+];
+const europa = [punt(4.90, 52.37), punt(4.35, 50.85), punt(2.35, 48.86)]; // Amsterdam, Brussel, Parijs
+const bogen = europa.map((e, i) => {
+  const doel = kaartSteden[[2, 1, 0][i]].pos;
+  return `M${e.x} ${e.y} Q${Math.min(e.x, doel.x) - 70} ${(e.y + doel.y) / 2} ${doel.x} ${doel.y}`;
+});
+---
+<BaseLayout
+  title={t.meta.title}
+  description={vul(t.meta.description)}
+  path={pad}
+  taal={taal}
+  stickyCta={{ label: t.hero.estimatie, href: '#aanmelden', wa: t.hero.waBericht }}
+  schema={[
+    faqSchema(faqs),
+    serviceSchema({ naam: t.meta.dienst, beschrijving: vul(t.meta.dienstBeschrijving), path: pad, steden: werkgebied, type: t.meta.dienst }),
+  ]}
+>
+  <!-- HERO: donkergroen (duidelijk los van de crème menubalk), met het kruimelpad
+       erin. Tekst en knoppen links, foto rechts; op mobiel eerst tekst en knoppen. -->
+  <section class="vk-hero">
+    <Breadcrumbs
+      items={[{ label: t.kruimel, href: pad }]}
+      home={{ label: ui[taal].breadcrumb.home, href: paginas.home[taal] }}
+    />
+    <div class="container vk-hero__grid">
+      <div class="vk-hero__tekst">
+        <p class="eyebrow eyebrow--light">{t.hero.eyebrow}</p>
+        <h1 set:html={t.hero.titel} />
+        <p class="vk-hero__sub">{t.hero.sub}</p>
+        <div class="vk-acties" data-verberg-sticky>
+          <a href="#aanmelden" class="btn btn--light" data-cta="hero">{t.hero.estimatie}</a>
+          <a href={waBericht} class="btn btn--outline btn--wa" rel="noopener" data-plek="hero"><Icon name="whatsapp" size={17} />{t.hero.whatsapp}</a>
+        </div>
+        <ul class="vk-trust">
+          {t.hero.trust.map((v) => <li><Icon name="check" size={16} /><span>{v}</span></li>)}
+        </ul>
+      </div>
+      <div class="vk-hero__foto">
+        <img
+          src={foto.src}
+          srcset={foto.srcSet.attribute}
+          sizes="(max-width: 900px) calc(100vw - 32px), 540px"
+          width={heroFoto.width}
+          height={heroFoto.height}
+          alt=""
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- AANMELDEN: kort formulier. Vier verplichte velden, de rest achter "Details toevoegen". -->
+  <section class="section section--tinted vk-aanmelden" id="aanmelden" data-verberg-sticky>
+    <div class="container vk-aanmelden__grid">
+      <div class="vk-aanmelden__kop">
+        <p class="eyebrow">{t.aanmelden.eyebrow}</p>
+        <h2>{t.aanmelden.titel}</h2>
+        <p class="section__desc">{t.aanmelden.intro}</p>
+      </div>
+
+      <div class="vk-aanmelden__info">
+        <div class="werkgebied">
+          <h3>{t.aanmelden.werkgebiedTitel}</h3>
+          <p>{t.aanmelden.werkgebiedTekst}</p>
+          <ul class="werkgebied__lijst">
+            {werkgebied.map((s) => (
+              <li><Icon name="afstand" size={17} /><span>{t.steden[s]}</span></li>
+            ))}
+          </ul>
+        </div>
+        <ul class="checks">
+          {t.aanmelden.voordelen.map((v) => <li>{v}</li>)}
+        </ul>
+        <p class="werkgebied__direct">{t.aanmelden.direct} <a href={waBericht} rel="noopener" data-plek="formulier">{t.aanmelden.directWa}</a> {t.aanmelden.directBel} <a href={`tel:${site.telefoonHref}`} dir="ltr" data-plek="formulier">{site.telefoon}</a>.</p>
+      </div>
+
+      <div class="vk-aanmelden__form">
+        <form class="card vform" id="verkoopForm" novalidate>
+          <p class="vform__verplicht"><span aria-hidden="true">* </span>{t.form.verplicht}</p>
+          <div class="veld">
+            <label for="naam">{t.form.naam} <span aria-hidden="true">*</span></label>
+            <input type="text" id="naam" name="naam" placeholder={t.form.naamPh} autocomplete="name" required />
+          </div>
+          <div class="veld">
+            <label for="telefoon">{t.form.telefoon} <span aria-hidden="true">*</span></label>
+            <input type="tel" id="telefoon" name="telefoon" placeholder={t.form.telefoonPh} autocomplete="tel" dir="ltr" required />
+          </div>
+          <div class="veld-rij">
+            <div class="veld">
+              <label for="stad">{t.form.stad} <span aria-hidden="true">*</span></label>
+              <select id="stad" name="stad" required>
+                <option value="">{t.form.stadKies}</option>
+                {werkgebied.map((s) => <option value={s}>{t.form.stadOptie.replace('{stad}', t.steden[s])}</option>)}
+              </select>
+            </div>
+            <div class="veld">
+              <label for="type">{t.form.type} <span aria-hidden="true">*</span></label>
+              <select id="type" name="type" required>
+                <option value="">{t.form.kies}</option>
+                {t.form.types.map((o) => <option>{o}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <details class="vform__meer">
+            <summary>{t.form.meer} <span class="veld__hint">{t.form.optioneel}</span></summary>
+            <div class="vform__meer-velden">
+              <div class="veld">
+                <label for="wijk">{t.form.wijk}</label>
+                <input type="text" id="wijk" name="wijk" placeholder={t.form.wijkPh} />
+              </div>
+              <div class="veld-rij">
+                <div class="veld">
+                  <label for="oppervlak">{t.form.oppervlak}</label>
+                  <input type="text" id="oppervlak" name="oppervlak" inputmode="numeric" placeholder={t.form.oppervlakPh} />
+                </div>
+                <div class="veld">
+                  <label for="prijs">{t.form.prijs}</label>
+                  <input type="text" id="prijs" name="prijs" placeholder={t.form.prijsPh} />
+                </div>
+              </div>
+              <div class="veld">
+                <label for="email">{t.form.email}</label>
+                <input type="email" id="email" name="email" placeholder={t.form.emailPh} autocomplete="email" dir="ltr" />
+              </div>
+              <div class="veld">
+                <label for="bericht">{t.form.bericht}</label>
+                <textarea id="bericht" name="bericht" rows="3" placeholder={t.form.berichtPh}></textarea>
+              </div>
+            </div>
+          </details>
+
+          <!-- Honeypot tegen spambots: onzichtbaar voor bezoekers en schermlezers. -->
+          <div class="vform__hp" aria-hidden="true">
+            <label for="vform_website">Website</label>
+            <input type="text" id="vform_website" name="website" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <p class="vform__validatie" id="vformValidatie" role="alert" hidden>{t.form.validatie}</p>
+          <button type="submit" class="btn btn--primary btn--full" id="vformKnop">{t.form.verstuur}</button>
+          <p class="vform__privacy">{privacy[0]}<a href="/privacybeleid/">{t.form.privacyLink}</a>{t.form.privacyTaal}{privacy[1]}</p>
+
+          <div class="vform__fout" id="vformFout" role="alert" hidden>
+            <p>{t.form.fout.tekst}</p>
+            <a class="btn btn--outline btn--wa" id="vformFoutWa" href={waBericht} rel="noopener" data-plek="formulier-fout"><Icon name="whatsapp" size={17} />{t.form.fout.wa}</a>
+          </div>
+        </form>
+
+        <div class="card vform-bedankt" id="vformBedankt" tabindex="-1" hidden>
+          <span class="vform-bedankt__ic"><Icon name="check" size={22} /></span>
+          <h3>{t.form.bedankt.titel}</h3>
+          <p>{t.form.bedankt.tekst}</p>
+          <p><a href={waBericht} rel="noopener" data-plek="bedankt">{t.form.bedankt.wa}</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAAROM: vier kaarten -->
+  <section class="section">
+    <div class="container">
+      <div class="section__header">
+        <p class="eyebrow">{t.waarom.eyebrow}</p>
+        <h2>{t.waarom.titel}</h2>
+        <p class="section__desc">{t.waarom.intro}</p>
+      </div>
+      <div class="vk-kaarten">
+        {t.waarom.kaarten.map((k, i) => (
+          <div class="vk-kaart">
+            <span class="vk-kaart__ic"><Icon name={waaromIcons[i]} size={22} /></span>
+            <h3>{k.titel}</h3>
+            <p>{k.tekst}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- WERKWIJZE: vijf stappen als tijdlijn -->
+  <section class="section section--tinted">
+    <div class="container">
+      <div class="section__header">
+        <p class="eyebrow">{t.werkwijze.eyebrow}</p>
+        <h2>{t.werkwijze.titel}</h2>
+      </div>
+      <ol class="vk-stappen">
+        {t.werkwijze.stappen.map((s, i) => (
+          <li class="vk-stap">
+            <span class="vk-stap__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{s.titel}</h3>
+            <p>{s.tekst}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- NETWERK: kopers in Marokko én Europa -->
+  <section class="section section--dark">
+    <div class="container vk-netwerk">
+      <div>
+        <p class="eyebrow eyebrow--light">{t.netwerk.eyebrow}</p>
+        <h2>{t.netwerk.titel}</h2>
+        <p class="vk-netwerk__tekst">{t.netwerk.tekst}</p>
+        <ul class="vk-groepen">
+          {t.netwerk.groepen.map((g) => (
+            <li><strong>{g.titel}</strong><span>{g.tekst}</span></li>
+          ))}
+        </ul>
+      </div>
+      <svg class="vk-kaartje" viewBox={`0 0 ${kader.breedte} ${kader.hoogte}`} role="img" aria-label={t.netwerk.kaartLabel} dir="ltr">
+        <path d={kaart.overig} class="vk-kaartje__land" />
+        <path d={kaart.diaspora} class="vk-kaartje__land vk-kaartje__land--eu" />
+        <path d={kaart.marokko} class="vk-kaartje__land vk-kaartje__land--ma" />
+        {bogen.map((d) => <path d={d} class="vk-kaartje__boog" />)}
+        {europa.map((e) => <circle cx={e.x} cy={e.y} r="4" class="vk-kaartje__eu" />)}
+        <text x={europa[1].x + 12} y={europa[1].y + 4} text-anchor="start" class="vk-kaartje__regio">{t.netwerk.europa}</text>
+        {kaartSteden.map((s) => (
+          <>
+            <circle cx={s.pos.x} cy={s.pos.y} r="4.5" class="vk-kaartje__ma" />
+            <text x={s.links ? s.pos.x - 9 : s.pos.x + 9} y={s.pos.y + 4} text-anchor={s.links ? 'end' : 'start'} class="vk-kaartje__stad">{t.steden[s.stad]}</text>
+          </>
+        ))}
+        <text x="150" y="388" text-anchor="start" class="vk-kaartje__regio">{t.netwerk.marokko}</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- PRIJZEN: vijf stadskaarten met datum en het label "vraagprijs". De volledige
+       tabellen, de wijken en de methode staan op de marktprijzenpagina. -->
+  <section class="section" id="prijzen">
+    <div class="container">
+      <div class="section__header">
+        <p class="eyebrow">{p.eyebrow}</p>
+        <h2>{p.titel}</h2>
+        <p class="section__desc">{p.intro}</p>
+      </div>
+
+      <ul class="vk-steden">
+        {stadKaarten.map((s) => (
+          <li class="vk-stadkaart">
+            <div class="vk-stadkaart__kop">
+              <h3>{s.naam}</h3>
+              <span>{p.kaartType}</span>
+            </div>
+            <p class="vk-stadkaart__prijs"><strong>{getal(s.mediaan)}</strong> {p.eenheid}</p>
+            <p class="vk-stadkaart__n">{p.kaartN.replace('{n}', getal(s.n))}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="vk-prijzen__noot"><em>{p.disclaimer}</em> <time datetime={marktprijzen.bijgewerkt}>{vulPrijs(p.bijgewerkt)}</time></p>
+
+      <div class="vk-prijzen__acties">
+        <a href="#aanmelden" class="btn btn--primary" data-cta="prijzen">{p.knop}</a>
+        <a href={paginas.prijzen[taal]} class="vk-prijzen__link">{p.analyse}{'\u00a0'}<span aria-hidden="true">{taal === 'ar' ? '←' : '→'}</span></a>
+      </div>
+    </div>
+  </section>
+
+  <Faq items={faqs} title={t.faqTitel} />
+
+  {/* De gidsen hieronder bestaan alleen in het Nederlands. */}
+  {isNl && (
+    <VerderLezen items={[
+      { label: 'Verkopen vanuit het buitenland', href: '/huis-verkopen-marokko-vanuit-nederland/', tekst: 'Wat er komt kijken als u buiten Marokko woont.' },
+      { label: 'Waarde van uw woning bepalen', href: '/waarde-woning-marokko-bepalen/', tekst: 'Hoe een realistische vraagprijs tot stand komt.' },
+      { label: 'Juridische documenten', href: '/juridische-documenten-vastgoed-marokko/', tekst: 'Welke stukken bij een overdracht horen.' },
+      { label: 'Titre foncier', href: '/titre-foncier-marokko/', tekst: 'Wat de eigendomstitel betekent voor een koper.' },
+    ]} />
+  )}
+
+  <section class="ctaband" data-verberg-sticky>
+    <div class="container">
+      <h2>{t.slot.titel}</h2>
+      <p>{vul(t.slot.tekst)}</p>
+      <div class="ctaband__actions">
+        <a href="#aanmelden" class="btn btn--light" data-cta="slot">{t.slot.knop}</a>
+        <a href={waBericht} class="btn btn--outline btn--wa vk-slot__wa" rel="noopener" data-plek="slot"><Icon name="whatsapp" size={17} />{t.slot.wa}</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ whatsapp: site.whatsapp, f: t.form, b: t.bericht }}>
+    (function () {
+      var form = document.getElementById('verkoopForm');
+      var knop = document.getElementById('vformKnop');
+      var validatie = document.getElementById('vformValidatie');
+      var fout = document.getElementById('vformFout');
+      var foutWa = document.getElementById('vformFoutWa');
+      var bedankt = document.getElementById('vformBedankt');
+      var verplicht = ['naam', 'telefoon', 'stad', 'type'];
+      var bezig = false;
+      var gestart = false;
+
+      function veld(id) { return document.getElementById(id); }
+      function val(id) { var el = veld(id); return el ? el.value.trim() : ''; }
+      function meet(naam, params) { if (window.meTrack) window.meTrack(naam, params); }
+
+      // Knoppen naar het formulier (hero, prijzen, slot, sticky): welke werkt het best?
+      document.querySelectorAll('a[data-cta]').forEach(function (a) {
+        a.addEventListener('click', function () { meet('cta_click', { form: 'verkoop', location: a.getAttribute('data-cta') }); });
+      });
+
+      // Eén keer per bezoek: iemand begint aan het formulier.
+      form.addEventListener('focusin', function () {
+        if (gestart) return;
+        gestart = true;
+        meet('form_start', { form: 'verkoop' });
+      });
+
+      form.addEventListener('input', function (e) {
+        if (e.target.getAttribute('aria-invalid') === 'true' && e.target.value.trim()) e.target.removeAttribute('aria-invalid');
+      });
+
+      // Reservebericht voor WhatsApp als opslaan mislukt: niets van wat de bezoeker
+      // invulde gaat verloren.
+      function bericht() {
+        var regels = [b.kop, ''];
+        function voegToe(label, id) { if (val(id)) regels.push(label + ': ' + val(id)); }
+        voegToe(b.naam, 'naam');
+        voegToe(b.telefoon, 'telefoon');
+        voegToe(b.email, 'email');
+        voegToe(b.type, 'type');
+        voegToe(b.stad, 'stad');
+        voegToe(b.wijk, 'wijk');
+        voegToe(b.oppervlak, 'oppervlak');
+        voegToe(b.prijs, 'prijs');
+        if (val('bericht')) regels.push('', b.toelichting + ':', val('bericht'));
+        return regels.join('\n');
+      }
+
+      function toonBedankt() {
+        form.hidden = true;
+        bedankt.hidden = false;
+        bedankt.focus({ preventScroll: true });
+        bedankt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (bezig) return;
+        fout.hidden = true;
+
+        // Honeypot gevuld: een bot. Doe alsof het gelukt is en sla niets op.
+        if (val('vform_website')) { toonBedankt(); return; }
+
+        var leeg = verplicht.filter(function (id) { return !val(id); });
+        verplicht.forEach(function (id) {
+          if (leeg.indexOf(id) > -1) veld(id).setAttribute('aria-invalid', 'true');
+          else veld(id).removeAttribute('aria-invalid');
+        });
+        validatie.hidden = leeg.length === 0;
+        if (leeg.length) { veld(leeg[0]).focus(); return; }
+
+        bezig = true;
+        knop.disabled = true;
+        knop.textContent = f.bezig;
+
+        // Opslaan in de CRM (LeadOpslag.astro); de mailnotificatie loopt server-side.
+        // Pas een bevestigde opslag geeft de bedankmelding.
+        var opslaan = window.meLead
+          ? window.meLead('verkoop', form, { kanaal: 'formulier' }, 10000)
+          : Promise.resolve(false);
+        opslaan.then(function (ok) {
+          bezig = false;
+          knop.disabled = false;
+          knop.textContent = f.verstuur;
+          if (ok) {
+            meet('generate_lead', { form: 'verkoop', method: 'formulier' });
+            toonBedankt();
+          } else {
+            meet('form_error', { form: 'verkoop' });
+            foutWa.href = 'https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(bericht());
+            fout.hidden = false;
+          }
+        });
+      });
+    })();
+  </script>
+</BaseLayout>

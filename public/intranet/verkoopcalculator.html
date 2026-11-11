@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Verkoopcalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Verkoopcalculator</h1><p>Netto opbrengst en meerwaardebelasting (TPI) bij verkoop in Marokko</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+
+<main class="wrap tool">
+  <div>
+    <div class="card">
+      <h3>Woning en eigenaar</h3>
+      <div class="grid2">
+        <div class="field"><label>Woning</label><input type="text" id="project" placeholder="Bijv. appartement Malabata, Tanger"></div>
+        <div class="field"><label>Naam eigenaar</label><input type="text" id="eig" placeholder="Naam"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Aankoop</h3><div class="sub">De verkrijgingsprijs zoals die in de akte staat.</div>
+      <div class="grid2">
+        <div class="field"><label>Aankoopprijs in de akte</label><div class="affix"><span>MAD</span><input type="text" id="aank" value="900.000"></div></div>
+        <div class="field"><label>Jaar van aankoop</label><input type="text" id="jaar" value="2017" inputmode="numeric"></div>
+      </div>
+      <div class="field"><label>Aankoopkosten</label>
+        <div class="seg" id="kmode"><button data-v="forf" class="on">Forfait 15%</button><button data-v="echt">Werkelijke kosten</button></div>
+        <div class="hint">Zonder bewijs rekent de belastingdienst 15% van de aankoopprijs als aankoopkosten.</div>
+      </div>
+      <div class="field" id="echtBox" style="display:none"><label>Werkelijke aankoopkosten</label><div class="affix"><span>MAD</span><input type="text" id="echt" value="60.000"></div></div>
+      <div class="field"><label>Verbouwing en investeringen <em>met facturen</em></label><div class="affix"><span>MAD</span><input type="text" id="verb" value="0"></div></div>
+    </div>
+    <div class="card">
+      <h3>Verkoop</h3>
+      <div class="field"><label>Verwachte verkoopprijs</label><div class="affix big"><span>MAD</span><input type="text" id="verk" value="1.350.000"></div></div>
+      <div class="grid2">
+        <div class="field"><label>Makelaar bij verkoop</label><div class="affix"><input type="text" id="mak" value="2,5"><span>%</span></div><div class="hint">Plus 20% btw.</div></div>
+        <div class="field"><label>Overige verkoopkosten <em>optioneel</em></label><div class="affix"><span>MAD</span><input type="text" id="ov" value="5.000"></div><div class="hint">Quitus fiscal, attestations, syndic, vertalingen.</div></div>
+      </div>
+      <label class="check"><input type="checkbox" id="hoofd"><div><b>Vrijstelling hoofdverblijf</b><span>Minimaal 5 jaar zelf bewoond als hoofdverblijf. Geldt tot een verkoopprijs van 4 miljoen MAD. Voor de meeste MRE-kopers met een vakantiewoning niet van toepassing.</span></div></label>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="sheet" id="sheet">
+      <div class="sheet-head"><div><h3>Verkoopberekening</h3><p>Netto opbrengst na kosten en TPI</p></div><img src="assets/logo-licht.png" alt=""></div>
+      <div class="sheet-body">
+        <div class="small muted" id="meta" style="margin-bottom:10px"></div>
+        <div class="kpis" style="margin-top:0">
+          <div class="kpi"><div class="k">TPI te betalen</div><div class="v" id="oTpi">–</div></div>
+          <div class="kpi dark"><div class="k">Netto winst</div><div class="v" id="oWinst">–</div></div>
+        </div>
+        <table class="rows"><thead><tr><th>Berekening</th><th class="r">MAD</th><th class="r">EUR</th></tr></thead><tbody id="rows"></tbody></table>
+        <div id="tpiBox" class="note"></div>
+        <p class="note">TPI (taxe sur les profits immobiliers): 20% van de belastbare winst, met een minimum van 3% van de verkoopprijs, ook bij verlies. De notaris houdt de TPI in bij de overdracht. De wettelijke indexatie van de aankoopprijs is hier niet meegenomen, dus de echte TPI valt meestal iets lager uit.</p>
+      </div>
+      <div class="sheet-foot"><span>Maghreb Estates</span><span>a.douider@maghreb-estates.com · maghreb-estates.com</span></div>
+    </div>
+    <div class="btns noprint">
+      <button class="btn" id="pdf">Download PDF</button>
+      <button class="btn outline" id="png">Download afbeelding</button>
+      <button class="btn accent" id="wa">Deel via WhatsApp</button>
+      <button class="btn outline" id="cp">Kopieer tekst</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const { fmt, num, money, mad, eur, pct, fxReady, esc, today } = ME;
+const $ = id => document.getElementById(id);
+['aank', 'echt', 'verb', 'verk', 'ov'].forEach(id => money($(id)));
+let kmode = 'forf', R = {};
+document.querySelectorAll('#kmode button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#kmode button').forEach(x => x.classList.toggle('on', x === b));
+  kmode = b.dataset.v; $('echtBox').style.display = kmode === 'echt' ? '' : 'none'; calc();
+});
+function calc() {
+  const fx = ME.fx, A = num($('aank').value), V = num($('verk').value);
+  const kk = kmode === 'forf' ? A * 0.15 : num($('echt').value);
+  const verb = num($('verb').value);
+  const kostprijs = A + kk + verb;
+  const mak = V * num($('mak').value) / 100 * 1.2, ov = num($('ov').value);
+  const winst = V - kostprijs;
+  const vrij = $('hoofd').checked && V <= 4000000;
+  const tpi20 = Math.max(0, winst) * 0.20, tpiMin = V * 0.03;
+  const tpi = vrij ? 0 : Math.max(tpi20, tpiMin);
+  const netto = V - mak - ov - tpi;
+  // Forfait 15% is een fiscale rekenregel; voor de echte winst schatten we de betaalde kosten op 6,5%.
+  const nettoWinst = netto - A - (kmode === 'echt' ? kk : A * 0.065) - verb;
+  R = { V, netto, tpi, nettoWinst };
+  $('oTpi').textContent = mad(tpi);
+  $('oWinst').textContent = mad(nettoWinst);
+  const row = (l, v, cls = '') => `<tr class="${cls}"><td>${l}</td><td class="r">${fmt(v)}</td><td class="r">${fmt(v / fx)}</td></tr>`;
+  $('rows').innerHTML =
+    row('Verkoopprijs', V) +
+    row('<span class="muted">Aankoopprijs</span>', A) +
+    row(`<span class="muted">Aankoopkosten (${kmode === 'forf' ? 'forfait 15%' : 'werkelijk'})</span>`, kk) +
+    (verb ? row('<span class="muted">Verbouwing</span>', verb) : '') +
+    row('Belastbare winst', winst) +
+    row('<span class="muted">− Makelaar incl. btw</span>', mak) +
+    row('<span class="muted">− Overige verkoopkosten</span>', ov) +
+    row('<span class="muted">− TPI</span>', tpi) +
+    row('Netto opbrengst na verkoop', netto, 'total') +
+    row(kmode === 'forf' ? 'Netto winst <span class="small muted">(betaalde aankoopkosten geschat op 6,5%)</span>' : 'Netto winst', nettoWinst, 'grand');
+  $('tpiBox').innerHTML = vrij ? '<div class="ok-bar">Vrijstelling hoofdverblijf toegepast. Controleer de bewoningsbewijzen met de notaris.</div>'
+    : tpi === tpiMin && tpi > tpi20 ? `<div class="warn-bar">Het minimum van 3% van de verkoopprijs (${mad(tpiMin)}) is hoger dan 20% van de winst (${mad(tpi20)}). De minimumheffing geldt.</div>`
+    : '';
+  const jaren = new Date().getFullYear() - num($('jaar').value);
+  $('meta').textContent = [today(), $('project').value, $('eig').value, jaren > 0 && jaren < 80 ? `${jaren} jaar in bezit` : ''].filter(Boolean).join(' · ');
+}
+function text() {
+  const fx = ME.fx;
+  return `Verkoopberekening ${$('project').value || ''}\nVerkoopprijs: ${mad(R.V)}\nTPI: ${mad(R.tpi)}\nNetto opbrengst: ${mad(R.netto)} (${eur(R.netto / fx)})\nNetto winst: ${mad(R.nettoWinst)} (${eur(R.nettoWinst / fx)})\n\nIndicatief, Maghreb Estates`;
+}
+document.querySelectorAll('input').forEach(i => { i.addEventListener('input', calc); i.addEventListener('change', calc); });
+$('pdf').onclick = () => ME.printEl($('sheet'));
+$('png').onclick = () => ME.pngEl($('sheet'), 'verkoop');
+$('wa').onclick = () => ME.wa(text());
+$('cp').onclick = () => ME.copy(text());
+calc(); fxReady.then(calc);
+</script>
+</body>
+</html>

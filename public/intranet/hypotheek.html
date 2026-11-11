@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="me-root" content="">
+<title>Hypotheek MRE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/me.css">
+<style>
+  .bars { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin: 8px 0 4px; }
+  .bars div { flex: 1; display: flex; flex-direction: column-reverse; min-width: 0; }
+  .bars i { display: block; }
+  .bars .a { background: var(--green); } .bars .r { background: var(--accent); }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+</style>
+</head>
+<body>
+<script src="assets/me.js"></script>
+<header class="topbar"><div class="wrap">
+  <div><a class="back" href="index.html">‹ Terug naar intranet</a><h1>Hypotheek MRE</h1><p>Maandlast van een Marokkaanse hypotheek voor Marokkanen in het buitenland</p></div>
+  <img class="logo" src="assets/logo-licht.png" alt="Maghreb Estates">
+</div></header>
+
+<main class="wrap tool">
+  <div>
+    <div class="card">
+      <h3>Lening</h3><div class="sub">Marokkaanse banken (o.a. Attijariwafa, BMCE/Bank of Africa, Banque Populaire, CIH) hebben speciale MRE-producten.</div>
+      <div class="field"><label>Koopsom</label><div class="affix big"><span>MAD</span><input type="text" id="prijs" value="1.500.000"></div></div>
+      <div class="grid2">
+        <div class="field"><label>Eigen inbreng</label><div class="affix"><input type="text" id="eigen" value="30"><span>%</span></div><div class="hint">Banken financieren voor MRE meestal 70 tot 80% van de koopsom. Kosten koper betaal je zelf.</div></div>
+        <div class="field"><label>Rente per jaar</label><div class="affix"><input type="text" id="rente" value="5"><span>%</span></div><div class="hint">Vast, indicatief 4,5 tot 6% (2026). Offerte van de bank is leidend.</div></div>
+        <div class="field"><label>Looptijd</label><div class="affix"><input type="text" id="jaren" value="20"><span>jaar</span></div><div class="hint">Maximaal 25 jaar. Lening moet zijn afgelost rond je 70e tot 75e.</div></div>
+        <div class="field"><label>Verzekering <em>overlijden en invaliditeit</em></label><div class="affix"><input type="text" id="verz" value="0,4"><span>% p.j.</span></div></div>
+      </div>
+      <div class="field"><label>Netto maandinkomen huishouden <em>in euro, optioneel</em></label><div class="affix"><span>€</span><input type="text" id="ink" value="4.500"></div><div class="hint">Banken hanteren een maximale woonlast van circa 40% van het inkomen, inclusief andere leningen.</div></div>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="sheet" id="sheet">
+      <div class="sheet-head"><div><h3>Hypotheekindicatie</h3><p>Annuïteitenlening</p></div><img src="assets/logo-licht.png" alt=""></div>
+      <div class="sheet-body">
+        <div class="big-figure"><div><div class="k">Maandlast</div><div class="v" id="oMaand">–</div></div><div class="e" id="oMaandE"></div></div>
+        <table class="rows"><tbody id="rows"></tbody></table>
+        <div id="ltv" style="margin-top:12px"></div>
+        <h4 style="margin-top:18px;font-size:17px">Aflossing en rente per jaar</h4>
+        <div class="bars" id="bars"></div>
+        <div class="legend"><span style="--c:var(--green)">Aflossing</span><span style="--c:var(--accent)">Rente</span></div>
+        <p class="note">Indicatief. De bank toetst inkomen, leeftijd, verblijfsstatus en andere leningen. Bij een hypotheek komen er extra kosten bij: inschrijving bij de conservation foncière (1,5%) en een notariële hypotheekakte.</p>
+      </div>
+      <div class="sheet-foot"><span>Maghreb Estates</span><span>a.douider@maghreb-estates.com · maghreb-estates.com</span></div>
+    </div>
+    <div class="btns noprint">
+      <button class="btn" id="pdf">Download PDF</button>
+      <button class="btn outline" id="cp">Kopieer tekst</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const { fmt, num, money, mad, eur, pct, fxReady } = ME;
+const $ = id => document.getElementById(id);
+['prijs', 'ink'].forEach(id => money($(id)));
+let R = {};
+function calc() {
+  const fx = ME.fx, P = num($('prijs').value);
+  const L = P * (1 - num($('eigen').value) / 100);
+  const r = num($('rente').value) / 100 / 12, n = Math.round(num($('jaren').value) * 12);
+  const ann = r ? L * r / (1 - Math.pow(1 + r, -n)) : L / n;
+  const verz = L * num($('verz').value) / 100 / 12;
+  const maand = ann + verz;
+  const totRente = ann * n - L;
+  R = { P, L, maand, totRente };
+  $('oMaand').textContent = mad(maand);
+  $('oMaandE').textContent = eur(maand / fx) + ' per maand';
+  $('rows').innerHTML = [
+    ['Koopsom', P], ['Eigen inbreng', P - L], ['Hypotheekbedrag', L],
+    ['Annuïteit per maand', ann], ['Verzekering per maand', verz],
+    ['Totale rente over de looptijd', totRente],
+  ].map(x => `<tr><td>${x[0]}</td><td class="r">${mad(x[1])}</td><td class="r">${eur(x[1] / fx)}</td></tr>`).join('');
+  const ink = num($('ink').value);
+  const ratio = ink ? (maand / fx) / ink * 100 : 0;
+  $('ltv').innerHTML = !ink ? '' : ratio <= 40
+    ? `<div class="ok-bar">Woonlast ${pct(ratio)} van het netto inkomen. Binnen de gangbare grens van 40%.</div>`
+    : `<div class="warn-bar">Woonlast ${pct(ratio)} van het netto inkomen. Boven de gangbare grens van 40%: verhoog de inbreng of de looptijd.</div>`;
+  // Jaarlijkse verdeling
+  let bal = L, years = [];
+  for (let y = 0; y < Math.ceil(n / 12); y++) {
+    let a = 0, i = 0;
+    for (let m = 0; m < 12 && bal > 0.5; m++) { const ri = bal * r; i += ri; a += ann - ri; bal -= ann - ri; }
+    years.push({ a, i });
+  }
+  const max = Math.max(...years.map(x => x.a + x.i), 1);
+  $('bars').innerHTML = years.map((x, k) => `<div title="Jaar ${k + 1}: aflossing ${fmt(x.a)}, rente ${fmt(x.i)}"><i class="a" style="height:${x.a / max * 120}px"></i><i class="r" style="height:${x.i / max * 120}px"></i></div>`).join('');
+}
+document.querySelectorAll('input').forEach(i => i.addEventListener('input', calc));
+$('pdf').onclick = () => ME.printEl($('sheet'));
+$('cp').onclick = () => ME.copy(`Hypotheekindicatie\nKoopsom: ${mad(R.P)}\nHypotheek: ${mad(R.L)}\nMaandlast: ${mad(R.maand)} (${eur(R.maand / ME.fx)})\nTotale rente: ${mad(R.totRente)}\n\nIndicatief, Maghreb Estates`);
+calc(); fxReady.then(calc);
+</script>
+</body>
+</html>
