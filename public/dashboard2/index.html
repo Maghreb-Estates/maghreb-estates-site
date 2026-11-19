@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Marktdata 2.0 — Maghreb Estates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --green: #1C2E1D; --green-mid: #34522e; --green-light: #e8f0e8;
+      --cream: #F5F1E8; --cream-dark: #ece7db; --card: #FEFCF8; --border: #d8d1c4;
+      --text: #1C2E1D; --muted: #55685a; --faint: #8a9a8a;
+      --accent: #C4622D; --gold: #C9A84C;
+      --ok: #2f5f2a; --ok-bg: #e3eedd; --warn: #8a5a12; --warn-bg: #f6ead0; --bad: #9b3b1c; --bad-bg: #f6e1d6;
+      --src-agenz: #2a78d6; --src-mubawab: #eb6834; --src-avito: #1baf7a;
+      --serif: 'Cormorant Garamond', Georgia, serif; --sans: 'Jost', system-ui, sans-serif; --mono: 'DM Mono', ui-monospace, monospace;
+      --radius: 10px; --side: 300px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { font: 400 15px/1.5 var(--sans); background: var(--cream); color: var(--text); -webkit-font-smoothing: antialiased; }
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .mono, .num { font-family: var(--mono); font-feature-settings: "tnum"; }
+    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
+
+    /* Gate */
+    #gate { position: fixed; inset: 0; background: var(--green); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    #gate .logo { font-family: var(--serif); color: var(--cream); font-size: 40px; margin-bottom: 6px; }
+    #gate .sub { color: rgba(245,241,232,.55); letter-spacing: .14em; text-transform: uppercase; font-size: 11px; margin-bottom: 36px; }
+    #gate form { display: flex; flex-direction: column; gap: 10px; width: min(320px, 100%); }
+    #gate input { background: rgba(245,241,232,.08); border: 1px solid rgba(245,241,232,.2); color: var(--cream); padding: 12px 14px; border-radius: 4px; font-family: var(--mono); }
+    #gate button { background: var(--cream); color: var(--green); border: 0; padding: 12px; border-radius: 4px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; font-size: 12px; }
+    #gate .err { color: #e8855a; font-size: 12px; min-height: 18px; text-align: center; }
+
+    /* Kop */
+    header.top { background: var(--green); color: var(--cream); padding: 18px 24px 0; }
+    .top-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .eyebrow { font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+    h1 { font-family: var(--serif); font-weight: 500; font-size: 30px; margin: 2px 0 4px; line-height: 1.1; }
+    .meta-line { color: rgba(245,241,232,.7); font-size: 13px; }
+    .meta-line b { color: var(--cream); font-weight: 500; }
+    .env { display: inline-block; font: 500 11px var(--mono); padding: 2px 8px; border-radius: 99px; background: rgba(245,241,232,.12); color: var(--cream); margin-left: 6px; }
+    .top-actions { display: flex; gap: 8px; padding-bottom: 6px; }
+    .btn { border: 1px solid var(--border); background: var(--card); padding: 7px 12px; border-radius: 6px; font-size: 13px; }
+    .btn:hover { border-color: var(--green-mid); }
+    .btn.dark { background: transparent; color: var(--cream); border-color: rgba(245,241,232,.3); }
+    .btn.dark:hover { border-color: var(--cream); }
+    nav.tabs { display: flex; gap: 2px; margin-top: 14px; overflow-x: auto; scrollbar-width: none; }
+    nav.tabs button { background: transparent; border: 0; color: rgba(245,241,232,.65); padding: 10px 14px; border-radius: 8px 8px 0 0; white-space: nowrap; font-size: 14px; }
+    nav.tabs button[aria-selected="true"] { background: var(--cream); color: var(--green); font-weight: 500; }
+    nav.tabs button .soon { font-size: 10px; opacity: .7; margin-left: 4px; }
+
+    /* Layout */
+    .layout { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); gap: 20px; padding: 20px 24px 60px; max-width: 1600px; margin: 0 auto; }
+    aside.filters { position: sticky; top: 12px; align-self: start; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; max-height: calc(100vh - 24px); overflow-y: auto; }
+    aside.filters h2 { font-family: var(--serif); font-size: 22px; font-weight: 500; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+    .fgroup { margin: 14px 0; }
+    .fgroup > label, .fgroup > .lbl { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; letter-spacing: .02em; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .seg button { border: 0; background: transparent; padding: 7px; font-size: 13px; }
+    .seg button[aria-pressed="true"] { background: var(--green); color: var(--cream); }
+    select, input[type="number"] { width: 100%; padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; background: #fff; font-size: 14px; }
+    select:disabled { background: var(--cream-dark); color: var(--faint); }
+    .range { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { border: 1px solid var(--border); background: #fff; border-radius: 99px; padding: 4px 10px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+    .chip[aria-pressed="true"] { background: var(--green); color: var(--cream); border-color: var(--green); }
+    .chip .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .fhint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .unavailable { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 10px; font-size: 12px; color: var(--muted); }
+    .unavailable summary { cursor: pointer; }
+    .unavailable li { margin: 3px 0; }
+    .ferr { background: var(--bad-bg); color: var(--bad); border-radius: 6px; padding: 8px 10px; font-size: 13px; margin-top: 8px; }
+
+    /* Actieve filters */
+    .active-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 14px; min-height: 30px; }
+    .active-bar .chip { background: var(--green-light); border-color: #c9d8c4; }
+    .active-bar .chip button { border: 0; background: none; padding: 0 0 0 2px; font-size: 15px; line-height: 1; color: var(--muted); }
+    .linkbtn { border: 0; background: none; color: var(--accent); text-decoration: underline; font-size: 13px; padding: 4px; }
+    .mobile-filter { display: none; }
+
+    /* Kaarten en panelen */
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+    .kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; position: relative; min-height: 118px; }
+    .kpi .lbl { font-size: 12px; color: var(--muted); }
+    .kpi .val { font: 500 24px/1.2 var(--mono); margin: 6px 0 4px; letter-spacing: -.01em; }
+    .kpi .val small { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+    .kpi .sub { font-size: 12px; color: var(--muted); }
+    .kpi.primary { border-color: var(--green-mid); box-shadow: inset 0 0 0 1px var(--green-mid); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 1px 8px; border-radius: 99px; white-space: nowrap; }
+    .badge.ok { background: var(--ok-bg); color: var(--ok); } .badge.warn { background: var(--warn-bg); color: var(--warn); } .badge.bad { background: var(--bad-bg); color: var(--bad); }
+    .badge.ok::before { content: "●"; } .badge.warn::before { content: "◐"; } .badge.bad::before { content: "○"; }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-top: 16px; position: relative; min-width: 0; }
+    .panel h3 { font-family: var(--serif); font-weight: 500; font-size: 21px; margin: 0; }
+    .panel .ph { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+    .panel .desc { font-size: 13px; color: var(--muted); margin: 2px 0 10px; }
+    .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+    .grid2 > .panel { margin-top: 16px; }
+    .chart { width: 100%; height: 340px; }
+    .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .toggle button { border: 0; background: transparent; padding: 4px 10px; font-size: 12px; }
+    .toggle button[aria-pressed="true"] { background: var(--green); color: var(--cream); }
+    .quality { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 13px; color: var(--muted); }
+    .quality b { color: var(--text); font-weight: 500; }
+    .limits { margin: 8px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+    details.stats { margin-top: 10px; }
+    details.stats summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+    .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 6px 18px; margin-top: 10px; font-size: 13px; }
+    .statgrid div { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding: 3px 0; }
+    #map { height: 420px; border-radius: 8px; overflow: hidden; }
+    .legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+    .legend .ramp { width: 160px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #dce8d4, #a9c79a, #6f9c5e, #3f6b33, #1C2E1D); }
+    .maplibregl-popup-content { font: 13px/1.45 var(--sans); padding: 10px 12px; border-radius: 8px; }
+
+    /* Tabellen */
+    .tw { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; background: #fff; }
+    th { background: var(--cream-dark); text-align: left; font-weight: 500; padding: 7px 10px; white-space: nowrap; position: sticky; top: 0; }
+    th.sortable { cursor: pointer; } th.sortable:hover { color: var(--accent); }
+    td { padding: 6px 10px; border-top: 1px solid var(--border); white-space: nowrap; }
+    td.n, th.n { text-align: right; font-family: var(--mono); font-feature-settings: "tnum"; }
+    tr.clickable { cursor: pointer; } tr.clickable:hover td { background: var(--green-light); }
+    tr.selected td { background: #f3e6dc; }
+    .scrollbox { max-height: 520px; overflow: auto; }
+
+    /* Status */
+    .loading::after { content: ""; position: absolute; inset: 0; background: rgba(254,252,248,.6); border-radius: var(--radius); }
+    .loading::before { content: "Berekenen…"; position: absolute; top: 14px; right: 18px; z-index: 2; font-size: 12px; color: var(--muted); }
+    .empty, .error { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+    .error { color: var(--bad); }
+    .notice { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 12px; }
+    .callout { border-left: 3px solid var(--accent); padding: 4px 12px; color: var(--muted); font-size: 13px; margin: 10px 0; }
+    .cards3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .city-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .cmp-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr) 32px; gap: 8px; align-items: center; margin: 6px 0; }
+    .cmp-row .idx { font: 500 13px var(--mono); color: var(--muted); }
+    .method h4 { font-family: var(--serif); font-size: 18px; font-weight: 500; margin: 18px 0 6px; }
+    .method p, .method li { font-size: 14px; }
+    .formula { font-family: var(--mono); font-size: 13px; background: var(--cream-dark); padding: 2px 6px; border-radius: 4px; }
+    footer.foot { text-align: center; font-size: 12px; color: var(--muted); padding: 0 16px 30px; }
+
+    @media (max-width: 1100px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: minmax(0, 1fr); padding: 14px 16px 50px; }
+      aside.filters { position: fixed; inset: 0 auto 0 0; width: min(340px, 90vw); max-height: none; border-radius: 0; z-index: 50; transform: translateX(-105%); transition: transform .2s; box-shadow: 0 0 30px rgba(0,0,0,.2); }
+      aside.filters.open { transform: none; }
+      .mobile-filter { display: inline-flex; }
+      header.top { padding: 14px 16px 0; }
+      h1 { font-size: 24px; }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .kpi .val { font-size: 19px; }
+      #map { height: 340px; }
+      .chart { height: 300px; }
+    }
+    @media (max-width: 420px) { .kpis { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+</head>
+<body>
+  <div id="gate">
+    <div class="logo">Maghreb Estates</div>
+    <div class="sub">Marktdata 2.0 · beveiligde toegang</div>
+    <form id="gateForm" autocomplete="off">
+      <input type="password" id="gatePw" placeholder="Wachtwoord" aria-label="Wachtwoord" />
+      <button type="submit">Openen</button>
+      <div class="err" id="gateErr" role="alert"></div>
+    </form>
+  </div>
+
+  <div id="app" class="hidden">
+    <header class="top">
+      <div class="top-row">
+        <div>
+          <div class="eyebrow">Maghreb Estates · Marktdata 2.0 <span class="env" id="envBadge"></span></div>
+          <h1>Vastgoedmarkt Marokko</h1>
+          <div class="meta-line" id="metaLine">Laden…</div>
+        </div>
+        <div class="top-actions">
+          <button class="btn dark mobile-filter" id="openFilters" aria-controls="filters">Filters</button>
+          <button class="btn dark" id="copyLink" title="Kopieer een link met deze filters">Link kopiëren</button>
+          <button class="btn dark" id="exportCsv">Exporteer CSV</button>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" id="tabs">
+        <button role="tab" data-tab="overview">Marktoverzicht</button>
+        <button role="tab" data-tab="city">Stad &amp; wijk</button>
+        <button role="tab" data-tab="compare">Vergelijken</button>
+        <button role="tab" data-tab="analyzer">Prijsanalyse<span class="soon">fase 2</span></button>
+        <button role="tab" data-tab="trends">Trends<span class="soon">niet actief</span></button>
+        <button role="tab" data-tab="yield">Huurrendement<span class="soon">niet actief</span></button>
+        <button role="tab" data-tab="method">Data &amp; methode</button>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <aside class="filters" id="filters" aria-label="Filters">
+        <h2>Filters <button class="linkbtn" id="resetFilters">Alles wissen</button></h2>
+        <div class="fgroup">
+          <span class="lbl">Transactie</span>
+          <div class="seg" id="fTx">
+            <button data-v="sale" aria-pressed="true">Koop</button>
+            <button data-v="rent" aria-pressed="false">Huur</button>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label for="fCity">Stad</label>
+          <select id="fCity"><option value="">Alle steden</option></select>
+        </div>
+        <div class="fgroup">
+          <label for="fNb">Wijk</label>
+          <select id="fNb" disabled><option value="">Kies eerst een stad</option></select>
+        </div>
+        <div class="fgroup">
+          <span class="lbl">Vastgoedtype</span>
+          <div class="chips" id="fTypes"></div>
+          <div class="fhint" id="typeHint"></div>
+        </div>
+        <div class="fgroup">
+          <span class="lbl">Databron</span>
+          <div class="chips" id="fSources"></div>
+        </div>
+        <div class="fgroup">
+          <span class="lbl">Vraagprijs (MAD)</span>
+          <div class="range"><input type="number" id="fPmin" placeholder="min" min="0" step="10000" aria-label="Minimale prijs" /><input type="number" id="fPmax" placeholder="max" min="0" step="10000" aria-label="Maximale prijs" /></div>
+        </div>
+        <div class="fgroup">
+          <span class="lbl">Oppervlakte (m²)</span>
+          <div class="range"><input type="number" id="fAmin" placeholder="min" min="0" aria-label="Minimale oppervlakte" /><input type="number" id="fAmax" placeholder="max" min="0" aria-label="Maximale oppervlakte" /></div>
+        </div>
+        <div class="fgroup">
+          <span class="lbl">Slaapkamers</span>
+          <div class="range"><input type="number" id="fBmin" placeholder="min" min="0" aria-label="Minimum slaapkamers" /><input type="number" id="fBmax" placeholder="max" min="0" aria-label="Maximum slaapkamers" /></div>
+        </div>
+        <div class="fgroup">
+          <label for="fBath">Badkamers (minimaal)</label>
+          <input type="number" id="fBath" placeholder="min" min="0" />
+        </div>
+        <div id="filterError" class="ferr hidden" role="alert"></div>
+        <details class="unavailable">
+          <summary>Filters zonder data (nog niet beschikbaar)</summary>
+          <ul>
+            <li>Regio: geen indeling stad → regio</li>
+            <li>Nieuwbouw / bestaand: niet in de brondata</li>
+            <li>Staat van het object: niet in de brondata</li>
+            <li>Gemeubileerd: alleen in titels, niet als veld</li>
+            <li>Waarnemingsperiode: één momentopname per bron</li>
+            <li>Voorzieningen: niet in de brondata</li>
+          </ul>
+        </details>
+      </aside>
+
+      <main id="main">
+        <div class="active-bar" id="activeBar"></div>
+        <section id="tab-overview" data-panel="overview"></section>
+        <section id="tab-city" data-panel="city" class="hidden"></section>
+        <section id="tab-compare" data-panel="compare" class="hidden"></section>
+        <section id="tab-analyzer" data-panel="analyzer" class="hidden"></section>
+        <section id="tab-trends" data-panel="trends" class="hidden"></section>
+        <section id="tab-yield" data-panel="yield" class="hidden"></section>
+        <section id="tab-method" data-panel="method" class="hidden"></section>
+      </main>
+    </div>
+    <footer class="foot">Vraagprijzen uit advertenties van Agenz, Mubawab en Avito, geen transactieprijzen. Kaart: Esri, © OpenStreetMap-bijdragers.</footer>
+  </div>
+  <script>window.D2_GATE_HASH = 'd9b5f58f0b38198293971865a14074f59eba3e82595becbe86ae51f1d9f1f65e';</script>
+  <script src="app.js"></script>
+</body>
+</html>
