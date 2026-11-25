@@ -220,7 +220,7 @@ export const stedenMetAanbod = (() => {
 })();
 
 /** Uitgelicht op de homepage (alle talen), in deze volgorde. Pas hier de slugs aan. */
-const uitgelichteSlugs = ['puerta-de-tetuan', 'archipel', 'cabo-golf'];
+const uitgelichteSlugs = ['tangerine', 'archipel', 'cabo-golf'];
 export const uitgelichteProjecten = uitgelichteSlugs.map((slug) => {
   const p = projecten.find((x) => x.slug === slug);
   if (!p) throw new Error(`Uitgelicht project ontbreekt: ${slug}`);
