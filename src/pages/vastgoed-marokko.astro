@@ -14,7 +14,7 @@ const path = '/vastgoed-marokko/';
 // Steden gegroepeerd per type markt (rustiger overzicht dan één lange lijst).
 const stedenGroepen = [
   { titel: 'Noord-Marokko', slugs: ['tanger', 'tetouan', 'martil', 'mdiq', 'al-hoceima', 'nador'] },
-  { titel: 'Grote steden & zakelijke markten', slugs: ['casablanca', 'rabat', 'kenitra', 'temara', 'skhirat'] },
+  { titel: 'Grote steden & zakelijke markten', slugs: ['casablanca', 'mohammedia', 'rabat', 'kenitra', 'temara', 'skhirat'] },
   { titel: 'Toerisme & lifestyle', slugs: ['marrakech', 'agadir', 'essaouira', 'saidia', 'dakhla'] },
   { titel: 'Overige steden', slugs: ['oujda', 'fes'] },
 ].map((g) => ({ titel: g.titel, steden: g.slugs.map((slug) => steden.find((s) => s.slug === slug)!).filter(Boolean) }));
@@ -57,7 +57,7 @@ const faqs = [
 
       <CtaInline
         title="Bekijk ons actuele vastgoedaanbod"
-        text="Wij begeleiden geselecteerde projecten in Tanger, Tétouan, M’diq, Cabo Negro, Martil en Marrakech. Bekijk foto's, ligging en projectinformatie."
+        text="Wij begeleiden geselecteerde projecten in Tanger, Tétouan, M’diq, Cabo Negro, Martil, Marrakech, Casablanca en Mohammedia. Bekijk foto's, ligging en projectinformatie."
         label="Naar het aanbod"
         href="/aanbod/"
       />

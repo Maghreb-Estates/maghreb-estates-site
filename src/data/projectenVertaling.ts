@@ -7,6 +7,7 @@ import type { Taal } from '../i18n/config';
 import type { Project, Kenmerk } from './projecten';
 import { steden, type Stad } from './steden';
 import { aaferVertaling } from './projectenVertalingAafer';
+import { allaliVertaling } from './projectenVertalingAllali';
 
 type VertaalTaal = Exclude<Taal, 'nl'>;
 
@@ -192,6 +193,7 @@ const projectVertaling: Record<string, Record<VertaalTaal, ProjectVertaling>> = 
 
   // Partner Groupe AAFER Immobilier — zie projectenVertalingAafer.ts
   ...aaferVertaling,
+  ...allaliVertaling,
 };
 
 // Resolved projectinhoud in de gevraagde taal (NL uit projecten.ts, anders vertaald).
@@ -299,6 +301,40 @@ const stadVertaling: Record<string, Record<VertaalTaal, StadVertaling>> = {
       invalshoek: 'مدينة ساحلية عصرية وأنيقة بمارينا — تركّز على العقار الساحلي عالي الجودة، بما في ذلك كابو نيغرو وتمودة باي.',
       intro: 'تقع المضيق بين تطوان والفنيدق وتُعدّ من أكثر المدن الساحلية أناقة في الشمال، بمارينا ومشاريع جديدة عالية الجودة. وتشمل المنطقة أيضاً منتجعَي كابو نيغرو وتمودة باي، وتجذب المشترين الباحثين عن الجودة على البحر.',
       verhuur: 'تتمتع المضيق بسوق جذابة للتأجير السياحي في الفئة الراقية. تُقيَّم نسبة الإشغال والعائد الممكنين لكل عقار على حدة.',
+    },
+  },
+  casablanca: {
+    en: {
+      invalshoek: 'The economic capital, with the largest and most liquid property market in Morocco — strong for stable, business-driven letting.',
+      intro: 'Casablanca is Morocco’s economic engine and has the country’s largest property market. From modern apartments in Anfa to large-scale new developments, the supply is diverse and demand is steady. For those looking for liquidity and long-term value, Casablanca is often a logical choice.',
+      verhuur: 'Rental demand in Casablanca is generally steady thanks to business activity. Long-term letting is the norm; the net return differs per district and property and should be calculated individually.',
+    },
+    fr: {
+      invalshoek: 'La capitale économique, avec le marché immobilier le plus grand et le plus liquide du Maroc — solide pour une location stable et professionnelle.',
+      intro: 'Casablanca est le moteur économique du Maroc et possède le plus grand marché immobilier du pays. Des appartements modernes d’Anfa aux grands programmes neufs, l’offre est variée et la demande stable. Pour qui recherche liquidité et valeur à long terme, Casablanca est souvent un choix logique.',
+      verhuur: 'La demande locative à Casablanca est généralement constante grâce à l’activité économique. La location longue durée est la norme ; le rendement net varie selon le quartier et le bien et doit être calculé au cas par cas.',
+    },
+    ar: {
+      invalshoek: 'العاصمة الاقتصادية، بأكبر سوق عقارية وأكثرها سيولة في المغرب — قوية للتأجير المستقر والمهني.',
+      intro: 'الدار البيضاء هي المحرّك الاقتصادي للمغرب وتضم أكبر سوق عقارية في البلاد. من الشقق العصرية في أنفا إلى مشاريع البناء الجديدة الكبرى، العرض متنوّع والطلب مستقر. ولمن يبحث عن السيولة والقيمة على المدى الطويل، كثيراً ما تكون الدار البيضاء خياراً منطقياً.',
+      verhuur: 'الطلب على الإيجار في الدار البيضاء ثابت عموماً بفضل النشاط الاقتصادي. التأجير طويل الأمد هو السائد؛ ويختلف العائد الصافي حسب الحي والعقار ويجب حسابه لكل حالة على حدة.',
+    },
+  },
+  mohammedia: {
+    en: {
+      invalshoek: 'Coastal city between Casablanca and Rabat, with beaches, a calmer pace and growing new-build supply in and around town.',
+      intro: 'Mohammedia lies on the Atlantic coast, about 25 kilometres from Casablanca and on the road to Rabat. The city combines beaches and a compact centre with its own port and economic activity. New developments are appearing in and around the city, including in Zenata Eco-City and the coastal town of Mansouria. For those who want to live or invest close to Casablanca, but by the sea and in calmer surroundings, Mohammedia can be interesting.',
+      verhuur: 'Mohammedia mainly has long-term rentals to families and workers in the Casablanca region, complemented by summer rentals on the coast. The potential differs per district and should be assessed per property.',
+    },
+    fr: {
+      invalshoek: 'Ville côtière entre Casablanca et Rabat, avec des plages, un rythme plus calme et une offre neuve croissante en ville et alentour.',
+      intro: 'Mohammedia se situe sur la côte atlantique, à environ 25 kilomètres de Casablanca et sur l’axe de Rabat. La ville associe plages et centre à taille humaine, avec son propre port et une activité économique. De nouveaux programmes voient le jour en ville et alentour, notamment à Zenata Éco-Cité et dans la station balnéaire de Mansouria. Pour qui veut vivre ou investir près de Casablanca, mais au bord de la mer et dans un cadre plus calme, Mohammedia peut être intéressante.',
+      verhuur: 'Mohammedia connaît surtout la location longue durée aux familles et aux actifs de la région de Casablanca, complétée par la location estivale sur la côte. Le potentiel varie selon le quartier et s’évalue bien par bien.',
+    },
+    ar: {
+      invalshoek: 'مدينة ساحلية بين الدار البيضاء والرباط، بشواطئ وإيقاع أهدأ وعرض متزايد من المشاريع الجديدة داخل المدينة وحولها.',
+      intro: 'تقع المحمدية على الساحل الأطلسي، على بعد نحو 25 كيلومتراً من الدار البيضاء وعلى الطريق نحو الرباط. تجمع المدينة بين الشواطئ ومركز متوسط الحجم، مع ميناء خاص بها ونشاط اقتصادي. وتظهر مشاريع جديدة داخل المدينة وحولها، منها في مدينة زناتة الإيكولوجية وفي المنصورية الساحلية. ولمن يريد السكن أو الاستثمار قرب الدار البيضاء، لكن على البحر وفي محيط أهدأ، قد تكون المحمدية خياراً مثيراً للاهتمام.',
+      verhuur: 'تعرف المحمدية أساساً التأجير طويل الأمد للأسر والعاملين في جهة الدار البيضاء، إلى جانب التأجير الصيفي على الساحل. وتختلف الإمكانية حسب الحي وتُقيَّم لكل عقار على حدة.',
     },
   },
 };

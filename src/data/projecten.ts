@@ -16,6 +16,7 @@
 
 import type { ImageMetadata } from 'astro';
 import { aaferProjecten } from './projectenAafer';
+import { allaliProjecten } from './projectenAllali';
 
 // -- Nest (Tanger · Route de Rabat) -----------------------------------------
 import nestGevel from '../assets/aanbod/nest/nest-tanger-gevel-schemering.jpg';
@@ -200,6 +201,9 @@ export const projecten: Project[] = [
 
   // ── PARTNER GROUPE AAFER IMMOBILIER — zie projectenAafer.ts ───────────────
   ...aaferProjecten,
+
+  // ── PARTNER GROUPE ALLALI — zie projectenAllali.ts ────────────────────────
+  ...allaliProjecten,
 ];
 
 // -- Afgeleide helpers -------------------------------------------------------

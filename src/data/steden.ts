@@ -66,6 +66,22 @@ export const steden: Stad[] = [
     populairBij: 'investeerders die rendement en zekerheid zoeken',
   },
   {
+    slug: 'mohammedia', naam: 'Mohammedia', regio: 'Casablanca-Settat',
+    invalshoek: 'Kuststad tussen Casablanca en Rabat, met stranden, een rustiger tempo en groeiende nieuwbouw in en rond de stad.',
+    intro: 'Mohammedia ligt aan de Atlantische kust, op ongeveer 25 kilometer van Casablanca en aan de as richting Rabat. De stad combineert stranden en een overzichtelijk centrum met een eigen haven en bedrijvigheid. In en rond de stad verschijnt nieuwbouw, onder meer in Zenata Eco-Cité en in de kustplaats Mansouria. Voor wie dicht bij Casablanca wil wonen of investeren, maar aan zee en in een rustigere omgeving, kan Mohammedia interessant zijn.',
+    voorWie: ['Gezinnen die dicht bij Casablanca aan zee willen wonen', 'Kopers van een tweede woning aan de kust', 'Investeerders in langetermijnverhuur in de regio Casablanca'],
+    voordelen: ['Kustligging met stranden, dicht bij Casablanca', 'Goede verbindingen via snelweg en trein richting Casablanca en Rabat', 'Groeiend nieuwbouwaanbod, onder meer in Zenata en Mansouria'],
+    risicos: ['Kwaliteit en opleverplanning verschillen per ontwikkelaar — off-plan goed laten controleren', 'Prijzen verschillen sterk tussen centrum, kustzone en nieuwe wijken', 'Seizoensverhuur is beperkter dan in uitgesproken toeristische kuststeden'],
+    gebieden: [
+      { naam: 'Centrum / Parc Floral', over: 'appartementen nabij winkels en voorzieningen' },
+      { naam: 'Mannesmann / kustzone', over: 'residenties dicht bij het strand' },
+      { naam: 'Zenata Eco-Cité', over: 'nieuwe, groene stad tussen Casablanca en Mohammedia' },
+      { naam: 'Mansouria', over: 'kustplaats ten noordoosten van Mohammedia met nieuwe residenties' },
+    ],
+    verhuur: 'Mohammedia kent vooral langetermijnverhuur aan gezinnen en werkenden in de regio Casablanca, aangevuld met zomerverhuur aan de kust. De potentie verschilt per wijk en moet per object worden beoordeeld.',
+    populairBij: 'gezinnen en kopers uit de regio Casablanca',
+  },
+  {
     slug: 'rabat', naam: 'Rabat', regio: 'Rabat-Salé-Kénitra',
     invalshoek: 'De bestuurlijke hoofdstad geldt als een van de stabielste en rustigste vastgoedmarkten van Marokko.',
     intro: 'Rabat is de bestuurlijke hoofdstad: groen, verzorgd en relatief rustig. De aanwezigheid van overheid, ambassades en internationale instellingen zorgt voor een stabiele markt en een gestage vraag naar kwaliteitswoningen. Voor kopers die zekerheid en rust boven snelle groei stellen, is Rabat vaak aantrekkelijk.',

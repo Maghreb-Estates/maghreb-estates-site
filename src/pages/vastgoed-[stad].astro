@@ -27,6 +27,9 @@ const path = `/vastgoed-${stad.slug}/`;
 const prominent = prominenteSteden.some((p) => p.slug === stad.slug);
 const extra = stedenExtra[stad.slug];
 const aanbod = projectenVoorStad(stad.slug);
+const heeftAanbod = aanbod.length > 0;
+const aanbodTekst = aanbod.length === 1 ? 'één project' : `${aanbod.length} projecten`;
+const aanbodNamen = aanbod.map((p) => p.naam).join(', ');
 const md = marktdata[stad.slug];
 const heeftCijfers = md && (md.appartement || md.villa || md.rekencase || md.huurYield || md.airbnb);
 
@@ -38,7 +41,9 @@ const faqs = prominent
       { q: `Kan Maghreb Estates mijn woning in ${stad.naam} beheren?`, a: `Ja. Na aankoop verzorgen wij verhuur, onderhoud en toezicht in ${stad.naam}, ook volledig op afstand.` },
     ]
   : [
-      { q: `Hebben jullie objecten beschikbaar in ${stad.naam}?`, a: `Op dit moment hebben wij geen eigen objecten in ${stad.naam}. Heeft u zelf een woning, project of advertentie op het oog? Stuur ons de link — wij helpen u vanuit Marokko met de controle en afhandeling.` },
+      heeftAanbod
+        ? { q: `Hebben jullie objecten beschikbaar in ${stad.naam}?`, a: `Ja. Wij begeleiden op dit moment ${aanbodTekst} in ${stad.naam}: ${aanbodNamen}. Heeft u zelf een woning, project of advertentie op het oog? Stuur ons de link — wij helpen u vanuit Marokko met de controle en afhandeling.` }
+        : { q: `Hebben jullie objecten beschikbaar in ${stad.naam}?`, a: `Op dit moment hebben wij geen eigen objecten in ${stad.naam}. Heeft u zelf een woning, project of advertentie op het oog? Stuur ons de link — wij helpen u vanuit Marokko met de controle en afhandeling.` },
       { q: `Kan ik als buitenlandse koper een woning kopen in ${stad.naam}?`, a: `Ja. Buitenlandse kopers kunnen in ${stad.naam} kopen. Wij controleren de eigendomstitel, het contract en begeleiden de overdracht via de notaris.` },
       { q: `Waarmee kunnen jullie in ${stad.naam} helpen?`, a: `Met dossiercontrole (titre foncier), het koopcontract, de betalingsroute, de notaris en de overdracht, en met beheer na aankoop.` },
     ];
@@ -66,9 +71,11 @@ const faqs = prominent
     vraag={prominent ? `Is ${stad.naam} interessant om vastgoed te kopen?` : `Kan Maghreb Estates mij helpen met vastgoed in ${stad.naam}?`}
     antwoord={prominent
       ? `${stad.intro} Koop echter nooit voordat de eigendomstitel (titre foncier) is gecontroleerd en de overdracht officieel via de notaris verloopt.`
-      : `Wij hebben op dit moment geen eigen objecten in ${stad.naam}. Heeft u zelf een woning of project gevonden? Stuur ons de link, dan helpen wij u vanuit Marokko met de dossiercontrole, de notaris en de overdracht.`}
+      : heeftAanbod
+        ? `Ja. Wij begeleiden op dit moment ${aanbodTekst} in ${stad.naam}: ${aanbodNamen}. Heeft u zelf een woning of project gevonden? Stuur ons de link, dan helpen wij u vanuit Marokko met de dossiercontrole, de notaris en de overdracht.`
+        : `Wij hebben op dit moment geen eigen objecten in ${stad.naam}. Heeft u zelf een woning of project gevonden? Stuur ons de link, dan helpen wij u vanuit Marokko met de dossiercontrole, de notaris en de overdracht.`}
     voorWie={`Kopers en eigenaren die actief zijn of willen worden in ${stad.naam}.`}
-    watLeerJe={prominent ? `Waarom ${stad.naam} kan passen, voor wie juist niet, en waar wij op letten.` : `Waarmee wij u in ${stad.naam} kunnen helpen, ook zonder eigen aanbod.`}
+    watLeerJe={prominent ? `Waarom ${stad.naam} kan passen, voor wie juist niet, en waar wij op letten.` : heeftAanbod ? `Welk aanbod wij in ${stad.naam} begeleiden en waarmee wij u verder helpen.` : `Waarmee wij u in ${stad.naam} kunnen helpen, ook zonder eigen aanbod.`}
     wanneerHelpen={`Met dossiercontrole, de notaris en beheer in ${stad.naam} — ook op afstand.`}
     letOp={stad.risicos[0]}
   />
