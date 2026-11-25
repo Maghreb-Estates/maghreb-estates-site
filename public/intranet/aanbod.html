@@ -51,8 +51,6 @@ const $ = id => document.getElementById(id);
 const P = [
   { slug: 'domaine-achakar', naam: "Le Domaine d'Achakar", stad: 'tanger', stadNaam: 'Tanger', wijk: 'Achakar', dev: '', type: 'Bouwgrond', prijs: 'Op aanvraag', kort: '39.051 m² getitelde grond, zone A2, 17.180 m² bebouwbaar' },
   { slug: 'nest', naam: 'Nest', stad: 'tanger', stadNaam: 'Tanger', wijk: 'Route de Rabat', dev: '', type: 'Appartementen', prijs: 'ca. 11.000 MAD/m²', kort: '2 slaapkamers, 68 tot 82 m², zwembad en parking' },
-  { slug: 'projet-or', naam: 'Projet Or', stad: 'marrakech', stadNaam: 'Marrakech', wijk: 'Agdal', dev: '', type: 'Appartementen', prijs: 'MAD 1.400.000', kort: '348 appartementen, twee zwembaden, spa en fitness' },
-  { slug: 'golf-city', naam: 'Marrakech Golf City', stad: 'marrakech', stadNaam: 'Marrakech', wijk: 'Avenue Mohammed VI', dev: 'Prestigia', type: "Appartementen, villa's", prijs: 'Op aanvraag', kort: 'Golfresort rond de 18-holes Montgomerie-baan' },
 ];
 const base = 'https://maghreb-estates.com';
 const url = (p, l) => l === 'nl' ? `${base}/aanbod/${p.stad}/${p.slug}/` : `${base}/${l}/properties/${p.stad}/${p.slug}/`;

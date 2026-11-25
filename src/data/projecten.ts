@@ -17,21 +17,6 @@
 import type { ImageMetadata } from 'astro';
 import { aaferProjecten } from './projectenAafer';
 
-// -- Golf City (Prestigia, Marrakech) ---------------------------------------
-import gcGolf from '../assets/aanbod/golf-city/golf-city-marrakech-golf-zwembad.jpg';
-import gcOverzicht from '../assets/aanbod/golf-city/golf-city-marrakech-overzicht.jpg';
-import gcProject1 from '../assets/aanbod/golf-city/golf-city-marrakech-project-01.jpg';
-import gcProject2 from '../assets/aanbod/golf-city/golf-city-marrakech-project-02.jpg';
-
-// -- Projet Or (Vaneau, Marrakech · Agdal) ----------------------------------
-import orA1 from '../assets/aanbod/projet-or/projet-or-marrakech-agdal-01.jpg';
-import orA2 from '../assets/aanbod/projet-or/projet-or-marrakech-agdal-02.jpg';
-import orA3 from '../assets/aanbod/projet-or/projet-or-marrakech-agdal-03.jpg';
-import orA4 from '../assets/aanbod/projet-or/projet-or-marrakech-agdal-04.jpg';
-import orA5 from '../assets/aanbod/projet-or/projet-or-marrakech-agdal-05.jpg';
-import orA6 from '../assets/aanbod/projet-or/projet-or-marrakech-agdal-06.jpg';
-import orA7 from '../assets/aanbod/projet-or/projet-or-marrakech-agdal-07.jpg';
-
 // -- Nest (Tanger · Route de Rabat) -----------------------------------------
 import nestGevel from '../assets/aanbod/nest/nest-tanger-gevel-schemering.jpg';
 import nestStraat from '../assets/aanbod/nest/nest-tanger-straatbeeld-schemering.jpg';
@@ -60,7 +45,7 @@ export interface Kenmerk {
 }
 
 export interface Project {
-  /** URL-slug binnen de stad, bv. "golf-city" → /aanbod/marrakech/golf-city/. */
+  /** URL-slug binnen de stad, bv. "aryano" → /aanbod/marrakech/aryano/. */
   slug: string;
   /** Nog niet in verkoop: grijze waas + label "Binnenkort beschikbaar" over de foto's. */
   binnenkort?: boolean;
@@ -162,105 +147,6 @@ export const projecten: Project[] = [
     ],
   },
 
-  // ── PROJET OR — Marrakech, Agdal ──────────────────────────────────────────
-  {
-    slug: 'projet-or',
-    naam: 'Projet Or',
-    stad: 'marrakech',
-    stadNaam: 'Marrakech',
-    regio: 'Marrakech-Safi',
-    wijk: 'Agdal',
-    types: ['Appartementen'],
-    kort: 'Moderne, beveiligde appartementenresidentie in Agdal met twee zwembaden, spa en fitness, op minder dan 15 minuten van de luchthaven.',
-    intro:
-      'Projet Or is een moderne appartementenresidentie in Agdal, een van de meest gewilde woonwijken van Marrakech. Het beveiligde complex combineert ruime buitenruimte — twee zwembaden, tuinen en een dakterras met panoramisch uitzicht — met voorzieningen als een spa en fitness. Maghreb Estates begeleidt u bij de selectie, de dossiercontrole en de aankoop van een appartement in dit project.',
-    omschrijving: [
-      'Het project omvat 348 appartementen in een gesloten, bewaakte residentie. De architectuur is modern en verzorgd, met veel aandacht voor gemeenschappelijke buitenruimte en groen. Twee buitenzwembaden en aangelegde tuinen vormen het hart van het complex; op het dak is een terras met panoramisch uitzicht over de omgeving.',
-      'Binnen de residentie zijn een spa en een fitnessruimte aanwezig, en het geheel is beveiligd met gecontroleerde toegang. Door de ligging in Agdal liggen winkelcentra, restaurants, meerdere golfbanen en zorgvoorzieningen op korte afstand, en is de luchthaven van Marrakech in minder dan een kwartier bereikbaar.',
-      'Wij bekijken met u welke woningtypen aansluiten bij uw doel — eigen gebruik, tweede woning of verhuur — en controleren vóór aankoop de eigendomstitel, het koopcontract en de betalingsroute. De begeleiding kan volledig op afstand, in het Nederlands, Engels, Frans of Arabisch.',
-    ],
-    kenmerken: [
-      { label: 'Stad', waarde: 'Marrakech (Agdal)' },
-      { label: 'Type', waarde: 'Appartementen' },
-      { label: 'Aantal woningen', waarde: '348 appartementen' },
-      { label: 'Prijsindicatie', waarde: 'Vanaf 1,4 miljoen MAD' },
-    ],
-    voorzieningen: [
-      'Twee buitenzwembaden',
-      'Aangelegde tuinen en groenzones',
-      'Spa',
-      'Fitnessruimte',
-      'Beveiligde residentie met gecontroleerde toegang',
-      'Dakterras met panoramisch uitzicht',
-    ],
-    ligging:
-      'Projet Or ligt in Agdal, een centrale en gewilde woonwijk van Marrakech. Winkelcentra, restaurants, meerdere golfbanen en zorgvoorzieningen bevinden zich in de directe omgeving; de luchthaven Marrakech-Menara is in minder dan 15 minuten bereikbaar.',
-    mapsQuery: 'Agdal, Marrakech, Marokko',
-    prijsVanaf: { bedrag: 1400000, valuta: 'MAD', tekst: 'Vanaf 1,4 miljoen MAD' },
-    bron: 'https://www.vaneau-maroc.com/en/node/640',
-    hero: { src: orA1, alt: 'Modern appartementencomplex Projet Or in Agdal, Marrakech' },
-    thumb: { src: orA1, alt: 'Projet Or, appartementenresidentie in Agdal, Marrakech' },
-    galerij: [
-      { src: orA1, alt: 'Gevelaanzicht van Projet Or in Agdal, Marrakech' },
-      { src: orA2, alt: 'Buitenzwembad en tuinen bij Projet Or in Marrakech' },
-      { src: orA3, alt: 'Gemeenschappelijke buitenruimte van Projet Or in Marrakech' },
-      { src: orA4, alt: 'Appartementen met balkons in Projet Or, Agdal' },
-      { src: orA5, alt: 'Groenzones binnen de residentie Projet Or in Marrakech' },
-      { src: orA6, alt: 'Detail van de architectuur van Projet Or in Marrakech' },
-      { src: orA7, alt: 'Overzicht van de residentie Projet Or in Agdal, Marrakech' },
-    ],
-  },
-
-  // ── MARRAKECH GOLF CITY — Prestigia ───────────────────────────────────────
-  {
-    slug: 'golf-city',
-    naam: 'Marrakech Golf City',
-    stad: 'marrakech',
-    stadNaam: 'Marrakech',
-    regio: 'Marrakech-Safi',
-    wijk: 'Avenue Mohammed VI',
-    developer: 'Prestigia',
-    types: ['Appartementen', "Villa's"],
-    kort: 'Grootschalige golfresort-wijk van Prestigia aan de Avenue Mohammed VI, rond de 18-holes Montgomerie-golfbaan, met appartementen en villa’s.',
-    intro:
-      'Marrakech Golf City is een grootschalige, gemengde woonwijk van ontwikkelaar Prestigia, gelegen aan de Avenue Mohammed VI nabij Hivernage. Het project is opgebouwd rond een 18-holes golfbaan (The Montgomerie) en combineert appartementen en villa’s met een clubhouse, winkelcentrum en hotelvoorzieningen. Maghreb Estates begeleidt u bij de oriëntatie op dit project en bij een eventuele aankoop.',
-    omschrijving: [
-      'Golf City is een van de bekendste golfresort-ontwikkelingen van Marrakech. De wijk beslaat een groot terrein en is aangelegd rond de door Colin Montgomerie ontworpen 18-holes golfbaan. Naast het groen bevat het project een clubhouse met restaurants, een winkelcentrum, hotelfaciliteiten en recreatieve voorzieningen.',
-      'Het woningaanbod is gemengd: appartementen met twee of drie slaapkamers en verschillende villatypes, van geschakelde tot vrijstaande woningen. De architectuur en het parkachtige stratenplan geven de wijk een rustige, residentiële uitstraling op korte afstand van het centrum van Marrakech.',
-      'Omdat de beschikbaarheid en de voorwaarden per fase en per woningtype verschillen, controleren wij die altijd actueel bij de bron voordat u een keuze maakt. Wij helpen u bij de objectselectie, de dossiercontrole en de begeleiding tot en met de overdracht — ook volledig op afstand.',
-    ],
-    kenmerken: [
-      { label: 'Stad', waarde: 'Marrakech (Avenue Mohammed VI)' },
-      { label: 'Type', waarde: "Appartementen en villa's" },
-      { label: 'Ontwikkelaar', waarde: 'Prestigia' },
-      { label: 'Bijzonder', waarde: '18-holes golfbaan (The Montgomerie)' },
-    ],
-    voorzieningen: [
-      '18-holes golfbaan (The Montgomerie Marrakech)',
-      'Clubhouse met restaurants',
-      'Winkelcentrum',
-      'Hotelvoorzieningen',
-      'Parkachtige, residentiële omgeving',
-    ],
-    woningtypen: [
-      { type: 'Appartement — 2 slaapkamers', details: 'vanaf circa 75 m²' },
-      { type: 'Appartement — 3 slaapkamers', details: 'vanaf circa 95 m²' },
-      { type: 'Villa (geschakeld / vrijstaand)', details: 'circa 300–500 m² grondoppervlak' },
-    ],
-    ligging:
-      'Marrakech Golf City ligt aan de Avenue Mohammed VI, in het verlengde van de wijk Hivernage, op korte afstand van het centrum van Marrakech. De wijk zelf is opgezet rond de golfbaan en heeft eigen voorzieningen.',
-    mapsQuery: 'Marrakech Golf City, Avenue Mohammed VI, Marrakech, Marokko',
-    bron: 'https://prestigia-morocco.com/en/programmes-immobilier/marrakech-golf-city/',
-    hero: { src: gcGolf, alt: 'Golfbaan en zwembad in Marrakech Golf City' },
-    thumb: { src: gcOverzicht, alt: 'Woningen en groen in Marrakech Golf City' },
-    galerij: [
-      { src: gcGolf, alt: 'Golfbaan met zwembad in Marrakech Golf City' },
-      { src: gcOverzicht, alt: 'Overzicht van de woonwijk Marrakech Golf City' },
-      { src: gcProject1, alt: 'Woningen langs de golfbaan in Marrakech Golf City' },
-      { src: gcProject2, alt: 'Straatbeeld in de residentiële wijk Marrakech Golf City' },
-    ],
-  },
-
   // ── NEST — Tanger, Route de Rabat ─────────────────────────────────────────
   {
     slug: 'nest',
@@ -330,7 +216,7 @@ export const stedenMetAanbod = (() => {
 })();
 
 /** Uitgelicht op de homepage (alle talen), in deze volgorde. Pas hier de slugs aan. */
-const uitgelichteSlugs = ['golf-city', 'archipel', 'cabo-golf'];
+const uitgelichteSlugs = ['puerta-de-tetuan', 'archipel', 'cabo-golf'];
 export const uitgelichteProjecten = uitgelichteSlugs.map((slug) => {
   const p = projecten.find((x) => x.slug === slug);
   if (!p) throw new Error(`Uitgelicht project ontbreekt: ${slug}`);

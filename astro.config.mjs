@@ -47,6 +47,17 @@ const redirects = {
   '/volmacht-huis-kopen-marokko/': '/juridische-documenten-vastgoed-marokko/',
   // Dubbele pagina opgeschoond (duplicate content)
   '/beste-stad-vastgoed-investeren-marokko/': '/beste-stad-investeren-vastgoed-marokko/',
+  // Projecten uit het aanbod gehaald → stadspagina Marrakech (blijft bestaan via Aryano)
+  '/aanbod/marrakech/projet-or/': '/aanbod/marrakech/',
+  '/aanbod/marrakech/golf-city/': '/aanbod/marrakech/',
+  ...Object.fromEntries(
+    ['en', 'fr', 'ar'].flatMap((l) =>
+      ['projet-or', 'golf-city'].map((slug) => [
+        `/${l}/properties/marrakech/${slug}/`,
+        `/${l}/properties/marrakech/`,
+      ]),
+    ),
+  ),
 };
 
 // URL's die niet in de sitemap horen: de geredirecte oude URL's (voorkomt dat
